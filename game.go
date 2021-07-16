@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -11,15 +10,35 @@ import (
 
 const screenWidth, screenHeight = 320, 240
 
-type game struct{}
+type updater interface {
+	Update() error
+}
+
+type drawer interface {
+	Draw(*ebiten.Image)
+}
+
+type game struct {
+	components []interface{}
+}
 
 func (g *game) Update() error {
-	// TODO
+	for _, c := range g.components {
+		if u, ok := c.(updater); ok {
+			if err := u.Update(); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
 
 func (g *game) Draw(screen *ebiten.Image) {
-	screen.Fill(color.RGBA{50, 50, 50, 255})
+	for _, c := range g.components {
+		if d, ok := c.(drawer); ok {
+			d.Draw(screen)
+		}
+	}
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.CurrentTPS()))
 }
 
