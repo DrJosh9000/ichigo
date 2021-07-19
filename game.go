@@ -52,4 +52,4 @@ func main() {
 	if err := ebiten.RunGame(&game{}); err != nil {
 		log.Fatal(err)
 	}
-}
+} 
