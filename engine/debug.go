@@ -13,3 +13,8 @@ type TPSDisplay struct{}
 func (TPSDisplay) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.CurrentTPS()))
 }
+
+func (TPSDisplay) DrawAfter(Drawer) bool {
+	// Always draw last
+	return true
+}

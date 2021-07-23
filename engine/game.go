@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"sort"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -12,6 +14,7 @@ type Updater interface {
 // Drawer is a component that can draw itself (called repeatedly).
 type Drawer interface {
 	Draw(*ebiten.Image)
+	DrawAfter(Drawer) bool
 }
 
 // Game implements the ebiten methods using a collection of components.
@@ -45,4 +48,17 @@ func (g *Game) Draw(screen *ebiten.Image) {
 // Layout returns the configured screen width/height.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
 	return g.ScreenWidth, g.ScreenHeight
+}
+
+// Sort sorts the components by draw order.
+// Non-Drawers are sorted first.
+func (g *Game) Sort() {
+	sort.Slice(g.Components, func(i, j int) bool {
+		a, aok := g.Components[i].(Drawer)
+		b, bok := g.Components[j].(Drawer)
+		if aok && bok {
+			return b.DrawAfter(a)
+		}
+		return !aok && bok
+	})
 }
