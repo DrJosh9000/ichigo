@@ -16,8 +16,9 @@ type Drawer interface {
 
 // Game implements the ebiten methods using a collection of components.
 type Game struct {
-	ScreenWidth, ScreenHeight int
-	Components                []interface{}
+	ScreenWidth  int
+	ScreenHeight int
+	Components   []interface{}
 }
 
 // Update calls Update on all Updater components.
