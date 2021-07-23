@@ -19,6 +19,6 @@ func main() {
 			engine.TPSDisplay{},
 		},
 	}); err != nil {
-		log.Fatal(err)
+		log.Fatalf("Game error: %v", err)
 	}
 }

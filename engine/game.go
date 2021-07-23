@@ -6,12 +6,13 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-// Updater is a component that can update (called repeatedly).
+// Updater is a component that can update. Update is called repeatedly.
 type Updater interface {
 	Update() error
 }
 
-// Drawer is a component that can draw itself (called repeatedly).
+// Drawer is a component that can draw itself. Draw is called often.
+// DrawAfter is used to reorder components.
 type Drawer interface {
 	Draw(*ebiten.Image)
 	DrawAfter(Drawer) bool
