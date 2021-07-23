@@ -54,7 +54,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
 // Sort sorts the components by Z position.
 // Non-Drawers are sorted before all Drawers.
 func (g *Game) Sort() {
-	// SliceStable to avoid z-fighting (among Non-Drawers and equal Drawers)
+	// Stable sort to avoid z-fighting (among Non-Drawers and equal Drawers)
 	sort.SliceStable(g.Components, func(i, j int) bool {
 		a, aok := g.Components[i].(Drawer)
 		b, bok := g.Components[j].(Drawer)
