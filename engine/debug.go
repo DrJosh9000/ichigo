@@ -2,6 +2,7 @@ package engine
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -14,7 +15,7 @@ func (TPSDisplay) Draw(screen *ebiten.Image) {
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f", ebiten.CurrentTPS()))
 }
 
-func (TPSDisplay) DrawAfter(Drawer) bool {
-	// Always draw last
-	return true
+func (TPSDisplay) Z() float64 {
+	// Always draw on top
+	return math.MaxFloat64
 }

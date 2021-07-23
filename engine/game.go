@@ -15,7 +15,7 @@ type Updater interface {
 // DrawAfter is used to reorder components.
 type Drawer interface {
 	Draw(*ebiten.Image)
-	DrawAfter(Drawer) bool
+	Z() float64
 }
 
 // Game implements the ebiten methods using a collection of components.
@@ -52,13 +52,14 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
 }
 
 // Sort sorts the components by draw order.
-// Non-Drawers are sorted first.
+// Non-Drawers are sorted before all Drawers.
 func (g *Game) Sort() {
-	sort.Slice(g.Components, func(i, j int) bool {
+	// SliceStable to avoid z-fighting (among Non-Drawers and equal Drawers)
+	sort.SliceStable(g.Components, func(i, j int) bool {
 		a, aok := g.Components[i].(Drawer)
 		b, bok := g.Components[j].(Drawer)
 		if aok && bok {
-			return b.DrawAfter(a)
+			return a.Z() < b.Z()
 		}
 		return !aok && bok
 	})
