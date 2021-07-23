@@ -51,7 +51,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
 	return g.ScreenWidth, g.ScreenHeight
 }
 
-// Sort sorts the components by draw order.
+// Sort sorts the components by Z position.
 // Non-Drawers are sorted before all Drawers.
 func (g *Game) Sort() {
 	// SliceStable to avoid z-fighting (among Non-Drawers and equal Drawers)
