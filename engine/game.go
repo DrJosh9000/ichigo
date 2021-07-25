@@ -23,6 +23,8 @@ type Game struct {
 	ScreenWidth  int
 	ScreenHeight int
 	Components   []interface{}
+
+	needsSort bool
 }
 
 // Update calls Update on all Updater components.
@@ -33,6 +35,10 @@ func (g *Game) Update() error {
 				return err
 			}
 		}
+	}
+	if g.needsSort {
+		g.needsSort = false
+		g.sortDrawers()
 	}
 	return nil
 }
@@ -51,9 +57,15 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
 	return g.ScreenWidth, g.ScreenHeight
 }
 
-// Sort sorts the components by Z position.
+// SetNeedsSort tells the game that the Drawers need sorting.
+// This will be done in the current update.
+func (g *Game) SetNeedsSort() {
+	g.needsSort = true
+}
+
+// sortDrawers sorts the components by Z position.
 // Non-Drawers are sorted before all Drawers.
-func (g *Game) Sort() {
+func (g *Game) sortDrawers() {
 	// Stable sort to avoid z-fighting (among Non-Drawers and equal Drawers)
 	sort.SliceStable(g.Components, func(i, j int) bool {
 		a, aok := g.Components[i].(Drawer)

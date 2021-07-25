@@ -19,14 +19,19 @@ func main() {
 	ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
 	ebiten.SetWindowTitle("TODO")
 
-	boxesFile, err := assets.Open("assets/boxes.png")
-	if err != nil {
-		log.Fatalf("Couldn't open asset: %v", err)
-	}
-	boxesPNG, _, err := image.Decode(boxesFile)
-	if err != nil {
-		log.Fatalf("Couldn't decode asset: %v", err)
-	}
+	var boxesPNG image.Image
+	func() {
+		boxesFile, err := assets.Open("assets/boxes.png")
+		if err != nil {
+			log.Fatalf("Couldn't open asset: %v", err)
+		}
+		defer boxesFile.Close()
+		boxesPNG, _, err = image.Decode(boxesFile)
+		if err != nil {
+			log.Fatalf("Couldn't decode asset: %v", err)
+		}
+	}()
+
 	tiles := &engine.Tilemap{
 		Map: [][]int{
 			{0, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 1},
@@ -49,14 +54,17 @@ func main() {
 		TileSize: 16,
 	}
 
-	if err := ebiten.RunGame(&engine.Game{
+	game := &engine.Game{
 		ScreenHeight: screenHeight,
 		ScreenWidth:  screenWidth,
 		Components: []interface{}{
 			tiles,
-			engine.TPSDisplay{},
+			engine.PerfDisplay{},
 		},
-	}); err != nil {
+	}
+	game.SetNeedsSort()
+
+	if err := ebiten.RunGame(game); err != nil {
 		log.Fatalf("Game error: %v", err)
 	}
 }
