@@ -8,7 +8,7 @@ import (
 
 type Tilemap struct {
 	Map      [][]int
-	Src      *ebiten.Image
+	Src      *ebiten.Image // must be a horizontal tile set
 	TileSize int
 	GeoM     ebiten.GeoM
 

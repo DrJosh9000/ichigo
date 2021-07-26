@@ -12,7 +12,7 @@ import (
 
 const screenWidth, screenHeight = 320, 240
 
-//go:embed assets/*
+//go:embed assets
 var assets embed.FS
 
 func main() {
