@@ -12,9 +12,9 @@ type Updater interface {
 }
 
 // Drawer is a component that can draw itself. Draw is called often.
-// DrawAfter is used to reorder components.
+// Z is used to reorder components.
 type Drawer interface {
-	Draw(*ebiten.Image)
+	Draw(screen *ebiten.Image, geom ebiten.GeoM)
 	Z() float64
 }
 
@@ -47,7 +47,7 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	for _, c := range g.Components {
 		if d, ok := c.(Drawer); ok {
-			d.Draw(screen)
+			d.Draw(screen, ebiten.GeoM{})
 		}
 	}
 }

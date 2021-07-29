@@ -10,17 +10,16 @@ type Tilemap struct {
 	Map      [][]Tile
 	Src      *ebiten.Image // must be a horizontal tile set
 	TileSize int
-	GeoM     ebiten.GeoM
 
 	ZPos
 }
 
-func (t *Tilemap) Draw(screen *ebiten.Image) {
+func (t *Tilemap) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 	for j, row := range t.Map {
 		for i, tile := range row {
 			var op ebiten.DrawImageOptions
 			op.GeoM.Translate(float64(i*t.TileSize), float64(j*t.TileSize))
-			op.GeoM.Concat(t.GeoM)
+			op.GeoM.Concat(geom)
 
 			sx := tile.TileIndex() * t.TileSize
 			src := t.Src.SubImage(image.Rect(sx, 0, sx+t.TileSize, t.TileSize)).(*ebiten.Image)
