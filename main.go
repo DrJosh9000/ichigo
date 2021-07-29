@@ -29,7 +29,7 @@ func main() {
 	}
 	boxesFile.Close()
 
-	staticTiles := [][]int{
+	staticTiles := [][]engine.StaticTile{
 		{0, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 1},
 		{9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
 		{9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9},
@@ -51,7 +51,7 @@ func main() {
 	for j := range staticTiles {
 		tiles[j] = make([]engine.Tile, len(staticTiles[j]))
 		for i := range staticTiles[j] {
-			tiles[j][i] = engine.StaticTile(staticTiles[j][i])
+			tiles[j][i] = staticTiles[j][i]
 		}
 	}
 
