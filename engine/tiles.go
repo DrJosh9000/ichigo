@@ -7,7 +7,7 @@ import (
 )
 
 type Tilemap struct {
-	Map      [][]int
+	Map      [][]Tile
 	Src      *ebiten.Image // must be a horizontal tile set
 	TileSize int
 	GeoM     ebiten.GeoM
@@ -22,9 +22,55 @@ func (t *Tilemap) Draw(screen *ebiten.Image) {
 			op.GeoM.Translate(float64(i*t.TileSize), float64(j*t.TileSize))
 			op.GeoM.Concat(t.GeoM)
 
-			sx := tile * t.TileSize
+			sx := tile.TileIndex() * t.TileSize
 			src := t.Src.SubImage(image.Rect(sx, 0, sx+t.TileSize, t.TileSize)).(*ebiten.Image)
 			screen.DrawImage(src, &op)
 		}
 	}
+}
+
+func (t *Tilemap) Update() error {
+	for j := range t.Map {
+		for i := range t.Map[j] {
+			if tile, ok := t.Map[j][i].(Updater); ok {
+				if err := tile.Update(); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
+type Tile interface {
+	TileIndex() int
+}
+
+type StaticTile int
+
+func (s StaticTile) TileIndex() int { return int(s) }
+
+type AnimatedTile struct {
+	Frame         int // if Tile in AnimationDefs, index
+	DurationTicks int // time spent showing this frame
+	AnimDef       []TileAnimFrameDef
+}
+
+func (a *AnimatedTile) TileIndex() int { return a.AnimDef[a.Frame].Tile }
+
+func (a *AnimatedTile) Update() error {
+	a.DurationTicks++
+	if a.DurationTicks >= a.AnimDef[a.Frame].DurationTicks {
+		a.DurationTicks = 0
+		a.Frame++
+	}
+	if a.Frame >= len(a.AnimDef) {
+		a.Frame = 0
+	}
+	return nil
+}
+
+type TileAnimFrameDef struct {
+	Tile          int // show this tile
+	DurationTicks int // show it for this long
 }
