@@ -19,18 +19,15 @@ func main() {
 	ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
 	ebiten.SetWindowTitle("TODO")
 
-	var boxesPNG image.Image
-	func() {
-		boxesFile, err := assets.Open("assets/boxes.png")
-		if err != nil {
-			log.Fatalf("Couldn't open asset: %v", err)
-		}
-		defer boxesFile.Close()
-		boxesPNG, _, err = image.Decode(boxesFile)
-		if err != nil {
-			log.Fatalf("Couldn't decode asset: %v", err)
-		}
-	}()
+	boxesFile, err := assets.Open("assets/boxes.png")
+	if err != nil {
+		log.Fatalf("Couldn't open asset: %v", err)
+	}
+	boxesPNG, _, err := image.Decode(boxesFile)
+	if err != nil {
+		log.Fatalf("Couldn't decode asset: %v", err)
+	}
+	boxesFile.Close()
 
 	tiles := &engine.Tilemap{
 		Map: [][]int{
