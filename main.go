@@ -55,6 +55,21 @@ func main() {
 		}
 	}
 
+	tiles[3][5] = &engine.AnimatedTile{
+		AnimDef: []engine.TileAnimFrameDef{
+			{Tile: 0, DurationTicks: 15},
+			{Tile: 1, DurationTicks: 15},
+			{Tile: 2, DurationTicks: 15},
+			{Tile: 3, DurationTicks: 15},
+			{Tile: 4, DurationTicks: 15},
+			{Tile: 5, DurationTicks: 15},
+			{Tile: 6, DurationTicks: 15},
+			{Tile: 7, DurationTicks: 15},
+			{Tile: 8, DurationTicks: 15},
+			{Tile: 9, DurationTicks: 15},
+		},
+	}
+
 	tilemap := &engine.Tilemap{
 		Map:      tiles,
 		Src:      ebiten.NewImageFromImage(boxesPNG),

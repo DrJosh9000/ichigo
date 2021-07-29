@@ -51,8 +51,8 @@ type StaticTile int
 func (s StaticTile) TileIndex() int { return int(s) }
 
 type AnimatedTile struct {
-	Frame         int // if Tile in AnimationDefs, index
-	DurationTicks int // time spent showing this frame
+	Frame         int // index into AnimDef
+	DurationTicks int // time spent showing current frame
 	AnimDef       []TileAnimFrameDef
 }
 
