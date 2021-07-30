@@ -1,12 +1,17 @@
 package engine
 
 import (
+	"encoding/gob"
 	"fmt"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
+
+func init() {
+	gob.Register(PerfDisplay{})
+}
 
 // PerfDisplay debugprints CurrentTPS and CurrentFPS in the top left.
 type PerfDisplay struct{}

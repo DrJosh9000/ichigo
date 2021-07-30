@@ -1,10 +1,17 @@
 package engine
 
 import (
+	"encoding/gob"
 	"image"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
+
+func init() {
+	gob.Register(AnimatedTile{})
+	gob.Register(StaticTile(0))
+	gob.Register(Tilemap{})
+}
 
 type Tilemap struct {
 	Map       [][]Tile

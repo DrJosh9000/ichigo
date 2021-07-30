@@ -1,11 +1,16 @@
 package engine
 
 import (
+	"encoding/gob"
 	"math"
 	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
+
+func init() {
+	gob.Register(Scene{})
+}
 
 // Drawer is a component that can draw itself. Draw is called often.
 type Drawer interface {
