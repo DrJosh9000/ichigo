@@ -7,14 +7,16 @@ import (
 )
 
 type Tilemap struct {
-	Map      [][]Tile
-	Src      *ebiten.Image // must be a horizontal tile set
-	TileSize int
+	Map       [][]Tile
+	Src       *ebiten.Image // must be a horizontal tile set
+	TileSize  int
+	Transform ebiten.GeoM
 
 	ZPos
 }
 
 func (t *Tilemap) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
+	geom.Concat(t.Transform)
 	for j, row := range t.Map {
 		for i, tile := range row {
 			var op ebiten.DrawImageOptions
