@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"math"
 	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -25,8 +26,6 @@ type ZPositioner interface {
 type Scene struct {
 	Components []interface{}
 	Transform  ebiten.GeoM
-
-	needsSort bool
 }
 
 // Draw draws all components in order.
@@ -39,16 +38,10 @@ func (s *Scene) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 	}
 }
 
-// SetNeedsSort informs l that its layers may be out of order.
-func (s *Scene) SetNeedsSort() {
-	s.needsSort = true
-}
-
 // sortByZ sorts the components by Z position.
 // Stable sort is used to avoid Z-fighting among layers without a Z, or
 // among those with equal Z. All non-ZPositioners are sorted first.
 func (s *Scene) sortByZ() {
-	s.needsSort = false
 	sort.SliceStable(s.Components, func(i, j int) bool {
 		a, aok := s.Components[i].(ZPositioner)
 		b, bok := s.Components[j].(ZPositioner)
@@ -61,14 +54,26 @@ func (s *Scene) sortByZ() {
 
 // Update calls Update on all Updater components.
 func (s *Scene) Update() error {
+	needsSort := false
+	curZ := -math.MaxFloat64 // this is min float64
 	for _, c := range s.Components {
+		// Update each updater in turn
 		if u, ok := c.(Updater); ok {
 			if err := u.Update(); err != nil {
 				return err
 			}
 		}
+		if !needsSort {
+			// Check if the update put the components out of order
+			if z, ok := c.(ZPositioner); ok {
+				if t := z.Z(); t < curZ {
+					needsSort = true
+					curZ = t
+				}
+			}
+		}
 	}
-	if s.needsSort {
+	if needsSort {
 		s.sortByZ()
 	}
 	return nil

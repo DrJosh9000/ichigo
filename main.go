@@ -87,7 +87,6 @@ func main() {
 			},
 		},
 	}
-	game.Scene.SetNeedsSort()
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatalf("Game error: %v", err)
