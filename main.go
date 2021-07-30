@@ -60,13 +60,14 @@ func main() {
 			{Tile: 0, DurationTicks: 15},
 			{Tile: 1, DurationTicks: 15},
 			{Tile: 2, DurationTicks: 15},
+		},
+	}
+	tiles[2][7] = &engine.AnimatedTile{
+		AnimDef: []engine.TileAnimFrameDef{
 			{Tile: 3, DurationTicks: 15},
 			{Tile: 4, DurationTicks: 15},
 			{Tile: 5, DurationTicks: 15},
 			{Tile: 6, DurationTicks: 15},
-			{Tile: 7, DurationTicks: 15},
-			{Tile: 8, DurationTicks: 15},
-			{Tile: 9, DurationTicks: 15},
 		},
 	}
 
@@ -76,16 +77,14 @@ func main() {
 		TileSize: 16,
 	}
 
-	components := []interface{}{
-		tilemap,
-		engine.PerfDisplay{},
-	}
-
 	game := &engine.Game{
 		ScreenHeight: screenHeight,
 		ScreenWidth:  screenWidth,
 		Scene: &engine.Scene{
-			Components: components,
+			Components: []interface{}{
+				tilemap,
+				engine.PerfDisplay{},
+			},
 		},
 	}
 	game.Scene.SetNeedsSort()
