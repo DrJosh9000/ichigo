@@ -11,7 +11,6 @@ type Tilemap struct {
 	Src       *ebiten.Image // must be a horizontal tile set
 	TileSize  int
 	Transform ebiten.GeoM
-
 	ZPos
 }
 
