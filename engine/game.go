@@ -6,12 +6,12 @@ import "github.com/hajimehoshi/ebiten/v2"
 type Game struct {
 	ScreenWidth  int
 	ScreenHeight int
-	Layers       *Layers
+	Scene        *Scene
 }
 
 // Draw draws the entire thing.
 func (g *Game) Draw(screen *ebiten.Image) {
-	g.Layers.Draw(screen, ebiten.GeoM{})
+	g.Scene.Draw(screen, ebiten.GeoM{})
 }
 
 // Layout returns the configured screen width/height.
@@ -21,5 +21,5 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
 
 // Update just passes the call onto Layers.
 func (g *Game) Update() error {
-	return g.Layers.Update()
+	return g.Scene.Update()
 }

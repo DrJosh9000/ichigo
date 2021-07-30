@@ -21,14 +21,14 @@ type ZPositioner interface {
 	Z() float64
 }
 
-// Layers
-type Layers struct {
+// Scene manages drawing and updating a bunch of components.
+type Scene struct {
 	Components []interface{}
 	needsSort  bool
 }
 
-// Draw draws all layers in order.
-func (l *Layers) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
+// Draw draws all components in order.
+func (l *Scene) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 	for _, i := range l.Components {
 		if d, ok := i.(Drawer); ok {
 			d.Draw(screen, geom)
@@ -37,13 +37,15 @@ func (l *Layers) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 }
 
 // SetNeedsSort informs l that its layers may be out of order.
-func (l *Layers) SetNeedsSort() {
+func (l *Scene) SetNeedsSort() {
 	l.needsSort = true
 }
 
 // sortByZ sorts the components by Z position.
-// Stable sort is used to avoid z-fighting among layers without a Z.
-func (l *Layers) sortByZ() {
+// Stable sort is used to avoid Z-fighting among layers without a Z, or
+// among those with equal Z. All non-ZPositioners are sorted first.
+func (l *Scene) sortByZ() {
+	l.needsSort = false
 	sort.SliceStable(l.Components, func(i, j int) bool {
 		a, aok := l.Components[i].(ZPositioner)
 		b, bok := l.Components[j].(ZPositioner)
@@ -52,11 +54,10 @@ func (l *Layers) sortByZ() {
 		}
 		return !aok && bok
 	})
-	l.needsSort = false
 }
 
 // Update calls Update on all Updater components.
-func (l *Layers) Update() error {
+func (l *Scene) Update() error {
 	for _, c := range l.Components {
 		if u, ok := c.(Updater); ok {
 			if err := u.Update(); err != nil {

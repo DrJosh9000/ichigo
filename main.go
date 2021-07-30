@@ -84,11 +84,11 @@ func main() {
 	game := &engine.Game{
 		ScreenHeight: screenHeight,
 		ScreenWidth:  screenWidth,
-		Layers: &engine.Layers{
+		Scene: &engine.Scene{
 			Components: components,
 		},
 	}
-	game.Layers.SetNeedsSort()
+	game.Scene.SetNeedsSort()
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatalf("Game error: %v", err)
