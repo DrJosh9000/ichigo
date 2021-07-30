@@ -48,10 +48,10 @@ func main() {
 	}
 
 	tiles := make([][]engine.Tile, len(staticTiles))
-	for j := range staticTiles {
-		tiles[j] = make([]engine.Tile, len(staticTiles[j]))
-		for i := range staticTiles[j] {
-			tiles[j][i] = staticTiles[j][i]
+	for j, row := range staticTiles {
+		tiles[j] = make([]engine.Tile, len(row))
+		for i, t := range row {
+			tiles[j][i] = t
 		}
 	}
 
