@@ -1,55 +1,17 @@
 package engine
 
-import (
-	"sort"
-
-	"github.com/hajimehoshi/ebiten/v2"
-)
-
-// Updater is a component that can update. Update is called repeatedly.
-type Updater interface {
-	Update() error
-}
-
-// Drawer is a component that can draw itself. Draw is called often.
-// Z is used to reorder components.
-type Drawer interface {
-	Draw(screen *ebiten.Image, geom ebiten.GeoM)
-	Z() float64
-}
+import "github.com/hajimehoshi/ebiten/v2"
 
 // Game implements the ebiten methods using a collection of components.
 type Game struct {
 	ScreenWidth  int
 	ScreenHeight int
-	Components   []interface{}
-
-	needsSort bool
+	Layers       *Layers
 }
 
-// Update calls Update on all Updater components.
-func (g *Game) Update() error {
-	for _, c := range g.Components {
-		if u, ok := c.(Updater); ok {
-			if err := u.Update(); err != nil {
-				return err
-			}
-		}
-	}
-	if g.needsSort {
-		g.needsSort = false
-		g.sortDrawers()
-	}
-	return nil
-}
-
-// Draw calls Draw on all Drawer components.
+// Draw draws the entire thing.
 func (g *Game) Draw(screen *ebiten.Image) {
-	for _, c := range g.Components {
-		if d, ok := c.(Drawer); ok {
-			d.Draw(screen, ebiten.GeoM{})
-		}
-	}
+	g.Layers.Draw(screen, ebiten.GeoM{})
 }
 
 // Layout returns the configured screen width/height.
@@ -57,22 +19,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
 	return g.ScreenWidth, g.ScreenHeight
 }
 
-// SetNeedsSort tells the game that the Drawers need sorting.
-// This will be done in the current update.
-func (g *Game) SetNeedsSort() {
-	g.needsSort = true
-}
-
-// sortDrawers sorts the components by Z position.
-// Non-Drawers are sorted before all Drawers.
-func (g *Game) sortDrawers() {
-	// Stable sort to avoid z-fighting (among Non-Drawers and equal Drawers)
-	sort.SliceStable(g.Components, func(i, j int) bool {
-		a, aok := g.Components[i].(Drawer)
-		b, bok := g.Components[j].(Drawer)
-		if aok && bok {
-			return a.Z() < b.Z()
-		}
-		return !aok && bok
-	})
+// Update just passes the call onto Layers.
+func (g *Game) Update() error {
+	return g.Layers.Update()
 }

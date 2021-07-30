@@ -76,15 +76,19 @@ func main() {
 		TileSize: 16,
 	}
 
+	components := []interface{}{
+		tilemap,
+		engine.PerfDisplay{},
+	}
+
 	game := &engine.Game{
 		ScreenHeight: screenHeight,
 		ScreenWidth:  screenWidth,
-		Components: []interface{}{
-			tilemap,
-			engine.PerfDisplay{},
+		Layers: &engine.Layers{
+			Components: components,
 		},
 	}
-	game.SetNeedsSort()
+	game.Layers.SetNeedsSort()
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatalf("Game error: %v", err)
