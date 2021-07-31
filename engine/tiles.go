@@ -14,6 +14,7 @@ func init() {
 	gob.Register(Tilemap{})
 }
 
+// Tilemap renders a grid of tiles.
 type Tilemap struct {
 	Map       [][]Tile
 	Src       ImageRef // must be a horizontal tile set
@@ -22,6 +23,7 @@ type Tilemap struct {
 	ZPos
 }
 
+// Draw draws the tilemap.
 func (t *Tilemap) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 	geom.Concat(t.Transform)
 	for j, row := range t.Map {
@@ -33,7 +35,7 @@ func (t *Tilemap) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 			sx := tile.TileIndex() * t.TileSize
 			im, err := t.Src.Image()
 			if err != nil {
-				log.Fatalf("Loading image from reference: %v", err)
+				log.Fatalf("Tilemap.Draw loading image: %v", err)
 			}
 			src := im.SubImage(image.Rect(sx, 0, sx+t.TileSize, t.TileSize)).(*ebiten.Image)
 			screen.DrawImage(src, &op)
@@ -41,6 +43,7 @@ func (t *Tilemap) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 	}
 }
 
+// Update calls Update on any tiles that are Updaters, e.g. AnimatedTile.
 func (t *Tilemap) Update() error {
 	for j := range t.Map {
 		for i := range t.Map[j] {
@@ -54,14 +57,17 @@ func (t *Tilemap) Update() error {
 	return nil
 }
 
+// Tile is the interface needed by Tilemap.
 type Tile interface {
 	TileIndex() int
 }
 
+// StaticTile returns a fixed tile index.
 type StaticTile int
 
 func (s StaticTile) TileIndex() int { return int(s) }
 
+// AnimatedTile uses an Anim to choose a tile index.
 type AnimatedTile struct {
 	Anim
 }

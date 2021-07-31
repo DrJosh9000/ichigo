@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"encoding/gob"
 	"fmt"
 	"image"
 	"io/fs"
@@ -11,20 +12,38 @@ import (
 var (
 	AssetFS fs.FS
 
-	imageCache = make(map[string]*ebiten.Image)
+	animDefCache = make(map[string]*AnimDef)
+	imageCache   = make(map[string]*ebiten.Image)
 )
 
+// AnimRef
 type AnimRef struct {
 	Path string
 
-	animdef *AnimDef
+	anim *Anim
 }
 
-func (r *AnimRef) Anim() *Anim {
-	// TODO
-	return &Anim{
-		Def: r.animdef,
+func (r *AnimRef) Anim() (*Anim, error) {
+	if r.anim != nil {
+		return r.anim, nil
 	}
+	if ad := animDefCache[r.Path]; ad != nil {
+		r.anim = &Anim{Def: ad}
+		return r.anim, nil
+	}
+	f, err := AssetFS.Open(r.Path)
+	if err != nil {
+		return nil, fmt.Errorf("open asset: %w", err)
+	}
+	defer f.Close()
+	dec := gob.NewDecoder(f)
+	ad := &AnimDef{}
+	if err := dec.Decode(ad); err != nil {
+		return nil, fmt.Errorf("decode asset: %w", err)
+	}
+	animDefCache[r.Path] = ad
+	r.anim = &Anim{Def: ad}
+	return r.anim, nil
 }
 
 // ImageRef loads images from the AssetFS into *ebiten.Image form.
