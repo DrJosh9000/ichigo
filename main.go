@@ -46,14 +46,14 @@ func main() {
 		}
 	}
 
-	tiles[3][5] = &engine.AnimatedTile{
+	tiles[4][5] = &engine.AnimatedTile{
 		AnimDef: []engine.TileAnimFrameDef{
 			{Tile: 0, DurationTicks: 16},
 			{Tile: 1, DurationTicks: 16},
 			{Tile: 2, DurationTicks: 16},
 		},
 	}
-	tiles[2][7] = &engine.AnimatedTile{
+	tiles[6][7] = &engine.AnimatedTile{
 		AnimDef: []engine.TileAnimFrameDef{
 			{Tile: 3, DurationTicks: 12},
 			{Tile: 4, DurationTicks: 12},
@@ -62,18 +62,16 @@ func main() {
 		},
 	}
 
-	tilemap := &engine.Tilemap{
-		Map:      tiles,
-		Src:      engine.ImageRef{Path: "assets/boxes.png"},
-		TileSize: 16,
-	}
-
 	game := &engine.Game{
 		ScreenHeight: screenHeight,
 		ScreenWidth:  screenWidth,
 		Scene: &engine.Scene{
 			Components: []interface{}{
-				tilemap,
+				&engine.Tilemap{
+					Map:      tiles,
+					Src:      engine.ImageRef{Path: "assets/boxes.png"},
+					TileSize: 16,
+				},
 				engine.PerfDisplay{},
 			},
 		},
