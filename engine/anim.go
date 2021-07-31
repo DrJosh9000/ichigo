@@ -29,12 +29,12 @@ func (a *Anim) Update() error {
 
 // AnimDef describes an animation (sequence of frames and timings).
 type AnimDef struct {
-	Frames  []AnimFrame `json:"frames"`
-	OneShot bool        `json:"oneshot"`
+	Frames  []AnimFrame
+	OneShot bool
 }
 
 // AnimFrame describes a frame in an animation.
 type AnimFrame struct {
-	Frame    int `json:"frame"`    // show this frame
-	Duration int `json:"duration"` // for this long, in ticks
+	Frame    int // show this frame
+	Duration int // for this long, in ticks
 }
