@@ -47,18 +47,28 @@ func main() {
 	}
 
 	tiles[4][5] = &engine.AnimatedTile{
-		AnimDef: []engine.TileAnimFrameDef{
-			{Tile: 0, DurationTicks: 16},
-			{Tile: 1, DurationTicks: 16},
-			{Tile: 2, DurationTicks: 16},
+		Anim: engine.Anim{
+			Def: &engine.AnimDef{
+				Frames: []engine.AnimFrame{
+					{Frame: 0, DurationTicks: 16},
+					{Frame: 1, DurationTicks: 16},
+					{Frame: 2, DurationTicks: 16},
+				},
+				Loop: true,
+			},
 		},
 	}
 	tiles[6][7] = &engine.AnimatedTile{
-		AnimDef: []engine.TileAnimFrameDef{
-			{Tile: 3, DurationTicks: 12},
-			{Tile: 4, DurationTicks: 12},
-			{Tile: 5, DurationTicks: 12},
-			{Tile: 6, DurationTicks: 12},
+		Anim: engine.Anim{
+			Def: &engine.AnimDef{
+				Frames: []engine.AnimFrame{
+					{Frame: 3, DurationTicks: 12},
+					{Frame: 4, DurationTicks: 12},
+					{Frame: 5, DurationTicks: 12},
+					{Frame: 6, DurationTicks: 12},
+				},
+				Loop: true,
+			},
 		},
 	}
 

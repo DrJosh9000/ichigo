@@ -63,26 +63,7 @@ type StaticTile int
 func (s StaticTile) TileIndex() int { return int(s) }
 
 type AnimatedTile struct {
-	Frame         int // index into AnimDef
-	DurationTicks int // time spent showing current frame
-	AnimDef       []TileAnimFrameDef
+	Anim
 }
 
-func (a *AnimatedTile) TileIndex() int { return a.AnimDef[a.Frame].Tile }
-
-func (a *AnimatedTile) Update() error {
-	a.DurationTicks++
-	if a.DurationTicks >= a.AnimDef[a.Frame].DurationTicks {
-		a.DurationTicks = 0
-		a.Frame++
-	}
-	if a.Frame >= len(a.AnimDef) {
-		a.Frame = 0
-	}
-	return nil
-}
-
-type TileAnimFrameDef struct {
-	Tile          int // show this tile
-	DurationTicks int // show it for this long
-}
+func (a *AnimatedTile) TileIndex() int { return a.CurrentFrame() }

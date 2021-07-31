@@ -14,12 +14,23 @@ var (
 	imageCache = make(map[string]*ebiten.Image)
 )
 
+type AnimRef struct {
+	Path string
+
+	animdef *AnimDef
+}
+
+// ImageRef loads images from the AssetFS into *ebiten.Image form.
+// It is your responsibility to import _ "image/..." for whatever
+// format the files are in.
 type ImageRef struct {
 	Path string
 
 	image *ebiten.Image
 }
 
+// Image returns the image. If it hasn't been loaded yet, it loads.
+// Multiple distinct ImageRefs can use the same path.
 func (r *ImageRef) Image() (*ebiten.Image, error) {
 	if r.image != nil {
 		return r.image, nil
