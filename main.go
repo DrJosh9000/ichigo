@@ -50,9 +50,9 @@ func main() {
 		Anim: engine.Anim{
 			Def: &engine.AnimDef{
 				Frames: []engine.AnimFrame{
-					{Frame: 0, DurationTicks: 16},
-					{Frame: 1, DurationTicks: 16},
-					{Frame: 2, DurationTicks: 16},
+					{Frame: 0, Duration: 16},
+					{Frame: 1, Duration: 16},
+					{Frame: 2, Duration: 16},
 				},
 				Loop: true,
 			},
@@ -62,10 +62,10 @@ func main() {
 		Anim: engine.Anim{
 			Def: &engine.AnimDef{
 				Frames: []engine.AnimFrame{
-					{Frame: 3, DurationTicks: 12},
-					{Frame: 4, DurationTicks: 12},
-					{Frame: 5, DurationTicks: 12},
-					{Frame: 6, DurationTicks: 12},
+					{Frame: 3, Duration: 12},
+					{Frame: 4, Duration: 12},
+					{Frame: 5, Duration: 12},
+					{Frame: 6, Duration: 12},
 				},
 				Loop: true,
 			},

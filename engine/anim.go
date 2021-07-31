@@ -3,26 +3,26 @@ package engine
 // Anim is an "instance" of an AnimDef: an animation being displayed,
 // together with the current state.
 type Anim struct {
-	Def          *AnimDef
-	CurrentIndex int
-	CurrentTicks int
+	Def   *AnimDef
+	Index int
+	Ticks int
 }
 
-func (a *Anim) CurrentFrame() int { return a.Def.Frames[a.CurrentIndex].Frame }
+func (a *Anim) CurrentFrame() int { return a.Def.Frames[a.Index].Frame }
 
 // Update increments the tick count and advances the frame if necessary.
 func (a *Anim) Update() error {
-	a.CurrentTicks++
-	if !a.Def.Loop && a.CurrentIndex == len(a.Def.Frames)-1 {
+	a.Ticks++
+	if !a.Def.Loop && a.Index == len(a.Def.Frames)-1 {
 		// on the last frame of a one shot so remain on final frame
 		return nil
 	}
-	if a.CurrentTicks >= a.Def.Frames[a.CurrentIndex].DurationTicks {
-		a.CurrentTicks = 0
-		a.CurrentIndex++
+	if a.Ticks >= a.Def.Frames[a.Index].Duration {
+		a.Ticks = 0
+		a.Index++
 	}
-	if a.Def.Loop && a.CurrentIndex >= len(a.Def.Frames) {
-		a.CurrentIndex = 0
+	if a.Def.Loop && a.Index >= len(a.Def.Frames) {
+		a.Index = 0
 	}
 	return nil
 }
@@ -35,6 +35,6 @@ type AnimDef struct {
 
 // AnimFrame describes a frame in an animation.
 type AnimFrame struct {
-	Frame         int `json:"frame"`    // show this frame
-	DurationTicks int `json:"duration"` // for this long
+	Frame    int `json:"frame"`    // show this frame
+	Duration int `json:"duration"` // for this long, in ticks
 }

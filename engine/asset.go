@@ -20,6 +20,13 @@ type AnimRef struct {
 	animdef *AnimDef
 }
 
+func (r *AnimRef) Anim() *Anim {
+	// TODO
+	return &Anim{
+		Def: r.animdef,
+	}
+}
+
 // ImageRef loads images from the AssetFS into *ebiten.Image form.
 // It is your responsibility to import _ "image/..." for whatever
 // format the files are in.
