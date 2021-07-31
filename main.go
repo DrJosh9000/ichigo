@@ -19,6 +19,23 @@ func main() {
 	ebiten.SetWindowTitle("TODO")
 
 	engine.AssetFS = assets
+	engine.AnimDefCache = map[string]*engine.AnimDef{
+		"green_tiles": {
+			Frames: []engine.AnimFrame{
+				{Frame: 0, Duration: 16},
+				{Frame: 1, Duration: 16},
+				{Frame: 2, Duration: 16},
+			},
+		},
+		"red_tiles": {
+			Frames: []engine.AnimFrame{
+				{Frame: 3, Duration: 12},
+				{Frame: 4, Duration: 12},
+				{Frame: 5, Duration: 12},
+				{Frame: 6, Duration: 12},
+			},
+		},
+	}
 
 	staticTiles := [][]engine.StaticTile{
 		{0, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 1},
@@ -46,31 +63,12 @@ func main() {
 		}
 	}
 
-	/*
-		tiles[4][5] = &engine.AnimatedTile{
-			Anim: engine.Anim{
-				Def: &engine.AnimDef{
-					Frames: []engine.AnimFrame{
-						{Frame: 0, Duration: 16},
-						{Frame: 1, Duration: 16},
-						{Frame: 2, Duration: 16},
-					},
-				},
-			},
-		}
-		tiles[6][7] = &engine.AnimatedTile{
-			Anim: engine.Anim{
-				Def: &engine.AnimDef{
-					Frames: []engine.AnimFrame{
-						{Frame: 3, Duration: 12},
-						{Frame: 4, Duration: 12},
-						{Frame: 5, Duration: 12},
-						{Frame: 6, Duration: 12},
-					},
-				},
-			},
-		}
-	*/
+	tiles[4][5] = &engine.AnimatedTile{
+		AnimRef: engine.AnimRef{Key: "green_tiles"},
+	}
+	tiles[6][7] = &engine.AnimatedTile{
+		AnimRef: engine.AnimRef{Key: "red_tiles"},
+	}
 
 	game := &engine.Game{
 		ScreenHeight: screenHeight,
