@@ -13,7 +13,7 @@ func (a *Anim) CurrentFrame() int { return a.Def.Frames[a.Index].Frame }
 // Update increments the tick count and advances the frame if necessary.
 func (a *Anim) Update() error {
 	a.Ticks++
-	if !a.Def.Loop && a.Index == len(a.Def.Frames)-1 {
+	if a.Def.OneShot && a.Index == len(a.Def.Frames)-1 {
 		// on the last frame of a one shot so remain on final frame
 		return nil
 	}
@@ -21,7 +21,7 @@ func (a *Anim) Update() error {
 		a.Ticks = 0
 		a.Index++
 	}
-	if a.Def.Loop && a.Index >= len(a.Def.Frames) {
+	if !a.Def.OneShot && a.Index >= len(a.Def.Frames) {
 		a.Index = 0
 	}
 	return nil
@@ -29,8 +29,8 @@ func (a *Anim) Update() error {
 
 // AnimDef describes an animation (sequence of frames and timings).
 type AnimDef struct {
-	Frames []AnimFrame `json:"frames"`
-	Loop   bool        `json:"loop"`
+	Frames  []AnimFrame `json:"frames"`
+	OneShot bool        `json:"oneshot"`
 }
 
 // AnimFrame describes a frame in an animation.

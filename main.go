@@ -54,7 +54,6 @@ func main() {
 					{Frame: 1, Duration: 16},
 					{Frame: 2, Duration: 16},
 				},
-				Loop: true,
 			},
 		},
 	}
@@ -67,7 +66,6 @@ func main() {
 					{Frame: 5, Duration: 12},
 					{Frame: 6, Duration: 12},
 				},
-				Loop: true,
 			},
 		},
 	}
