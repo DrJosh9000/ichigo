@@ -3,7 +3,6 @@ package engine
 import (
 	"encoding/gob"
 	"image"
-	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -33,11 +32,7 @@ func (t *Tilemap) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 			op.GeoM.Concat(geom)
 
 			sx := tile.TileIndex() * t.TileSize
-			im, err := t.Src.Image()
-			if err != nil {
-				log.Fatalf("Tilemap.Draw loading image: %v", err)
-			}
-			src := im.SubImage(image.Rect(sx, 0, sx+t.TileSize, t.TileSize)).(*ebiten.Image)
+			src := t.Src.Image().SubImage(image.Rect(sx, 0, sx+t.TileSize, t.TileSize)).(*ebiten.Image)
 			screen.DrawImage(src, &op)
 		}
 	}
@@ -69,7 +64,9 @@ func (s StaticTile) TileIndex() int { return int(s) }
 
 // AnimatedTile uses an Anim to choose a tile index.
 type AnimatedTile struct {
-	Anim
+	AnimRef
 }
 
-func (a *AnimatedTile) TileIndex() int { return a.CurrentFrame() }
+func (a *AnimatedTile) TileIndex() int { return a.Anim().CurrentFrame() }
+
+func (a *AnimatedTile) Update() error { return a.Anim().Update() }

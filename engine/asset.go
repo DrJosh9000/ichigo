@@ -2,9 +2,9 @@ package engine
 
 import (
 	"encoding/gob"
-	"fmt"
 	"image"
 	"io/fs"
+	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -16,34 +16,34 @@ var (
 	imageCache   = make(map[string]*ebiten.Image)
 )
 
-// AnimRef
+// AnimRef loads AnimDef from an asset and manages an Anim using it.
 type AnimRef struct {
 	Path string
 
 	anim *Anim
 }
 
-func (r *AnimRef) Anim() (*Anim, error) {
+func (r *AnimRef) Anim() *Anim {
 	if r.anim != nil {
-		return r.anim, nil
+		return r.anim
 	}
 	if ad := animDefCache[r.Path]; ad != nil {
 		r.anim = &Anim{Def: ad}
-		return r.anim, nil
+		return r.anim
 	}
 	f, err := AssetFS.Open(r.Path)
 	if err != nil {
-		return nil, fmt.Errorf("open asset: %w", err)
+		log.Fatalf("Couldn't open asset: %v", err)
 	}
 	defer f.Close()
 	dec := gob.NewDecoder(f)
 	ad := &AnimDef{}
 	if err := dec.Decode(ad); err != nil {
-		return nil, fmt.Errorf("decode asset: %w", err)
+		log.Fatalf("Couldn't decode asset: %v", err)
 	}
 	animDefCache[r.Path] = ad
 	r.anim = &Anim{Def: ad}
-	return r.anim, nil
+	return r.anim
 }
 
 // ImageRef loads images from the AssetFS into *ebiten.Image form.
@@ -57,24 +57,24 @@ type ImageRef struct {
 
 // Image returns the image. If it hasn't been loaded yet, it loads.
 // Multiple distinct ImageRefs can use the same path.
-func (r *ImageRef) Image() (*ebiten.Image, error) {
+func (r *ImageRef) Image() *ebiten.Image {
 	if r.image != nil {
-		return r.image, nil
+		return r.image
 	}
 	r.image = imageCache[r.Path]
 	if r.image != nil {
-		return r.image, nil
+		return r.image
 	}
 	f, err := AssetFS.Open(r.Path)
 	if err != nil {
-		return nil, fmt.Errorf("open asset: %w", err)
+		log.Fatalf("Couldn't open asset: %v", err)
 	}
 	defer f.Close()
 	i, _, err := image.Decode(f)
 	if err != nil {
-		return nil, fmt.Errorf("decode asset: %w", err)
+		log.Fatalf("Couldn't decode asset: %v", err)
 	}
 	r.image = ebiten.NewImageFromImage(i)
 	imageCache[r.Path] = r.image
-	return r.image, nil
+	return r.image
 }

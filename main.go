@@ -46,29 +46,31 @@ func main() {
 		}
 	}
 
-	tiles[4][5] = &engine.AnimatedTile{
-		Anim: engine.Anim{
-			Def: &engine.AnimDef{
-				Frames: []engine.AnimFrame{
-					{Frame: 0, Duration: 16},
-					{Frame: 1, Duration: 16},
-					{Frame: 2, Duration: 16},
+	/*
+		tiles[4][5] = &engine.AnimatedTile{
+			Anim: engine.Anim{
+				Def: &engine.AnimDef{
+					Frames: []engine.AnimFrame{
+						{Frame: 0, Duration: 16},
+						{Frame: 1, Duration: 16},
+						{Frame: 2, Duration: 16},
+					},
 				},
 			},
-		},
-	}
-	tiles[6][7] = &engine.AnimatedTile{
-		Anim: engine.Anim{
-			Def: &engine.AnimDef{
-				Frames: []engine.AnimFrame{
-					{Frame: 3, Duration: 12},
-					{Frame: 4, Duration: 12},
-					{Frame: 5, Duration: 12},
-					{Frame: 6, Duration: 12},
+		}
+		tiles[6][7] = &engine.AnimatedTile{
+			Anim: engine.Anim{
+				Def: &engine.AnimDef{
+					Frames: []engine.AnimFrame{
+						{Frame: 3, Duration: 12},
+						{Frame: 4, Duration: 12},
+						{Frame: 5, Duration: 12},
+						{Frame: 6, Duration: 12},
+					},
 				},
 			},
-		},
-	}
+		}
+	*/
 
 	game := &engine.Game{
 		ScreenHeight: screenHeight,
