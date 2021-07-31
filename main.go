@@ -2,7 +2,6 @@ package main
 
 import (
 	"embed"
-	"image"
 	_ "image/png"
 	"log"
 
@@ -19,15 +18,7 @@ func main() {
 	ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
 	ebiten.SetWindowTitle("TODO")
 
-	boxesFile, err := assets.Open("assets/boxes.png")
-	if err != nil {
-		log.Fatalf("Couldn't open asset: %v", err)
-	}
-	boxesPNG, _, err := image.Decode(boxesFile)
-	if err != nil {
-		log.Fatalf("Couldn't decode asset: %v", err)
-	}
-	boxesFile.Close()
+	engine.AssetFS = assets
 
 	staticTiles := [][]engine.StaticTile{
 		{0, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 1},
@@ -73,7 +64,7 @@ func main() {
 
 	tilemap := &engine.Tilemap{
 		Map:      tiles,
-		Src:      ebiten.NewImageFromImage(boxesPNG),
+		Src:      engine.ImageRef{Path: "assets/boxes.png"},
 		TileSize: 16,
 	}
 

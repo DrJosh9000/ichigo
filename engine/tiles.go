@@ -3,6 +3,7 @@ package engine
 import (
 	"encoding/gob"
 	"image"
+	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -15,7 +16,7 @@ func init() {
 
 type Tilemap struct {
 	Map       [][]Tile
-	Src       *ebiten.Image // must be a horizontal tile set
+	Src       ImageRef // must be a horizontal tile set
 	TileSize  int
 	Transform ebiten.GeoM
 	ZPos
@@ -30,7 +31,11 @@ func (t *Tilemap) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 			op.GeoM.Concat(geom)
 
 			sx := tile.TileIndex() * t.TileSize
-			src := t.Src.SubImage(image.Rect(sx, 0, sx+t.TileSize, t.TileSize)).(*ebiten.Image)
+			im, err := t.Src.Image()
+			if err != nil {
+				log.Fatalf("Loading image from reference: %v", err)
+			}
+			src := im.SubImage(image.Rect(sx, 0, sx+t.TileSize, t.TileSize)).(*ebiten.Image)
 			screen.DrawImage(src, &op)
 		}
 	}
