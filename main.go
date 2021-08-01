@@ -75,6 +75,12 @@ func main() {
 		ScreenWidth:  screenWidth,
 		Scene: &engine.Scene{
 			Components: []interface{}{
+				&engine.GobDumper{
+					KeyCombo: []ebiten.Key{
+						ebiten.KeyControl,
+						ebiten.KeyD,
+					},
+				},
 				&engine.Tilemap{
 					Map:      tiles,
 					Src:      engine.ImageRef{Path: "assets/boxes.png"},
@@ -84,6 +90,7 @@ func main() {
 			},
 		},
 	}
+	game.Build()
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatalf("Game error: %v", err)

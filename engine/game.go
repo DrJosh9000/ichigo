@@ -29,7 +29,6 @@ type Game struct {
 	ScreenHeight int
 	Scene        *Scene
 
-	allComponents  []interface{}
 	componentsByID map[string]interface{}
 }
 
@@ -51,11 +50,21 @@ func (g *Game) Update() error {
 // Component returns the component with a given ID.
 func (g *Game) Component(id string) interface{} { return g.componentsByID[id] }
 
-// Walk calls visit with every component, for as long as visit returns true.
-func (g *Game) Walk(visit func(interface{}) bool) {
-	for _, c := range g.allComponents {
-		if !visit(c) {
-			return
+// Walk calls v with every component, for as long as visit returns true.
+func (g *Game) Walk(v func(interface{}) bool) {
+	g.walk(g.Scene, v)
+}
+
+func (g *Game) walk(c interface{}, v func(interface{}) bool) {
+	if !v(c) {
+		return
+	}
+	if sc, ok := c.(Scanner); ok {
+		for _, c := range sc.Scan(g) {
+			if !v(c) {
+				return
+			}
+			g.walk(c, v)
 		}
 	}
 }
@@ -63,16 +72,11 @@ func (g *Game) Walk(visit func(interface{}) bool) {
 // Build builds the component database.
 func (g *Game) Build() {
 	byID := make(map[string]interface{})
-	all := []interface{}{g.Scene}
-	for offset := 0; offset < len(all); offset++ {
-		head := all[offset]
-		if id, ok := head.(IDer); ok {
-			byID[id.ID()] = head
+	g.walk(g.Scene, func(c interface{}) bool {
+		if id, ok := c.(IDer); ok {
+			byID[id.ID()] = c
 		}
-		if sc, ok := head.(Scanner); ok {
-			all = append(all, sc.Scan(g))
-		}
-	}
-	g.allComponents = all
+		return true
+	})
 	g.componentsByID = byID
 }
