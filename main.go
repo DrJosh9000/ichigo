@@ -83,6 +83,7 @@ func main() {
 					},
 				},
 				&engine.Tilemap{
+					ID:       "terrain",
 					Map:      tiles,
 					Src:      engine.ImageRef{Path: "assets/boxes.png"},
 					TileSize: 16,

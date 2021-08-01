@@ -2,7 +2,6 @@ package engine
 
 import (
 	"encoding/gob"
-	"fmt"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -50,16 +49,28 @@ func (g *Game) Update() error {
 
 // RegisterComponent tells the game there is a new component.
 func (g *Game) RegisterComponent(c interface{}) {
-	if id, ok := c.(Identifier); ok {
-		g.componentsByID[id.Ident()] = c
+	i, ok := c.(Identifier)
+	if !ok {
+		return
 	}
+	id := i.Ident()
+	if id == "" {
+		return
+	}
+	g.componentsByID[id] = c
 }
 
 // UnregisterComponent tells the game the component is no more.
 func (g *Game) UnregisterComponent(c interface{}) {
-	if id, ok := c.(Identifier); ok {
-		delete(g.componentsByID, id.Ident())
+	i, ok := c.(Identifier)
+	if !ok {
+		return
 	}
+	id := i.Ident()
+	if id == "" {
+		return
+	}
+	delete(g.componentsByID, id)
 }
 
 // Component returns the component with a given ID.
@@ -91,5 +102,4 @@ func (g *Game) Build() {
 		g.RegisterComponent(c)
 		return true
 	})
-	fmt.Printf("%#v\n", g.componentsByID)
 }
