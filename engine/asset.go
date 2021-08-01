@@ -14,7 +14,7 @@ var (
 
 	// AnimDefs are easier to write as Go expressions -
 	// so just set this.
-	AnimDefCache map[string]*AnimDef
+	AnimDefs map[string]*AnimDef
 
 	imageCache = make(map[string]*ebiten.Image)
 )
@@ -30,7 +30,7 @@ func (r *AnimRef) Anim() *Anim {
 	if r.anim != nil {
 		return r.anim
 	}
-	if ad := AnimDefCache[r.Key]; ad != nil {
+	if ad := AnimDefs[r.Key]; ad != nil {
 		r.anim = &Anim{Def: ad}
 		return r.anim
 	}
