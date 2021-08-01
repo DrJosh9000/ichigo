@@ -12,12 +12,12 @@ func init() {
 	gob.Register(Scene{})
 }
 
-// Drawer is a component that can draw itself. Draw is called often.
+// Drawer components can draw themselves. Draw is called often.
 type Drawer interface {
 	Draw(screen *ebiten.Image, geom ebiten.GeoM)
 }
 
-// Updater is a component that can update. Update is called repeatedly.
+// Updater components can update themselves. Update is called repeatedly.
 type Updater interface {
 	Update() error
 }
@@ -56,6 +56,9 @@ func (s *Scene) sortByZ() {
 		return !aok && bok
 	})
 }
+
+// Scan returns all subcomponents.
+func (s *Scene) Scan(g *Game) []interface{} { return s.Components }
 
 // Update calls Update on all Updater components.
 func (s *Scene) Update() error {
