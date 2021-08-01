@@ -19,7 +19,7 @@ func main() {
 	ebiten.SetWindowTitle("TODO")
 
 	engine.AssetFS = assets
-	engine.AnimDefCache = map[string]*engine.AnimDef{
+	engine.AnimDefs = map[string]*engine.AnimDef{
 		"green_tiles": {
 			Frames: []engine.AnimFrame{
 				{Frame: 0, Duration: 16},
