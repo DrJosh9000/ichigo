@@ -77,10 +77,7 @@ func main() {
 			ID: "root_scene",
 			Components: []interface{}{
 				&engine.GobDumper{
-					KeyCombo: []ebiten.Key{
-						ebiten.KeyControl,
-						ebiten.KeyD,
-					},
+					KeyCombo: []ebiten.Key{ebiten.KeyControl, ebiten.KeyD},
 				},
 				&engine.Tilemap{
 					ID:       "terrain",
