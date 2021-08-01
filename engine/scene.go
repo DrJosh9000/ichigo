@@ -69,7 +69,7 @@ func (s *Scene) Scan(g *Game) []interface{} { return s.Components }
 // Update calls Update on all Updater components.
 func (s *Scene) Update() error {
 	needsSort := false
-	curZ := -math.MaxFloat64 // this is min float64
+	curZ := -math.MaxFloat64 // fun fact: this is min float64
 	for _, c := range s.Components {
 		// Update each updater in turn
 		if u, ok := c.(Updater); ok {
