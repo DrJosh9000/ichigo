@@ -15,6 +15,8 @@ func init() {
 
 // Tilemap renders a grid of tiles.
 type Tilemap struct {
+	Hidden bool
+	ID
 	Map       [][]Tile
 	Src       ImageRef // must be a horizontal tile set
 	TileSize  int
@@ -24,6 +26,9 @@ type Tilemap struct {
 
 // Draw draws the tilemap.
 func (t *Tilemap) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
+	if t.Hidden {
+		return
+	}
 	geom.Concat(t.Transform)
 	for j, row := range t.Map {
 		for i, tile := range row {

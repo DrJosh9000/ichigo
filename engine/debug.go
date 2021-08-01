@@ -18,9 +18,14 @@ func init() {
 }
 
 // PerfDisplay debugprints CurrentTPS and CurrentFPS in the top left.
-type PerfDisplay struct{}
+type PerfDisplay struct {
+	Hidden bool
+}
 
-func (PerfDisplay) Draw(screen *ebiten.Image, _ ebiten.GeoM) {
+func (p PerfDisplay) Draw(screen *ebiten.Image, _ ebiten.GeoM) {
+	if p.Hidden {
+		return
+	}
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f  FPS: %0.2f", ebiten.CurrentTPS(), ebiten.CurrentFPS()))
 }
 

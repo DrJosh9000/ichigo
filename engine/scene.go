@@ -30,11 +30,17 @@ type ZPositioner interface {
 // Scene manages drawing and updating a bunch of components.
 type Scene struct {
 	Components []interface{}
-	Transform  ebiten.GeoM
+	Hidden     bool
+	ID
+	Transform ebiten.GeoM
+	ZPos
 }
 
 // Draw draws all components in order.
 func (s *Scene) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
+	if s.Hidden {
+		return
+	}
 	geom.Concat(s.Transform)
 	for _, i := range s.Components {
 		if d, ok := i.(Drawer); ok {

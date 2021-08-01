@@ -74,6 +74,7 @@ func main() {
 		ScreenHeight: screenHeight,
 		ScreenWidth:  screenWidth,
 		Scene: &engine.Scene{
+			ID: "root_scene",
 			Components: []interface{}{
 				&engine.GobDumper{
 					KeyCombo: []ebiten.Key{

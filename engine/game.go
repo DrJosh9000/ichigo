@@ -2,6 +2,7 @@ package engine
 
 import (
 	"encoding/gob"
+	"fmt"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -10,10 +11,10 @@ func init() {
 	gob.Register(Game{})
 }
 
-// IDer components have a name. This makes it easier for components to
-// find and interact with one another.
-type IDer interface {
-	ID() string
+// Identifier components have a sense of self. This makes it easier for
+// components to find and interact with one another.
+type Identifier interface {
+	Ident() string
 }
 
 // Scanner components can be scanned. It is called when the game
@@ -47,6 +48,20 @@ func (g *Game) Update() error {
 	return g.Scene.Update()
 }
 
+// RegisterComponent tells the game there is a new component.
+func (g *Game) RegisterComponent(c interface{}) {
+	if id, ok := c.(Identifier); ok {
+		g.componentsByID[id.Ident()] = c
+	}
+}
+
+// UnregisterComponent tells the game the component is no more.
+func (g *Game) UnregisterComponent(c interface{}) {
+	if id, ok := c.(Identifier); ok {
+		delete(g.componentsByID, id.Ident())
+	}
+}
+
 // Component returns the component with a given ID.
 func (g *Game) Component(id string) interface{} { return g.componentsByID[id] }
 
@@ -71,12 +86,10 @@ func (g *Game) walk(c interface{}, v func(interface{}) bool) {
 
 // Build builds the component database.
 func (g *Game) Build() {
-	byID := make(map[string]interface{})
-	g.walk(g.Scene, func(c interface{}) bool {
-		if id, ok := c.(IDer); ok {
-			byID[id.ID()] = c
-		}
+	g.componentsByID = make(map[string]interface{})
+	g.Walk(func(c interface{}) bool {
+		g.RegisterComponent(c)
 		return true
 	})
-	g.componentsByID = byID
+	fmt.Printf("%#v\n", g.componentsByID)
 }
