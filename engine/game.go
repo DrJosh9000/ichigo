@@ -47,7 +47,8 @@ func (g *Game) Update() error {
 	return g.Scene.Update()
 }
 
-// RegisterComponent tells the game there is a new component.
+// RegisterComponent tells the game there is a new component. Currently this is
+// only necessary for components with IDs.
 func (g *Game) RegisterComponent(c interface{}) {
 	i, ok := c.(Identifier)
 	if !ok {
@@ -73,7 +74,7 @@ func (g *Game) UnregisterComponent(c interface{}) {
 	delete(g.componentsByID, id)
 }
 
-// Component returns the component with a given ID.
+// Component returns the component with a given ID, or nil if there is none.
 func (g *Game) Component(id string) interface{} { return g.componentsByID[id] }
 
 // Walk calls v with every component, for as long as visit returns true.
