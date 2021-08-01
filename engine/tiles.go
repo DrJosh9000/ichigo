@@ -20,7 +20,7 @@ type Tilemap struct {
 	Map       [][]Tile
 	Src       ImageRef // must be a horizontal tile set
 	TileSize  int
-	Transform ebiten.GeoM
+	Transform GeoMDef
 	ZPos
 }
 
@@ -29,7 +29,7 @@ func (t *Tilemap) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 	if t.Hidden {
 		return
 	}
-	geom.Concat(t.Transform)
+	geom.Concat(*t.Transform.GeoM())
 	for j, row := range t.Map {
 		for i, tile := range row {
 			var op ebiten.DrawImageOptions

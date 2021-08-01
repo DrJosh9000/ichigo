@@ -32,7 +32,7 @@ type Scene struct {
 	Components []interface{}
 	Hidden     bool
 	ID
-	Transform ebiten.GeoM
+	Transform GeoMDef
 	ZPos
 }
 
@@ -41,7 +41,8 @@ func (s *Scene) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 	if s.Hidden {
 		return
 	}
-	geom.Concat(s.Transform)
+	geom.Concat(*s.Transform.GeoM())
+
 	for _, i := range s.Components {
 		if d, ok := i.(Drawer); ok {
 			d.Draw(screen, geom)
