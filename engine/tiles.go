@@ -15,7 +15,8 @@ func init() {
 
 // Tilemap renders a grid of tiles.
 type Tilemap struct {
-	Hidden bool
+	Disabled bool
+	Hidden   bool
 	ID
 	Map       [][]Tile
 	Src       ImageRef // must be a horizontal tile set
@@ -45,6 +46,9 @@ func (t *Tilemap) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 
 // Update calls Update on any tiles that are Updaters, e.g. AnimatedTile.
 func (t *Tilemap) Update() error {
+	if t.Disabled {
+		return nil
+	}
 	for j := range t.Map {
 		for i := range t.Map[j] {
 			if tile, ok := t.Map[j][i].(Updater); ok {

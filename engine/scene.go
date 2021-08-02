@@ -30,6 +30,7 @@ type ZPositioner interface {
 // Scene manages drawing and updating a bunch of components.
 type Scene struct {
 	Components []interface{}
+	Disabled   bool
 	Hidden     bool
 	ID
 	Transform GeoMDef
@@ -69,6 +70,9 @@ func (s *Scene) Scan() []interface{} { return s.Components }
 
 // Update calls Update on all Updater components.
 func (s *Scene) Update() error {
+	if s.Disabled {
+		return nil
+	}
 	needsSort := false
 	curZ := -math.MaxFloat64 // fun fact: this is min float64
 	for _, c := range s.Components {
