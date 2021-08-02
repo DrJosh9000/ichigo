@@ -19,7 +19,7 @@ type Tilemap struct {
 	Hidden   bool
 	ID
 	Map       [][]Tile
-	Src       ImageRef // must be a horizontal tile set
+	Src       ImageRef
 	TileSize  int
 	Transform GeoMDef
 	ZPos
@@ -30,6 +30,8 @@ func (t *Tilemap) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 	if t.Hidden {
 		return
 	}
+	src := t.Src.Image()
+	w, _ := src.Size()
 	geom.Concat(*t.Transform.GeoM())
 	for j, row := range t.Map {
 		for i, tile := range row {
@@ -40,8 +42,9 @@ func (t *Tilemap) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 			op.GeoM.Translate(float64(i*t.TileSize), float64(j*t.TileSize))
 			op.GeoM.Concat(geom)
 
-			sx := tile.TileIndex() * t.TileSize
-			src := t.Src.Image().SubImage(image.Rect(sx, 0, sx+t.TileSize, t.TileSize)).(*ebiten.Image)
+			s := tile.TileIndex() * t.TileSize
+			sx, sy := s%w, (s/w)*t.TileSize
+			src := src.SubImage(image.Rect(sx, sy, sx+t.TileSize, sy+t.TileSize)).(*ebiten.Image)
 			screen.DrawImage(src, &op)
 		}
 	}
