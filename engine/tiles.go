@@ -33,6 +33,9 @@ func (t *Tilemap) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 	geom.Concat(*t.Transform.GeoM())
 	for j, row := range t.Map {
 		for i, tile := range row {
+			if tile == nil {
+				continue
+			}
 			var op ebiten.DrawImageOptions
 			op.GeoM.Translate(float64(i*t.TileSize), float64(j*t.TileSize))
 			op.GeoM.Concat(geom)
@@ -49,10 +52,10 @@ func (t *Tilemap) Update() error {
 	if t.Disabled {
 		return nil
 	}
-	for j := range t.Map {
-		for i := range t.Map[j] {
-			if tile, ok := t.Map[j][i].(Updater); ok {
-				if err := tile.Update(); err != nil {
+	for _, row := range t.Map {
+		for _, tile := range row {
+			if u, ok := tile.(Updater); ok {
+				if err := u.Update(); err != nil {
 					return err
 				}
 			}

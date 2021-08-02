@@ -69,6 +69,9 @@ func main() {
 	tiles[6][7] = &engine.AnimatedTile{
 		AnimRef: engine.AnimRef{Key: "red_tiles"},
 	}
+	tiles[2][8] = &engine.AnimatedTile{
+		AnimRef: engine.AnimRef{Key: "green_tiles"},
+	}
 
 	game := &engine.Game{
 		ScreenHeight: screenHeight,
