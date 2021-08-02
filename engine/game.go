@@ -104,7 +104,8 @@ func (g *Game) walk(c interface{}, v func(interface{}) bool) {
 	}
 }
 
-// Build builds the component database.
+// Build builds the component database, and calls Build, on all components
+// reachable via Scan.
 func (g *Game) Build() {
 	g.componentsByID = make(map[string]interface{})
 	g.Walk(func(c interface{}) bool {
