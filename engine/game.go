@@ -25,7 +25,7 @@ type Builder interface {
 
 // Scanner components can be scanned. It is called when the game tree is walked
 // (such as when the game component database is constructed).
-// Scan should return a slice containing all subcomponents.
+// Scan should return a slice containing all immediate subcomponents.
 type Scanner interface {
 	Scan() []interface{}
 }
