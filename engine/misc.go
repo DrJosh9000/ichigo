@@ -18,7 +18,7 @@ type ZPos float64
 // Z returns z as a float64.
 func (z ZPos) Z() float64 { return float64(z) }
 
-// GeoMDef is a serialisable form of GeoM.
+// GeoMDef is a serialisable form of ebiten.GeoM.
 type GeoMDef [6]float64 // Assumption: this has identical memory layout to GeoM
 
 // ToGeoMDef translates a GeoM to a GeoMDef using unsafe.Pointer.
