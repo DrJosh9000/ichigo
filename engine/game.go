@@ -16,11 +16,18 @@ type Identifier interface {
 	Ident() string
 }
 
-// Scanner components can be scanned. It is called when the game
+// Builder components can be built. It is called when the game
 // component database is being constructed. It should store the Game reference
-// (if needed later on), and return a slice of all subcomponents.
+// (if needed later on).
+type Builder interface {
+	Build(game *Game)
+}
+
+// Scanner components can be scanned. It is called when the game tree is walked
+// (such as when the game component database is constructed).
+// Scan should return a slice containing all subcomponents.
 type Scanner interface {
-	Scan(game *Game) []interface{}
+	Scan() []interface{}
 }
 
 // Game implements the ebiten methods using a collection of components.
@@ -77,7 +84,8 @@ func (g *Game) UnregisterComponent(c interface{}) {
 // Component returns the component with a given ID, or nil if there is none.
 func (g *Game) Component(id string) interface{} { return g.componentsByID[id] }
 
-// Walk calls v with every component, for as long as visit returns true.
+// Walk calls v with every component reachable via Scan, for as long as visit
+// returns true.
 func (g *Game) Walk(v func(interface{}) bool) {
 	g.walk(g.Scene, v)
 }
@@ -87,7 +95,7 @@ func (g *Game) walk(c interface{}, v func(interface{}) bool) {
 		return
 	}
 	if sc, ok := c.(Scanner); ok {
-		for _, c := range sc.Scan(g) {
+		for _, c := range sc.Scan() {
 			if !v(c) {
 				return
 			}
@@ -100,6 +108,9 @@ func (g *Game) walk(c interface{}, v func(interface{}) bool) {
 func (g *Game) Build() {
 	g.componentsByID = make(map[string]interface{})
 	g.Walk(func(c interface{}) bool {
+		if b, ok := c.(Builder); ok {
+			b.Build(g)
+		}
 		g.RegisterComponent(c)
 		return true
 	})

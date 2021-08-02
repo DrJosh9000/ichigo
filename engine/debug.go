@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"compress/gzip"
 	"encoding/gob"
 	"errors"
 	"fmt"
@@ -42,11 +43,10 @@ type GobDumper struct {
 	game *Game
 }
 
-func (d *GobDumper) Scan(g *Game) []interface{} {
-	d.game = g
-	return nil
-}
+// Build simply stores the reference to the Game.
+func (d *GobDumper) Build(g *Game) { d.game = g }
 
+// Update waits for the key combo, then dumps the game state into a gzipped gob.
 func (d *GobDumper) Update() error {
 	for _, key := range d.KeyCombo {
 		if !ebiten.IsKeyPressed(key) {
@@ -56,12 +56,17 @@ func (d *GobDumper) Update() error {
 	if d.game == nil {
 		return errors.New("nil d.game in GobDumper.Update")
 	}
-	f, err := os.Create(time.Now().Format("20060102030405.gob"))
+	f, err := os.Create(time.Now().Format("20060102030405.gob.gz"))
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	if err := gob.NewEncoder(f).Encode(d.game); err != nil {
+	gz := gzip.NewWriter(f)
+	defer gz.Close()
+	if err := gob.NewEncoder(gz).Encode(d.game); err != nil {
+		return err
+	}
+	if err := gz.Close(); err != nil {
 		return err
 	}
 	return f.Close()

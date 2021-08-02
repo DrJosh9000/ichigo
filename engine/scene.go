@@ -65,7 +65,7 @@ func (s *Scene) sortByZ() {
 }
 
 // Scan returns all subcomponents.
-func (s *Scene) Scan(g *Game) []interface{} { return s.Components }
+func (s *Scene) Scan() []interface{} { return s.Components }
 
 // Update calls Update on all Updater components.
 func (s *Scene) Update() error {
