@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"image"
 	_ "image/png"
 	"log"
 
@@ -72,6 +73,15 @@ func main() {
 							Map:      tiles,
 							Src:      engine.ImageRef{Path: "assets/boxes.png"},
 							TileSize: 16,
+						},
+						&engine.SolidRect{
+							ID:   "ground",
+							Rect: image.Rect(0, 192, 320, 240),
+						},
+						&engine.Actor{
+							ID:       "protagonist",
+							Position: image.Pt(100, 100),
+							Size:     image.Pt(16, 16),
 						},
 					},
 				},

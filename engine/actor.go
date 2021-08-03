@@ -3,8 +3,13 @@ package engine
 import (
 	"encoding/gob"
 	"image"
+	"image/color"
 	"math"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
+
+const gravity = 0.5
 
 func init() {
 	gob.Register(Actor{})
@@ -25,6 +30,8 @@ type Actor struct {
 
 	game       *Game
 	xRem, yRem float64
+	src        *ebiten.Image // TODO: refactor
+	vx, vy     float64       // TODO: refactor
 }
 
 func (a *Actor) collidesAt(p image.Point) bool {
@@ -40,6 +47,40 @@ func (a *Actor) collidesAt(p image.Point) bool {
 		return true
 	})
 	return hit
+}
+
+func (a *Actor) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
+	// TODO: delegate drawing to something else
+	var op ebiten.DrawImageOptions
+	op.GeoM.Translate(float64(a.Position.X), float64(a.Position.Y))
+	op.GeoM.Concat(geom)
+	screen.DrawImage(a.src, &op)
+}
+
+func (a *Actor) Update() error {
+	// TODO: delegate updating to something else
+	if a.collidesAt(a.Position.Add(image.Pt(0, 1))) {
+		// Not falling
+		a.vy = 0
+		if ebiten.IsKeyPressed(ebiten.KeySpace) {
+			// Jump?
+			a.vy = -7
+		}
+	} else {
+		// Falling
+		a.vy += gravity
+	}
+	switch {
+	case ebiten.IsKeyPressed(ebiten.KeyLeft):
+		a.vx = -3
+	case ebiten.IsKeyPressed(ebiten.KeyRight):
+		a.vx = 3
+	default:
+		a.vx = 0
+	}
+	a.MoveX(a.vx, nil)
+	a.MoveY(a.vy, nil)
+	return nil
 }
 
 func (a *Actor) MoveX(dx float64, onCollide func()) {
@@ -84,6 +125,10 @@ func (a *Actor) MoveY(dy float64, onCollide func()) {
 
 func (a *Actor) Build(g *Game) {
 	a.game = g
+
+	// TODO: remove hack temporary image
+	a.src = ebiten.NewImage(16, 16)
+	a.src.Fill(color.White)
 }
 
 func sign(m int) int {
