@@ -64,11 +64,16 @@ func main() {
 				&engine.GobDumper{
 					KeyCombo: []ebiten.Key{ebiten.KeyControl, ebiten.KeyD},
 				},
-				&engine.Tilemap{
-					ID:       "terrain",
-					Map:      tiles,
-					Src:      engine.ImageRef{Path: "assets/boxes.png"},
-					TileSize: 16,
+				&engine.Scene{
+					ID: "level_1",
+					Components: []interface{}{
+						&engine.Tilemap{
+							ID:       "terrain",
+							Map:      tiles,
+							Src:      engine.ImageRef{Path: "assets/boxes.png"},
+							TileSize: 16,
+						},
+					},
 				},
 				engine.PerfDisplay{},
 			},

@@ -19,6 +19,7 @@ type Collider interface {
 }
 
 type Actor struct {
+	ID
 	Position image.Point
 	Size     image.Point
 

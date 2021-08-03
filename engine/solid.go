@@ -10,6 +10,7 @@ func init() {
 }
 
 type SolidRect struct {
+	ID
 	Rect image.Rectangle
 }
 
