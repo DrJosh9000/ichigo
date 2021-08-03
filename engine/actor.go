@@ -7,6 +7,7 @@ import (
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 const gravity = 0.5
@@ -63,7 +64,7 @@ func (a *Actor) Update() error {
 	if a.collidesAt(a.Position.Add(image.Pt(0, 1))) {
 		// Not falling
 		a.vy = 0
-		if ebiten.IsKeyPressed(ebiten.KeySpace) {
+		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 			// Jump?
 			a.vy = -7
 		}
