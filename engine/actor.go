@@ -27,6 +27,7 @@ type Actor struct {
 	ID
 	Position image.Point
 	Size     image.Point
+	ZPos     // TODO: refactor
 
 	game       *Game
 	xRem, yRem float64

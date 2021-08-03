@@ -73,15 +73,33 @@ func main() {
 							Map:      tiles,
 							Src:      engine.ImageRef{Path: "assets/boxes.png"},
 							TileSize: 16,
+							ZPos:     0,
+						},
+						&engine.SolidRect{
+							ID:   "ceiling",
+							Rect: image.Rect(0, -2, 320, -1),
+						},
+						&engine.SolidRect{
+							ID:   "left_wall",
+							Rect: image.Rect(-2, 0, -1, 240),
+						},
+						&engine.SolidRect{
+							ID:   "right_wall",
+							Rect: image.Rect(320, 0, 321, 240),
 						},
 						&engine.SolidRect{
 							ID:   "ground",
 							Rect: image.Rect(0, 192, 320, 240),
 						},
+						&engine.SolidRect{
+							ID:   "a_red_tile",
+							Rect: image.Rect(16, 144, 31, 159),
+						},
 						&engine.Actor{
 							ID:       "protagonist",
 							Position: image.Pt(100, 100),
 							Size:     image.Pt(16, 16),
+							ZPos:     1,
 						},
 					},
 				},
