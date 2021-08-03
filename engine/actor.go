@@ -79,8 +79,12 @@ func (a *Actor) Update() error {
 	default:
 		a.vx = 0
 	}
-	a.MoveX(a.vx, nil)
-	a.MoveY(a.vy, nil)
+	a.MoveX(a.vx, func() {
+		a.vx = 0
+	})
+	a.MoveY(a.vy, func() {
+		a.vy = 0
+	})
 	return nil
 }
 

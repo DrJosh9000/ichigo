@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"fmt"
 	"image"
 	_ "image/png"
 	"log"
@@ -56,6 +57,53 @@ func main() {
 		{engine.StaticTile(9), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(9)},
 	}
 
+	level1 := &engine.Scene{
+		ID: "level_1",
+		Components: []interface{}{
+			&engine.Tilemap{
+				ID:       "terrain",
+				Map:      tiles,
+				Src:      engine.ImageRef{Path: "assets/boxes.png"},
+				TileSize: 16,
+				ZPos:     0,
+			},
+			&engine.SolidRect{
+				ID:   "ceiling",
+				Rect: image.Rect(0, -1, 320, 0),
+			},
+			&engine.SolidRect{
+				ID:   "left_wall",
+				Rect: image.Rect(-1, 0, 0, 240),
+			},
+			&engine.SolidRect{
+				ID:   "right_wall",
+				Rect: image.Rect(320, 0, 321, 240),
+			},
+			/*&engine.SolidRect{
+				ID:   "ground",
+				Rect: image.Rect(0, 192, 320, 240),
+			},*/
+			&engine.Actor{
+				ID:       "protagonist",
+				Position: image.Pt(100, 100),
+				Size:     image.Pt(16, 16),
+				ZPos:     1,
+			},
+		},
+	}
+
+	// TODO: something better...
+	for j, row := range tiles {
+		for i, tile := range row {
+			if tile != nil {
+				level1.Components = append(level1.Components, &engine.SolidRect{
+					ID:   engine.ID(fmt.Sprintf("tile_%d_%d", j, i)),
+					Rect: image.Rect(i*16, j*16, (i+1)*16, (j+1)*16),
+				})
+			}
+		}
+	}
+
 	game := &engine.Game{
 		ScreenHeight: screenHeight,
 		ScreenWidth:  screenWidth,
@@ -65,44 +113,7 @@ func main() {
 				&engine.GobDumper{
 					KeyCombo: []ebiten.Key{ebiten.KeyControl, ebiten.KeyD},
 				},
-				&engine.Scene{
-					ID: "level_1",
-					Components: []interface{}{
-						&engine.Tilemap{
-							ID:       "terrain",
-							Map:      tiles,
-							Src:      engine.ImageRef{Path: "assets/boxes.png"},
-							TileSize: 16,
-							ZPos:     0,
-						},
-						&engine.SolidRect{
-							ID:   "ceiling",
-							Rect: image.Rect(0, -2, 320, -1),
-						},
-						&engine.SolidRect{
-							ID:   "left_wall",
-							Rect: image.Rect(-2, 0, -1, 240),
-						},
-						&engine.SolidRect{
-							ID:   "right_wall",
-							Rect: image.Rect(320, 0, 321, 240),
-						},
-						&engine.SolidRect{
-							ID:   "ground",
-							Rect: image.Rect(0, 192, 320, 240),
-						},
-						&engine.SolidRect{
-							ID:   "a_red_tile",
-							Rect: image.Rect(16, 144, 31, 159),
-						},
-						&engine.Actor{
-							ID:       "protagonist",
-							Position: image.Pt(100, 100),
-							Size:     image.Pt(16, 16),
-							ZPos:     1,
-						},
-					},
-				},
+				level1,
 				engine.PerfDisplay{},
 			},
 		},
