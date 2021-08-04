@@ -84,13 +84,12 @@ func (g *Game) UnregisterComponent(c interface{}) {
 // Component returns the component with a given ID, or nil if there is none.
 func (g *Game) Component(id string) interface{} { return g.componentsByID[id] }
 
-// Walk calls v with every component reachable via Scan, for as long as visit
-// returns true.
-func (g *Game) Walk(v func(interface{}) bool) {
-	g.walk(g.Scene, v)
-}
+// Scan implements Scanner.
+func (g *Game) Scan() []interface{} { return []interface{}{g.Scene} }
 
-func (g *Game) walk(c interface{}, v func(interface{}) bool) {
+// Walk calls v with every component reachable from c via Scan, recursively,
+// for as long as visit returns true.
+func Walk(c interface{}, v func(interface{}) bool) {
 	if !v(c) {
 		return
 	}
@@ -99,7 +98,7 @@ func (g *Game) walk(c interface{}, v func(interface{}) bool) {
 			if !v(c) {
 				return
 			}
-			g.walk(c, v)
+			Walk(c, v)
 		}
 	}
 }
@@ -108,7 +107,7 @@ func (g *Game) walk(c interface{}, v func(interface{}) bool) {
 // reachable via Scan.
 func (g *Game) Build() {
 	g.componentsByID = make(map[string]interface{})
-	g.Walk(func(c interface{}) bool {
+	Walk(g.Scene, func(c interface{}) bool {
 		if b, ok := c.(Builder); ok {
 			b.Build(g)
 		}

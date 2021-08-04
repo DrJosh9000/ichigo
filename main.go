@@ -2,7 +2,6 @@ package main
 
 import (
 	"embed"
-	"fmt"
 	"image"
 	_ "image/png"
 	"log"
@@ -90,18 +89,6 @@ func main() {
 				ZPos:     1,
 			},
 		},
-	}
-
-	// TODO: something better...
-	for j, row := range tiles {
-		for i, tile := range row {
-			if tile != nil {
-				level1.Components = append(level1.Components, &engine.SolidRect{
-					ID:   engine.ID(fmt.Sprintf("tile_%d_%d", j, i)),
-					Rect: image.Rect(i*16, j*16, (i+1)*16, (j+1)*16),
-				})
-			}
-		}
 	}
 
 	game := &engine.Game{

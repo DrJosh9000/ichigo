@@ -19,10 +19,29 @@ type Tilemap struct {
 	Hidden   bool
 	ID
 	Map       [][]Tile
+	Ersatz     bool // "fake wall"
 	Src       ImageRef
 	TileSize  int
 	Transform GeoMDef
 	ZPos
+}
+
+// CollidesWith implements Collider.
+func (t *Tilemap) CollidesWith(r image.Rectangle) bool {
+	if t.Ersatz {
+		return false
+	}
+	for j, row := range t.Map {
+		for i, tile := range row {
+			if tile == nil {
+				continue
+			}
+			if r.Overlaps(image.Rect(i*t.TileSize, j*t.TileSize, (i+1)*t.TileSize, (j+1)*t.TileSize)) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // Draw draws the tilemap.

@@ -39,7 +39,7 @@ type Actor struct {
 func (a *Actor) collidesAt(p image.Point) bool {
 	// TODO: more efficient test?
 	hit := false
-	a.game.Walk(func(c interface{}) bool {
+	Walk(a.game, func(c interface{}) bool {
 		if coll, ok := c.(Collider); ok {
 			if coll.CollidesWith(image.Rectangle{Min: p, Max: p.Add(a.Size)}) {
 				hit = true
