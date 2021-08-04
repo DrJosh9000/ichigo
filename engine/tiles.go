@@ -31,6 +31,7 @@ func (t *Tilemap) CollidesWith(r image.Rectangle) bool {
 	if t.Ersatz {
 		return false
 	}
+	// TODO: optimise?
 	for j, row := range t.Map {
 		for i, tile := range row {
 			if tile == nil {

@@ -82,10 +82,14 @@ func main() {
 				ID:   "ground",
 				Rect: image.Rect(0, 192, 320, 240),
 			},*/
-			&engine.Actor{
+			&engine.Sprite{
 				ID:       "protagonist",
-				Position: image.Pt(100, 100),
-				Size:     image.Pt(16, 16),
+				Actor: engine.Actor{
+					Position: image.Pt(100, 100),
+					Size:     image.Pt(16, 16),
+				},
+				AnimRef: engine.AnimRef{Key: "green_tiles"},
+				Src: engine.ImageRef{Path: "assets/boxes.png"},
 				ZPos:     1,
 			},
 		},

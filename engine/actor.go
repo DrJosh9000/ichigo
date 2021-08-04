@@ -3,11 +3,7 @@ package engine
 import (
 	"encoding/gob"
 	"image"
-	"image/color"
 	"math"
-
-	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 const gravity = 0.5
@@ -24,19 +20,16 @@ type Collider interface {
 	CollidesWith(image.Rectangle) bool
 }
 
+// Actor handles basic movement.
 type Actor struct {
-	ID
 	Position image.Point
 	Size     image.Point
-	ZPos     // TODO: refactor
 
 	game       *Game
 	xRem, yRem float64
-	src        *ebiten.Image // TODO: refactor
-	vx, vy     float64       // TODO: refactor
 }
 
-func (a *Actor) collidesAt(p image.Point) bool {
+func (a *Actor) CollidesAt(p image.Point) bool {
 	// TODO: more efficient test?
 	hit := false
 	Walk(a.game, func(c interface{}) bool {
@@ -51,44 +44,6 @@ func (a *Actor) collidesAt(p image.Point) bool {
 	return hit
 }
 
-func (a *Actor) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
-	// TODO: delegate drawing to something else
-	var op ebiten.DrawImageOptions
-	op.GeoM.Translate(float64(a.Position.X), float64(a.Position.Y))
-	op.GeoM.Concat(geom)
-	screen.DrawImage(a.src, &op)
-}
-
-func (a *Actor) Update() error {
-	// TODO: delegate updating to something else
-	if a.collidesAt(a.Position.Add(image.Pt(0, 1))) {
-		// Not falling
-		a.vy = 0
-		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
-			// Jump?
-			a.vy = -7
-		}
-	} else {
-		// Falling
-		a.vy += gravity
-	}
-	switch {
-	case ebiten.IsKeyPressed(ebiten.KeyLeft):
-		a.vx = -3
-	case ebiten.IsKeyPressed(ebiten.KeyRight):
-		a.vx = 3
-	default:
-		a.vx = 0
-	}
-	a.MoveX(a.vx, func() {
-		a.vx = 0
-	})
-	a.MoveY(a.vy, func() {
-		a.vy = 0
-	})
-	return nil
-}
-
 func (a *Actor) MoveX(dx float64, onCollide func()) {
 	a.xRem += dx
 	move := int(math.Round(a.xRem))
@@ -98,7 +53,7 @@ func (a *Actor) MoveX(dx float64, onCollide func()) {
 	a.xRem -= float64(move)
 	sign := sign(move)
 	for move != 0 {
-		if a.collidesAt(a.Position.Add(image.Pt(sign, 0))) {
+		if a.CollidesAt(a.Position.Add(image.Pt(sign, 0))) {
 			if onCollide != nil {
 				onCollide()
 			}
@@ -118,7 +73,7 @@ func (a *Actor) MoveY(dy float64, onCollide func()) {
 	a.yRem -= float64(move)
 	sign := sign(move)
 	for move != 0 {
-		if a.collidesAt(a.Position.Add(image.Pt(0, sign))) {
+		if a.CollidesAt(a.Position.Add(image.Pt(0, sign))) {
 			if onCollide != nil {
 				onCollide()
 			}
@@ -131,10 +86,6 @@ func (a *Actor) MoveY(dy float64, onCollide func()) {
 
 func (a *Actor) Build(g *Game) {
 	a.game = g
-
-	// TODO: remove hack temporary image
-	a.src = ebiten.NewImage(16, 16)
-	a.src.Fill(color.White)
 }
 
 func sign(m int) int {
