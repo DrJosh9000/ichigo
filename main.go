@@ -36,6 +36,27 @@ func main() {
 				{Frame: 6, Duration: 12},
 			},
 		},
+		"aw_idle": {
+			Frames: []engine.AnimFrame{
+				{Frame: 0, Duration: 60},
+			},
+		},
+		"aw_walk_right": {
+			Frames: []engine.AnimFrame{
+				{Frame: 1, Duration: 6},
+				{Frame: 2, Duration: 6},
+				{Frame: 3, Duration: 6},
+				{Frame: 4, Duration: 6},
+			},
+		},
+		"aw_walk_left": {
+			Frames: []engine.AnimFrame{
+				{Frame: 5, Duration: 6},
+				{Frame: 6, Duration: 6},
+				{Frame: 7, Duration: 6},
+				{Frame: 8, Duration: 6},
+			},
+		},
 	}
 
 	tiles := [][]engine.Tile{
@@ -86,10 +107,9 @@ func main() {
 				ID:       "protagonist",
 				Actor: engine.Actor{
 					Position: image.Pt(100, 100),
-					Size:     image.Pt(16, 16),
+					Size:     image.Pt(8, 16),
 				},
-				AnimRef: engine.AnimRef{Key: "green_tiles"},
-				Src: engine.ImageRef{Path: "assets/boxes.png"},
+				Src: engine.ImageRef{Path: "assets/aw.png"},
 				ZPos:     1,
 			},
 		},

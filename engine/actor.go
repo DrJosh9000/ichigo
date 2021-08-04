@@ -6,8 +6,6 @@ import (
 	"math"
 )
 
-const gravity = 0.5
-
 func init() {
 	gob.Register(Actor{})
 }

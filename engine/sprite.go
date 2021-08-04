@@ -7,16 +7,20 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
+const dampen = 0.5
+const gravity = 0.2
+
 // Sprite combines an Actor with the ability to Draw...
 type Sprite struct {
 	Actor
-	AnimRef
+	*Anim // TODO: better
 	Hidden bool
 	ID
 	Src ImageRef
 	ZPos
 
 	vx, vy     float64       // TODO: refactor
+	animIdle, animWalkLeft, animWalkRight *Anim
 }
 
 func (s *Sprite) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
@@ -27,7 +31,7 @@ func (s *Sprite) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 	op.GeoM.Translate(float64(s.Actor.Position.X), float64(s.Actor.Position.Y))
 	op.GeoM.Concat(geom)
 
-	frame := s.Anim().CurrentFrame()
+	frame := s.Anim.CurrentFrame()
 	src := s.Src.Image()
 	w, _ := src.Size()
 	sx, sy := (frame * s.Actor.Size.X) % w, ((frame * s.Actor.Size.X) / w) * s.Actor.Size.Y
@@ -46,7 +50,7 @@ func (s *Sprite) Update() error {
 		s.vy = 0
 		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
 			// Jump?
-			s.vy = -7
+			s.vy = -5
 		}
 	} else {
 		// Falling
@@ -54,13 +58,23 @@ func (s *Sprite) Update() error {
 	}
 	switch {
 	case ebiten.IsKeyPressed(ebiten.KeyLeft):
-		s.vx = -3
+		s.vx = -2
+		s.Anim = s.animWalkLeft
 	case ebiten.IsKeyPressed(ebiten.KeyRight):
-		s.vx = 3
+		s.vx = 2
+		s.Anim = s.animWalkRight
 	default:
 		s.vx = 0
+		s.Anim = s.animIdle
 	}
-	s.Actor.MoveX(s.vx, func() { s.vx = 0 })
-	s.Actor.MoveY(s.vy, func() { s.vy = 0 })
-	return s.Anim().Update()
+	s.Actor.MoveX(s.vx, func() { s.vx = -s.vx * dampen })
+	s.Actor.MoveY(s.vy, func() { s.vy = -s.vy * dampen })
+	return s.Anim.Update()
+}
+
+func (s *Sprite) Build(g *Game) {
+	// TODO: better than this
+	s.animWalkLeft = &Anim{Def: AnimDefs["aw_walk_left"]}
+	s.animWalkRight = &Anim{Def: AnimDefs["aw_walk_right"]}
+	s.animIdle = &Anim{Def: AnimDefs["aw_idle"]}
 }
