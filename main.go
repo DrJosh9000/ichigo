@@ -37,41 +37,46 @@ func main() {
 				{Frame: 6, Duration: 12},
 			},
 		},
-		"aw_idle": {
+		"aw_idle_right": {
 			Frames: []engine.AnimFrame{
 				{Frame: 0, Duration: 60},
 			},
 		},
+		"aw_idle_left": {
+			Frames: []engine.AnimFrame{
+				{Frame: 1, Duration: 60},
+			},
+		},
 		"aw_walk_right": {
 			Frames: []engine.AnimFrame{
-				{Frame: 1, Duration: 6},
 				{Frame: 2, Duration: 6},
 				{Frame: 3, Duration: 6},
 				{Frame: 4, Duration: 6},
+				{Frame: 5, Duration: 6},
 			},
 		},
 		"aw_walk_left": {
 			Frames: []engine.AnimFrame{
-				{Frame: 5, Duration: 6},
 				{Frame: 6, Duration: 6},
 				{Frame: 7, Duration: 6},
 				{Frame: 8, Duration: 6},
+				{Frame: 9, Duration: 3},
 			},
 		},
 		"aw_run_right": {
 			Frames: []engine.AnimFrame{
-				{Frame: 9, Duration: 3},
 				{Frame: 10, Duration: 3},
 				{Frame: 11, Duration: 3},
 				{Frame: 12, Duration: 3},
+				{Frame: 13, Duration: 3},
 			},
 		},
 		"aw_run_left": {
 			Frames: []engine.AnimFrame{
-				{Frame: 13, Duration: 3},
 				{Frame: 14, Duration: 3},
 				{Frame: 15, Duration: 3},
 				{Frame: 16, Duration: 3},
+				{Frame: 17, Duration: 3},
 			},
 		},
 	}
