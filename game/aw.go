@@ -25,7 +25,7 @@ type Awakeman struct {
 func (aw *Awakeman) Update() error {
 	const (
 		bounceDampen = 0.5
-		gravity      = 0.2
+		gravity      = 0.3
 		jumpVelocity = -5
 		runVelocity  = 2
 	)

@@ -19,7 +19,7 @@ type Tilemap struct {
 	Hidden   bool
 	ID
 	Map       [][]Tile
-	Ersatz     bool // "fake wall"
+	Ersatz    bool // "fake wall"
 	Src       ImageRef
 	TileSize  int
 	Transform GeoMDef
