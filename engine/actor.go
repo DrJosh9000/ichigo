@@ -3,7 +3,6 @@ package engine
 import (
 	"encoding/gob"
 	"image"
-	"math"
 )
 
 func init() {
@@ -40,7 +39,7 @@ func (a *Actor) CollidesAt(p image.Point) bool {
 
 func (a *Actor) MoveX(dx float64, onCollide func()) {
 	a.xRem += dx
-	move := int(math.Round(a.xRem))
+	move := int(a.xRem + 0.5) // Note: math.Round can lead to vibration
 	if move == 0 {
 		return
 	}
@@ -60,7 +59,7 @@ func (a *Actor) MoveX(dx float64, onCollide func()) {
 
 func (a *Actor) MoveY(dy float64, onCollide func()) {
 	a.yRem += dy
-	move := int(math.Round(a.yRem))
+	move := int(a.yRem + 0.5)
 	if move == 0 {
 		return
 	}
