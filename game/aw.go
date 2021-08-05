@@ -26,7 +26,7 @@ func (aw *Awakeman) Update() error {
 	const (
 		bounceDampen = 0.5
 		gravity      = 0.3
-		jumpVelocity = -3
+		jumpVelocity = -3.5
 		runVelocity  = 1.5
 	)
 
@@ -38,6 +38,7 @@ func (aw *Awakeman) Update() error {
 			// Jump?
 			aw.vy = jumpVelocity
 		}
+		// TODO: coyote-time
 	} else {
 		// Falling
 		aw.vy += gravity
