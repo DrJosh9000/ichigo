@@ -20,7 +20,7 @@ type Sprite struct {
 	ZPos
 
 	vx, vy     float64       // TODO: refactor
-	animIdle, animWalkLeft, animWalkRight *Anim
+	animIdle, animRunLeft, animRunRight *Anim
 }
 
 func (s *Sprite) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
@@ -59,10 +59,10 @@ func (s *Sprite) Update() error {
 	switch {
 	case ebiten.IsKeyPressed(ebiten.KeyLeft):
 		s.vx = -2
-		s.Anim = s.animWalkLeft
+		s.Anim = s.animRunLeft
 	case ebiten.IsKeyPressed(ebiten.KeyRight):
 		s.vx = 2
-		s.Anim = s.animWalkRight
+		s.Anim = s.animRunRight
 	default:
 		s.vx = 0
 		s.Anim = s.animIdle
@@ -74,7 +74,7 @@ func (s *Sprite) Update() error {
 
 func (s *Sprite) Build(g *Game) {
 	// TODO: better than this
-	s.animWalkLeft = &Anim{Def: AnimDefs["aw_walk_left"]}
-	s.animWalkRight = &Anim{Def: AnimDefs["aw_walk_right"]}
+	s.animRunLeft = &Anim{Def: AnimDefs["aw_run_left"]}
+	s.animRunRight = &Anim{Def: AnimDefs["aw_run_right"]}
 	s.animIdle = &Anim{Def: AnimDefs["aw_idle"]}
 }

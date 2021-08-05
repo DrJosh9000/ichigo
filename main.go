@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"image"
+	"image/color"
 	_ "image/png"
 	"log"
 
@@ -57,6 +58,22 @@ func main() {
 				{Frame: 8, Duration: 6},
 			},
 		},
+		"aw_run_right": {
+			Frames: []engine.AnimFrame{
+				{Frame: 9, Duration: 3},
+				{Frame: 10, Duration: 3},
+				{Frame: 11, Duration: 3},
+				{Frame: 12, Duration: 3},
+			},
+		},
+		"aw_run_left": {
+			Frames: []engine.AnimFrame{
+				{Frame: 13, Duration: 3},
+				{Frame: 14, Duration: 3},
+				{Frame: 15, Duration: 3},
+				{Frame: 16, Duration: 3},
+			},
+		},
 	}
 
 	tiles := [][]engine.Tile{
@@ -80,6 +97,9 @@ func main() {
 	level1 := &engine.Scene{
 		ID: "level_1",
 		Components: []interface{}{
+			engine.Fill{
+				Color: color.White,
+			},
 			&engine.Tilemap{
 				ID:       "terrain",
 				Map:      tiles,
@@ -104,13 +124,13 @@ func main() {
 				Rect: image.Rect(0, 192, 320, 240),
 			},*/
 			&engine.Sprite{
-				ID:       "protagonist",
+				ID: "protagonist",
 				Actor: engine.Actor{
 					Position: image.Pt(100, 100),
-					Size:     image.Pt(8, 16),
+					Size:     image.Pt(10, 16),
 				},
-				Src: engine.ImageRef{Path: "assets/aw.png"},
-				ZPos:     1,
+				Src:  engine.ImageRef{Path: "assets/aw.png"},
+				ZPos: 1,
 			},
 		},
 	}

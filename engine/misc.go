@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"image/color"
 	"unsafe"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -29,4 +30,13 @@ func ToGeoMDef(m *ebiten.GeoM) *GeoMDef {
 // GeoM translates a GeoMDef to a GeoM using unsafe.Pointer.
 func (d *GeoMDef) GeoM() *ebiten.GeoM {
 	return (*ebiten.GeoM)(unsafe.Pointer(d))
+}
+
+// Fill fills the image with a colour.
+type Fill struct {
+	Color color.Color
+}
+
+func (f Fill) Draw(screen *ebiten.Image, _ ebiten.GeoM) {
+	screen.Fill(color.Color(f.Color))
 }
