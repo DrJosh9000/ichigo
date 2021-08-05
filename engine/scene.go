@@ -36,9 +36,12 @@ func (s *Scene) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 	}
 }
 
+// Prepare does an initial Z-order sort.
+func (s *Scene) Prepare(*Game) { s.sortByZ() }
+
 // sortByZ sorts the components by Z position.
-// Stable sort is used to avoid Z-fighting among layers without a Z, or
-// among those with equal Z. All non-ZPositioners are sorted first.
+// Everything without a Z sorts first. Stable sort is used to avoid Z-fighting
+// (among layers without a Z, or those with equal Z).
 func (s *Scene) sortByZ() {
 	sort.SliceStable(s.Components, func(i, j int) bool {
 		a, aok := s.Components[i].(ZPositioner)
@@ -58,8 +61,7 @@ func (s *Scene) Update() error {
 	if s.Disabled {
 		return nil
 	}
-	needsSort := false
-	curZ := -math.MaxFloat64 // fun fact: this is min float64
+
 	for _, c := range s.Components {
 		// Update each updater in turn
 		if u, ok := c.(Updater); ok {
@@ -67,18 +69,20 @@ func (s *Scene) Update() error {
 				return err
 			}
 		}
-		if !needsSort {
-			// Check if the update put the components out of order
-			if z, ok := c.(ZPositioner); ok {
-				if t := z.Z(); t < curZ {
-					needsSort = true
-					curZ = t
-				}
-			}
-		}
 	}
-	if needsSort {
-		s.sortByZ()
+	// Check if the updates put the components out of order; if so, sort
+	curZ := -math.MaxFloat64 // fun fact: this is min float64
+	for _, c := range s.Components {
+		z, ok := c.(ZPositioner)
+		if !ok {
+			continue
+		}
+		t := z.Z()
+		if t < curZ {
+			s.sortByZ()
+			return nil
+		}
+		curZ = t
 	}
 	return nil
 }

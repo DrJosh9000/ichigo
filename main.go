@@ -44,15 +44,16 @@ func main() {
 	level1 := &engine.Scene{
 		ID: "level_1",
 		Components: []interface{}{
-			engine.Fill{
-				Color: color.White,
+			&engine.Fill{
+				Color: color.Gray{100},
+				ZPos:  0,
 			},
 			&engine.Tilemap{
 				ID:       "terrain",
 				Map:      tiles,
 				Src:      engine.ImageRef{Path: "assets/boxes.png"},
 				TileSize: 16,
-				ZPos:     0,
+				ZPos:     1,
 			},
 			&engine.SolidRect{
 				ID:   "ceiling",
@@ -75,7 +76,7 @@ func main() {
 						Size:            image.Pt(10, 16),
 					},
 					Src:  engine.ImageRef{Path: "assets/aw.png"},
-					ZPos: 1,
+					ZPos: 2,
 				},
 			},
 		},
