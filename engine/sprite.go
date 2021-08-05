@@ -1,10 +1,15 @@
 package engine
 
 import (
+	"encoding/gob"
 	"image"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
+
+func init() {
+	gob.Register(Sprite{})
+}
 
 // Sprite combines an Actor with the ability to Draw from a single spritesheet.
 type Sprite struct {

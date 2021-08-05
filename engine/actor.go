@@ -13,11 +13,6 @@ func init() {
 // Thorson-style movement:
 // https://maddythorson.medium.com/celeste-and-towerfall-physics-d24bd2ae0fc5
 
-// Collider components have tangible form.
-type Collider interface {
-	CollidesWith(image.Rectangle) bool
-}
-
 // Actor handles basic movement.
 type Actor struct {
 	CollisionDomain string

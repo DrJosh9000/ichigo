@@ -1,12 +1,17 @@
 package game
 
 import (
+	"encoding/gob"
 	"image"
 
 	"drjosh.dev/gurgle/engine"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
+
+func init() {
+	gob.Register(Awakeman{})
+}
 
 type Awakeman struct {
 	engine.Sprite

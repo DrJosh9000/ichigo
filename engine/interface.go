@@ -1,6 +1,15 @@
 package engine
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"image"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
+
+// Collider components have tangible form.
+type Collider interface {
+	CollidesWith(image.Rectangle) bool
+}
 
 // Drawer components can draw themselves. Draw is called often.
 // Each component is responsible for calling Draw on its child components.
