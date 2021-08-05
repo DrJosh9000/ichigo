@@ -10,6 +10,8 @@ type Anim struct {
 
 func (a *Anim) CurrentFrame() int { return a.Def.Frames[a.Index].Frame }
 
+func (a *Anim) Reset() { a.Index, a.Ticks = 0, 0 }
+
 // Update increments the tick count and advances the frame if necessary.
 func (a *Anim) Update() error {
 	a.Ticks++

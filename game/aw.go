@@ -65,10 +65,10 @@ func (aw *Awakeman) Update() error {
 }
 
 func (aw *Awakeman) Prepare(*engine.Game) {
-	aw.animRunLeft = &engine.Anim{Def: engine.AnimDefs["aw_run_left"]}
-	aw.animRunRight = &engine.Anim{Def: engine.AnimDefs["aw_run_right"]}
 	aw.animIdleLeft = &engine.Anim{Def: engine.AnimDefs["aw_idle_left"]}
 	aw.animIdleRight = &engine.Anim{Def: engine.AnimDefs["aw_idle_right"]}
+	aw.animRunLeft = &engine.Anim{Def: engine.AnimDefs["aw_run_left"]}
+	aw.animRunRight = &engine.Anim{Def: engine.AnimDefs["aw_run_right"]}
 }
 
 func (aw *Awakeman) Scan() []interface{} { return []interface{}{&aw.Sprite} }

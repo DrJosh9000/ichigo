@@ -40,6 +40,11 @@ func (s *Sprite) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 
 func (s *Sprite) Scan() []interface{} { return []interface{}{&s.Actor} }
 
-func (s *Sprite) SetAnim(a *Anim) { s.anim = a }
+func (s *Sprite) SetAnim(a *Anim) {
+	if s.anim != a {
+		a.Reset()
+	}
+	s.anim = a
+}
 
 func (s *Sprite) Update() error { return s.anim.Update() }
