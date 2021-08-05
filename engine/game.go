@@ -14,12 +14,12 @@ func init() {
 type Game struct {
 	ScreenWidth  int
 	ScreenHeight int
-	Scene        *Scene
+	*Scene
 
 	componentsByID map[string]interface{}
 }
 
-// Draw draws the entire thing.
+// Draw draws the entire thing, with no geometric transform.
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.Scene.Draw(screen, ebiten.GeoM{})
 }
@@ -27,11 +27,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 // Layout returns the configured screen width/height.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
 	return g.ScreenWidth, g.ScreenHeight
-}
-
-// Update just passes the call onto Layers.
-func (g *Game) Update() error {
-	return g.Scene.Update()
 }
 
 // RegisterComponent tells the game there is a new component. Currently this is

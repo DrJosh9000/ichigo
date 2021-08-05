@@ -12,7 +12,8 @@ type Collider interface {
 }
 
 // Drawer components can draw themselves. Draw is called often.
-// Each component is responsible for calling Draw on its child components.
+// Each component is responsible for calling Draw on its child components
+// (so that hiding the parent can hide the children, etc).
 type Drawer interface {
 	Draw(screen *ebiten.Image, geom ebiten.GeoM)
 }
@@ -38,7 +39,8 @@ type Scanner interface {
 }
 
 // Updater components can update themselves. Update is called repeatedly.
-// Each component is responsible for calling Update on its child components.
+// Each component is responsible for calling Update on its child components
+// (so that disabling the parent prevents updates to the children, etc).
 type Updater interface {
 	Update() error
 }
