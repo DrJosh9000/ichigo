@@ -20,17 +20,18 @@ type Collider interface {
 
 // Actor handles basic movement.
 type Actor struct {
-	Position image.Point
-	Size     image.Point
+	CollisionDomain string
+	Pos             image.Point
+	Size            image.Point
 
-	game       *Game
-	xRem, yRem float64
+	collisionDomain interface{}
+	xRem, yRem      float64
 }
 
 func (a *Actor) CollidesAt(p image.Point) bool {
 	// TODO: more efficient test?
 	hit := false
-	Walk(a.game, func(c interface{}) bool {
+	Walk(a.collisionDomain, func(c interface{}) bool {
 		if coll, ok := c.(Collider); ok {
 			if coll.CollidesWith(image.Rectangle{Min: p, Max: p.Add(a.Size)}) {
 				hit = true
@@ -51,13 +52,13 @@ func (a *Actor) MoveX(dx float64, onCollide func()) {
 	a.xRem -= float64(move)
 	sign := sign(move)
 	for move != 0 {
-		if a.CollidesAt(a.Position.Add(image.Pt(sign, 0))) {
+		if a.CollidesAt(a.Pos.Add(image.Pt(sign, 0))) {
 			if onCollide != nil {
 				onCollide()
 			}
 			return
 		}
-		a.Position.X += sign
+		a.Pos.X += sign
 		move -= sign
 	}
 }
@@ -71,19 +72,19 @@ func (a *Actor) MoveY(dy float64, onCollide func()) {
 	a.yRem -= float64(move)
 	sign := sign(move)
 	for move != 0 {
-		if a.CollidesAt(a.Position.Add(image.Pt(0, sign))) {
+		if a.CollidesAt(a.Pos.Add(image.Pt(0, sign))) {
 			if onCollide != nil {
 				onCollide()
 			}
 			return
 		}
-		a.Position.Y += sign
+		a.Pos.Y += sign
 		move -= sign
 	}
 }
 
-func (a *Actor) Build(g *Game) {
-	a.game = g
+func (a *Actor) Prepare(g *Game) {
+	a.collisionDomain = g.Component(a.CollisionDomain)
 }
 
 func sign(m int) int {

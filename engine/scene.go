@@ -12,21 +12,6 @@ func init() {
 	gob.Register(Scene{})
 }
 
-// Drawer components can draw themselves. Draw is called often.
-type Drawer interface {
-	Draw(screen *ebiten.Image, geom ebiten.GeoM)
-}
-
-// Updater components can update themselves. Update is called repeatedly.
-type Updater interface {
-	Update() error
-}
-
-// ZPositioner is used to reorder layers.
-type ZPositioner interface {
-	Z() float64
-}
-
 // Scene manages drawing and updating a bunch of components.
 type Scene struct {
 	Components []interface{}

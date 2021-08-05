@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"drjosh.dev/gurgle/engine"
+	"drjosh.dev/gurgle/game"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -124,18 +125,17 @@ func main() {
 				ID:   "right_wall",
 				Rect: image.Rect(320, 0, 321, 240),
 			},
-			/*&engine.SolidRect{
-				ID:   "ground",
-				Rect: image.Rect(0, 192, 320, 240),
-			},*/
-			&engine.Sprite{
-				ID: "protagonist",
-				Actor: engine.Actor{
-					Position: image.Pt(100, 100),
-					Size:     image.Pt(10, 16),
+			&game.Awakeman{
+				Sprite: engine.Sprite{
+					ID: "awakeman",
+					Actor: engine.Actor{
+						CollisionDomain: "level_1",
+						Pos:             image.Pt(100, 100),
+						Size:            image.Pt(10, 16),
+					},
+					Src:  engine.ImageRef{Path: "assets/aw.png"},
+					ZPos: 1,
 				},
-				Src:  engine.ImageRef{Path: "assets/aw.png"},
-				ZPos: 1,
 			},
 		},
 	}
@@ -154,7 +154,7 @@ func main() {
 			},
 		},
 	}
-	game.Build()
+	game.PrepareToRun()
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatalf("Game error: %v", err)

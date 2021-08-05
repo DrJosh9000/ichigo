@@ -43,8 +43,8 @@ type GobDumper struct {
 	game *Game
 }
 
-// Build simply stores the reference to the Game.
-func (d *GobDumper) Build(g *Game) { d.game = g }
+// Prepare simply stores the reference to the Game.
+func (d *GobDumper) Prepare(g *Game) { d.game = g }
 
 // Update waits for the key combo, then dumps the game state into a gzipped gob.
 func (d *GobDumper) Update() error {

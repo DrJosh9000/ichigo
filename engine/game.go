@@ -10,26 +10,6 @@ func init() {
 	gob.Register(Game{})
 }
 
-// Identifier components have a sense of self. This makes it easier for
-// components to find and interact with one another.
-type Identifier interface {
-	Ident() string
-}
-
-// Builder components can be built. It is called when the game
-// component database is being constructed. It should store the Game reference
-// (if needed later on).
-type Builder interface {
-	Build(game *Game)
-}
-
-// Scanner components can be scanned. It is called when the game tree is walked
-// (such as when the game component database is constructed).
-// Scan should return a slice containing all immediate subcomponents.
-type Scanner interface {
-	Scan() []interface{}
-}
-
 // Game implements the ebiten methods using a collection of components.
 type Game struct {
 	ScreenWidth  int
@@ -103,15 +83,19 @@ func Walk(c interface{}, v func(interface{}) bool) {
 	}
 }
 
-// Build builds the component database, and calls Build, on all components
-// reachable via Scan.
-func (g *Game) Build() {
+// PrepareToRun builds the component database (using Walk) and then calls
+// Prepare on every Preparer. You must call PrepareToRun before passing to
+// ebiten.RunGame.
+func (g *Game) PrepareToRun() {
 	g.componentsByID = make(map[string]interface{})
-	Walk(g.Scene, func(c interface{}) bool {
-		if b, ok := c.(Builder); ok {
-			b.Build(g)
-		}
+	Walk(g, func(c interface{}) bool {
 		g.RegisterComponent(c)
+		return true
+	})
+	Walk(g, func(c interface{}) bool {
+		if p, ok := c.(Prepper); ok {
+			p.Prepare(g)
+		}
 		return true
 	})
 }
