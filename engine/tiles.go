@@ -31,10 +31,17 @@ func (t *Tilemap) CollidesWith(r image.Rectangle) bool {
 	if t.Ersatz {
 		return false
 	}
-	// TODO: optimise?
-	for j, row := range t.Map {
-		for i, tile := range row {
-			if tile == nil {
+
+	// If we round down r.Min, and round up r.Max, to the nearest tile
+	// coordinates, that gives the full range of tiles to test.
+	sm1 := t.TileSize - 1
+	min := r.Min.Div(t.TileSize)
+	max := r.Max.Add(image.Pt(sm1, sm1)).Div(t.TileSize)
+
+	for j := min.Y; j <= max.Y && j < len(t.Map); j++ {
+		row := t.Map[j]
+		for i := min.X; i <= max.X && i < len(row); i++ {
+			if row[i] == nil {
 				continue
 			}
 			if r.Overlaps(image.Rect(i*t.TileSize, j*t.TileSize, (i+1)*t.TileSize, (j+1)*t.TileSize)) {
