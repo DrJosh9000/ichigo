@@ -14,7 +14,9 @@ func init() {
 // Sprite combines an Actor with the ability to Draw from a single spritesheet.
 type Sprite struct {
 	Actor
-	Hidden bool
+	FrameSize   image.Point
+	FrameOffset image.Point
+	Hidden      bool
 	ID
 	Src ImageRef
 	ZPos
@@ -27,15 +29,16 @@ func (s *Sprite) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 		return
 	}
 	var op ebiten.DrawImageOptions
-	op.GeoM.Translate(float64(s.Pos.X), float64(s.Pos.Y))
+	dp := s.Pos.Add(s.FrameOffset)
+	op.GeoM.Translate(float64(dp.X), float64(dp.Y))
 	op.GeoM.Concat(geom)
 
 	frame := s.anim.CurrentFrame()
 	src := s.Src.Image()
 	w, _ := src.Size()
-	sp := image.Pt((frame*s.Size.X)%w, ((frame*s.Size.X)/w)*s.Size.Y)
+	sp := image.Pt((frame*s.FrameSize.X)%w, ((frame*s.FrameSize.X)/w)*s.FrameSize.Y)
 
-	screen.DrawImage(src.SubImage(image.Rectangle{sp, sp.Add(s.Size)}).(*ebiten.Image), &op)
+	screen.DrawImage(src.SubImage(image.Rectangle{sp, sp.Add(s.FrameSize)}).(*ebiten.Image), &op)
 }
 
 func (s *Sprite) Scan() []interface{} { return []interface{}{&s.Actor} }
