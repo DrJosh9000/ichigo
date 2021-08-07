@@ -44,11 +44,11 @@ func (aw *Awakeman) Update() error {
 		aw.vy += gravity
 	}
 	switch {
-	case ebiten.IsKeyPressed(ebiten.KeyLeft):
+	case ebiten.IsKeyPressed(ebiten.KeyLeft) || ebiten.IsKeyPressed(ebiten.KeyA):
 		aw.vx = -runVelocity
 		aw.SetAnim(aw.animRunLeft)
 		aw.facingLeft = true
-	case ebiten.IsKeyPressed(ebiten.KeyRight):
+	case ebiten.IsKeyPressed(ebiten.KeyRight) || ebiten.IsKeyPressed(ebiten.KeyD):
 		aw.vx = runVelocity
 		aw.SetAnim(aw.animRunRight)
 		aw.facingLeft = false
