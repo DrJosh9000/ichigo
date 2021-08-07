@@ -16,8 +16,9 @@ func init() {
 type Awakeman struct {
 	engine.Sprite
 
-	vx, vy     float64
-	facingLeft bool
+	vx, vy      float64
+	facingLeft  bool
+	coyoteTimer int
 
 	animIdleLeft, animIdleRight, animRunLeft, animRunRight *engine.Anim
 }
@@ -27,21 +28,24 @@ func (aw *Awakeman) Update() error {
 		bounceDampen = 0.5
 		gravity      = 0.3
 		jumpVelocity = -3.5
-		runVelocity  = 1.5
+		runVelocity  = 1.4
 	)
 
 	// Standing on something?
 	if aw.CollidesAt(aw.Pos.Add(image.Pt(0, 1))) {
 		// Not falling
 		aw.vy = 0
-		if inpututil.IsKeyJustPressed(ebiten.KeySpace) {
-			// Jump?
-			aw.vy = jumpVelocity
-		}
-		// TODO: coyote-time
+		aw.coyoteTimer = 5
 	} else {
 		// Falling
 		aw.vy += gravity
+		if aw.coyoteTimer > 0 {
+			aw.coyoteTimer--
+		}
+	}
+	if aw.coyoteTimer > 0 && inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+		// Jump
+		aw.vy = jumpVelocity
 	}
 	switch {
 	case ebiten.IsKeyPressed(ebiten.KeyLeft) || ebiten.IsKeyPressed(ebiten.KeyA):

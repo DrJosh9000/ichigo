@@ -42,13 +42,13 @@ func init() {
 				{Frame: 6, Duration: 6},
 				{Frame: 7, Duration: 6},
 				{Frame: 8, Duration: 6},
-				{Frame: 9, Duration: 3},
+				{Frame: 9, Duration: 6},
 			},
 		},
 		"aw_run_right": {
 			Frames: []engine.AnimFrame{
 				{Frame: 10, Duration: 3},
-				{Frame: 11, Duration: 3},
+				{Frame: 11, Duration: 5},
 				{Frame: 12, Duration: 3},
 				{Frame: 13, Duration: 3},
 			},
@@ -56,7 +56,7 @@ func init() {
 		"aw_run_left": {
 			Frames: []engine.AnimFrame{
 				{Frame: 14, Duration: 3},
-				{Frame: 15, Duration: 3},
+				{Frame: 15, Duration: 5},
 				{Frame: 16, Duration: 3},
 				{Frame: 17, Duration: 3},
 			},
