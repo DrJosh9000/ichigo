@@ -18,11 +18,10 @@ type Tilemap struct {
 	Disabled bool
 	Hidden   bool
 	ID
-	Map       [][]Tile
-	Ersatz    bool // "fake wall"
-	Src       ImageRef
-	TileSize  int
-	Transform GeoMDef
+	Map      [][]Tile
+	Ersatz   bool // "fake wall"
+	Src      ImageRef
+	TileSize int
 	ZPos
 }
 
@@ -59,7 +58,6 @@ func (t *Tilemap) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 	}
 	src := t.Src.Image()
 	w, _ := src.Size()
-	geom.Concat(*t.Transform.GeoM())
 	for j, row := range t.Map {
 		for i, tile := range row {
 			if tile == nil {

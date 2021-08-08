@@ -18,7 +18,6 @@ type Scene struct {
 	Disabled   bool
 	Hidden     bool
 	ID
-	Transform GeoMDef
 	ZPos
 }
 
@@ -27,8 +26,6 @@ func (s *Scene) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
 	if s.Hidden {
 		return
 	}
-	geom.Concat(*s.Transform.GeoM())
-
 	for _, i := range s.Components {
 		if d, ok := i.(Drawer); ok {
 			d.Draw(screen, geom)

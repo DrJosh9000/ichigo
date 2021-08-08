@@ -68,6 +68,7 @@ func main() {
 				Rect: image.Rect(320, 0, 321, 240),
 			},
 			&game.Awakeman{
+				CameraID: "level_1_camera",
 				Sprite: engine.Sprite{
 					ID: "awakeman",
 					Actor: engine.Actor{
@@ -93,7 +94,10 @@ func main() {
 				&engine.GobDumper{
 					KeyCombo: []ebiten.Key{ebiten.KeyControl, ebiten.KeyD},
 				},
-				level1,
+				&engine.Camera{
+					ID:    "level_1_camera",
+					Scene: level1,
+				},
 				engine.PerfDisplay{},
 			},
 		},

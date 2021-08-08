@@ -16,6 +16,9 @@ func init() {
 type Awakeman struct {
 	engine.Sprite
 
+	CameraID string
+
+	camera      *engine.Camera
 	vx, vy      float64
 	facingLeft  bool
 	coyoteTimer int
@@ -65,10 +68,15 @@ func (aw *Awakeman) Update() error {
 	}
 	aw.MoveX(aw.vx, func() { aw.vx = -aw.vx * bounceDampen })
 	aw.MoveY(aw.vy, func() { aw.vy = -aw.vy * bounceDampen })
+
+	aw.camera.Centre(aw.Pos.Add(aw.Size.Div(2)))
+
 	return aw.Sprite.Update()
 }
 
-func (aw *Awakeman) Prepare(*engine.Game) {
+func (aw *Awakeman) Prepare(game *engine.Game) {
+	aw.camera = game.Component(aw.CameraID).(*engine.Camera)
+
 	aw.animIdleLeft = &engine.Anim{Def: engine.AnimDefs["aw_idle_left"]}
 	aw.animIdleRight = &engine.Anim{Def: engine.AnimDefs["aw_idle_right"]}
 	aw.animRunLeft = &engine.Anim{Def: engine.AnimDefs["aw_run_left"]}
