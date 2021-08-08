@@ -12,8 +12,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-// commit?
-
 //go:embed assets
 var assets embed.FS
 
