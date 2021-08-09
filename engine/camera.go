@@ -12,6 +12,7 @@ type Camera struct {
 	Transform GeoMDef
 
 	game *Game
+	// TODO: camera constraints
 }
 
 func (c *Camera) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
@@ -25,6 +26,7 @@ func (c *Camera) Scan() []interface{} { return []interface{}{c.Scene} }
 
 func (c *Camera) Prepare(game *Game) { c.game = game }
 
+// Centre centres the camera on a world coordinate.
 func (c *Camera) Centre(p image.Point) {
 	// Currently the centre of the screen c is A^-1.c in world coordinates
 	// So it is off by (p - A^-1.c)
@@ -35,7 +37,5 @@ func (c *Camera) Centre(p image.Point) {
 	t.Invert()
 }
 
-func (c *Camera) Zoom(f float64) {
-	t := c.Transform.GeoM()
-	t.Scale(f, f)
-}
+// Zoom scales the existing camera transform by f along both X and Y.
+func (c *Camera) Zoom(f float64) { c.Transform.GeoM().Scale(f, f) }
