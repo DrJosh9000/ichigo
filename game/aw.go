@@ -46,7 +46,8 @@ func (aw *Awakeman) Update() error {
 			aw.coyoteTimer--
 		}
 	}
-	if aw.coyoteTimer > 0 && inpututil.IsKeyJustPressed(ebiten.KeySpace) {
+	// NB: spacebar sometimes does things on web pages (scrolls down)
+	if aw.coyoteTimer > 0 && (inpututil.IsKeyJustPressed(ebiten.KeySpace) || inpututil.IsKeyJustPressed(ebiten.KeyZ)) {
 		// Jump
 		aw.vy = jumpVelocity
 	}
