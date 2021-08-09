@@ -67,11 +67,22 @@ func (aw *Awakeman) Update() error {
 			aw.SetAnim(aw.animIdleLeft)
 		}
 	}
+	zc := false
+	if inpututil.IsKeyJustPressed(ebiten.KeyShift) {
+		aw.camera.Zoom(2)
+		zc = true
+	}
+	if inpututil.IsKeyJustReleased(ebiten.KeyShift) {
+		aw.camera.Zoom(0.5)
+		zc = true
+	}
+
+	p := aw.Pos
 	aw.MoveX(aw.vx, func() { aw.vx = -aw.vx * bounceDampen })
 	aw.MoveY(aw.vy, func() { aw.vy = -aw.vy * bounceDampen })
-
-	aw.camera.Centre(aw.Pos.Add(aw.Size.Div(2)))
-
+	if zc || aw.Pos != p {
+		aw.camera.Centre(aw.Pos.Add(aw.Size.Div(2)))
+	}
 	return aw.Sprite.Update()
 }
 
