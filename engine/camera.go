@@ -11,18 +11,22 @@ type Camera struct {
 	Scene *Scene
 
 	// camera controls
-	Zoom   float64
-	Centre image.Point
+	Centre   image.Point
+	Rotation float64
+	Zoom     float64
 
 	game *Game
 	// TODO: camera constraints
 }
 
 func (c *Camera) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
-	//geom.Concat(*c.Transform.GeoM())
-	scx, scy := float64(c.game.ScreenWidth/2), float64(c.game.ScreenHeight/2)
-	geom.Translate((scx/c.Zoom - float64(c.Centre.X)), (scy/c.Zoom - float64(c.Centre.Y)))
+	// move the c.Centre to the origin
+	geom.Translate(-float64(c.Centre.X), -float64(c.Centre.Y))
+	// zoom and rotate
 	geom.Scale(c.Zoom, c.Zoom)
+	geom.Rotate(c.Rotation)
+	// move the origin to the centre of screen space
+	geom.Translate(float64(c.game.ScreenWidth/2), float64(c.game.ScreenHeight/2))
 	c.Scene.Draw(screen, geom)
 }
 

@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/gob"
 	"image"
+	"math"
 
 	"drjosh.dev/gurgle/engine"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -71,8 +72,12 @@ func (aw *Awakeman) Update() error {
 	if ebiten.IsKeyPressed(ebiten.KeyShift) {
 		aw.camera.Zoom = 2
 	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
+		aw.camera.Rotation += math.Pi / 6
+	}
 	aw.MoveX(aw.vx, func() { aw.vx = -aw.vx * bounceDampen })
 	aw.MoveY(aw.vy, func() { aw.vy = -aw.vy * bounceDampen })
+	// aw.Pos is top-left corner, so add half size to get centre
 	aw.camera.Centre = aw.Pos.Add(aw.Size.Div(2))
 	return aw.Sprite.Update()
 }
