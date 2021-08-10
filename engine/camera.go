@@ -6,6 +6,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+// TODO: should this be integrated with Scene?
+
 type Camera struct {
 	ID
 	Scene *Scene
