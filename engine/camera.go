@@ -22,7 +22,7 @@ type Camera struct {
 }
 
 func (c *Camera) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
-	// move the c.Centre to the origin
+	// move c.Centre to the origin
 	geom.Translate(-float64(c.Centre.X), -float64(c.Centre.Y))
 	// zoom and rotate
 	geom.Scale(c.Zoom, c.Zoom)
