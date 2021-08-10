@@ -8,15 +8,21 @@ import (
 
 type Camera struct {
 	ID
-	Scene     *Scene
-	Transform GeoMDef
+	Scene *Scene
+
+	// camera controls
+	Zoom   float64
+	Centre image.Point
 
 	game *Game
 	// TODO: camera constraints
 }
 
 func (c *Camera) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
-	geom.Concat(*c.Transform.GeoM())
+	//geom.Concat(*c.Transform.GeoM())
+	scx, scy := float64(c.game.ScreenWidth/2), float64(c.game.ScreenHeight/2)
+	geom.Translate((scx/c.Zoom - float64(c.Centre.X)), (scy/c.Zoom - float64(c.Centre.Y)))
+	geom.Scale(c.Zoom, c.Zoom)
 	c.Scene.Draw(screen, geom)
 }
 
@@ -24,18 +30,9 @@ func (c *Camera) Update() error { return c.Scene.Update() }
 
 func (c *Camera) Scan() []interface{} { return []interface{}{c.Scene} }
 
-func (c *Camera) Prepare(game *Game) { c.game = game }
-
-// Centre centres the camera on a world coordinate.
-func (c *Camera) Centre(p image.Point) {
-	// Currently the centre of the screen c is A^-1.c in world coordinates
-	// So it is off by (p - A^-1.c)
-	t := c.Transform.GeoM()
-	t.Invert()
-	wcx, wcy := t.Apply(float64(c.game.ScreenWidth/2), float64(c.game.ScreenHeight/2))
-	t.Translate(float64(p.X)-wcx, float64(p.Y)-wcy)
-	t.Invert()
+func (c *Camera) Prepare(game *Game) {
+	c.game = game
+	if c.Zoom == 0 {
+		c.Zoom = 1
+	}
 }
-
-// Zoom scales the existing camera transform by f along both X and Y.
-func (c *Camera) Zoom(f float64) { c.Transform.GeoM().Scale(f, f) }
