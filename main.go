@@ -96,7 +96,7 @@ func main() {
 				},
 				&engine.Camera{
 					ID:     "level_1_camera",
-					Bounds: image.Rect(-16, -16, 320+16, 240+16),
+					Bounds: image.Rect(-32, -32, 320+32, 240+32),
 					Scene:  level1,
 				},
 				engine.PerfDisplay{},

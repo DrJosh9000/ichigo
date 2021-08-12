@@ -6,11 +6,13 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+// Camera models a camera that is viewing a scene. Changes to the
+// configuration take effect immediately.
 type Camera struct {
 	ID
 	Scene *Scene
 
-	// camera controls
+	// Camera controls
 	Bounds image.Rectangle // world coordinates
 	Centre image.Point     // world coordinates
 	//Rotation float64       // radians
@@ -18,23 +20,19 @@ type Camera struct {
 
 	Filter ebiten.Filter
 
-	game *Game
+	game      *Game
+	zoomBound float64
 }
 
+// Draw applies transformations to opts, then calls c.Scene.Draw with it.
 func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
-	// If the camera bounds are smaller than the screen dimensions, that
-	// places a lower bound on zoom.
-	// If the configured centre still puts the camera out of bounds, move it.
-	centre, zoom := c.Centre, c.Zoom
-	if sz := c.Bounds.Size(); sz.X < c.game.ScreenWidth || sz.Y < c.game.ScreenHeight {
-		if z := float64(c.game.ScreenWidth) / float64(sz.X); zoom < z {
-			zoom = z
-		}
-		if z := float64(c.game.ScreenHeight) / float64(sz.Y); zoom < z {
-			zoom = z
-		}
+	zoom := c.Zoom
+	if zoom < c.zoomBound {
+		zoom = c.zoomBound
 	}
 
+	// If the configured centre still puts the camera out of bounds, move it.
+	centre := c.Centre
 	// Camera frame currently Rectangle{ centre ± (screen/(2*zoom)) }.
 	sw2, sh2 := float64(c.game.ScreenWidth/2), float64(c.game.ScreenHeight/2)
 	swz, shz := int(sw2/zoom), int(sh2/zoom)
@@ -60,18 +58,28 @@ func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	// 3. Move the origin to the centre of screen space.
 	opts.GeoM.Translate(sw2, sh2)
 
+	// Apply other options
 	opts.Filter = c.Filter
 
 	c.Scene.Draw(screen, opts)
 }
 
+// Update passes the call to c.Scene.
 func (c *Camera) Update() error { return c.Scene.Update() }
 
+// Scan returns the only child (c.Scene).
 func (c *Camera) Scan() []interface{} { return []interface{}{c.Scene} }
 
+// Prepare, among other things, computes the lower bound for Zoom based on
+// c.Bounds and game.ScreenWidth/Height.
 func (c *Camera) Prepare(game *Game) {
 	c.game = game
-	if c.Zoom == 0 {
-		c.Zoom = 1
+
+	// The lower bound on zoom is the larger of
+	// { (ScreenWidth / BoundsWidth), (ScreenHeight / BoundsHeight) }
+	sz := c.Bounds.Size()
+	c.zoomBound = float64(c.game.ScreenWidth) / float64(sz.X)
+	if z := float64(c.game.ScreenHeight) / float64(sz.Y); c.zoomBound < z {
+		c.zoomBound = z
 	}
 }
