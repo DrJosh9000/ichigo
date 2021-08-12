@@ -30,25 +30,41 @@ func (aw *Awakeman) Update() error {
 	const (
 		bounceDampen = 0.5
 		gravity      = 0.3
-		jumpVelocity = -3.5
+		jumpVelocity = -3.6
 		runVelocity  = 1.4
 	)
 
+	// High-school physics time! Under constant acceleration:
+	//   v = v_0 + a*t
+	// and
+	//   s = t * (v_0 + v) / 2
+	// (note t is in ticks and s is in world units)
+	// and since we get one Update per tick (t = 1),
+	//   v = v_0 + a,
+	// and
+	//   s = (v_0 + v) / 2.
+	// Capture current v_0 to use later.
+	ux, uy := aw.vx, aw.vy
+
 	// Standing on something?
 	if aw.CollidesAt(aw.Pos.Add(image.Pt(0, 1))) {
-		// Not falling
+		// Not falling. Let's assume aw always lands safely.
+		// Setting a = -v_0 gives v = v_0 - v_0 = 0.
 		aw.vy = 0
 		aw.coyoteTimer = 5
 	} else {
-		// Falling
+		// Falling. v = v_0 + a, and a is gravity.
 		aw.vy += gravity
 		if aw.coyoteTimer > 0 {
 			aw.coyoteTimer--
 		}
 	}
+
+	// Handle controls
+
 	// NB: spacebar sometimes does things on web pages (scrolls down)
 	if aw.coyoteTimer > 0 && (inpututil.IsKeyJustPressed(ebiten.KeySpace) || inpututil.IsKeyJustPressed(ebiten.KeyZ)) {
-		// Jump
+		// Jump. One frame of a = jumpVelocity (ignoring any gravity already applied this tick).
 		aw.vy = jumpVelocity
 	}
 	switch {
@@ -76,8 +92,11 @@ func (aw *Awakeman) Update() error {
 			aw.camera.Rotation += math.Pi / 6
 		}
 	*/
-	aw.MoveX(aw.vx, func() { aw.vx = -aw.vx * bounceDampen })
-	aw.MoveY(aw.vy, func() { aw.vy = -aw.vy * bounceDampen })
+
+	// s = (v_0 + v) / 2.
+	// On collision, bounce a little bit.
+	aw.MoveX((ux+aw.vx)/2, func() { aw.vx = -aw.vx * bounceDampen })
+	aw.MoveY((uy+aw.vy)/2, func() { aw.vy = -aw.vy * bounceDampen })
 	// aw.Pos is top-left corner, so add half size to get centre
 	aw.camera.Centre = aw.Pos.Add(aw.Size.Div(2))
 	return aw.Sprite.Update()
