@@ -95,8 +95,9 @@ func main() {
 					KeyCombo: []ebiten.Key{ebiten.KeyControl, ebiten.KeyD},
 				},
 				&engine.Camera{
-					ID:    "level_1_camera",
-					Scene: level1,
+					ID:     "level_1_camera",
+					Bounds: image.Rect(-16, -16, 320+16, 240+16),
+					Scene:  level1,
 				},
 				engine.PerfDisplay{},
 			},

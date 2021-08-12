@@ -6,29 +6,58 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-// TODO: should this be integrated with Scene?
-
 type Camera struct {
 	ID
 	Scene *Scene
 
 	// camera controls
-	Centre   image.Point
-	Rotation float64
-	Zoom     float64
+	Bounds image.Rectangle // world coordinates
+	Centre image.Point     // world coordinates
+	//Rotation float64       // radians
+	Zoom float64 // unitless
 
 	game *Game
-	// TODO: camera constraints
 }
 
 func (c *Camera) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
-	// move c.Centre to the origin
-	geom.Translate(-float64(c.Centre.X), -float64(c.Centre.Y))
-	// zoom and rotate
-	geom.Scale(c.Zoom, c.Zoom)
-	geom.Rotate(c.Rotation)
-	// move the origin to the centre of screen space
-	geom.Translate(float64(c.game.ScreenWidth/2), float64(c.game.ScreenHeight/2))
+	// If the camera bounds are smaller than the screen dimensions, that
+	// places a lower bound on zoom.
+	// If the configured centre still puts the camera out of bounds, move it.
+	centre, zoom := c.Centre, c.Zoom
+	if sz := c.Bounds.Size(); sz.X < c.game.ScreenWidth || sz.Y < c.game.ScreenHeight {
+		if z := float64(c.game.ScreenWidth) / float64(sz.X); zoom < z {
+			zoom = z
+		}
+		if z := float64(c.game.ScreenHeight) / float64(sz.Y); zoom < z {
+			zoom = z
+		}
+	}
+
+	// Camera frame currently Rectangle{ centre ± (screen/(2*zoom)) }.
+	sw2, sh2 := float64(c.game.ScreenWidth/2), float64(c.game.ScreenHeight/2)
+	swz, shz := int(sw2/zoom), int(sh2/zoom)
+	if centre.X-swz < c.Bounds.Min.X {
+		centre.X = c.Bounds.Min.X + swz
+	}
+	if centre.Y-shz < c.Bounds.Min.Y {
+		centre.Y = c.Bounds.Min.Y + shz
+	}
+	if centre.X+swz > c.Bounds.Max.X {
+		centre.X = c.Bounds.Max.X - swz
+	}
+	if centre.Y+shz > c.Bounds.Max.Y {
+		centre.Y = c.Bounds.Max.Y - shz
+	}
+
+	// Apply camera controls to geom.
+	// 1. Move c.Centre to the origin
+	geom.Translate(-float64(centre.X), -float64(centre.Y))
+	// 2. Zoom and rotate
+	geom.Scale(zoom, zoom)
+	//geom.Rotate(c.Rotation)
+	// 3. Move the origin to the centre of screen space.
+	geom.Translate(sw2, sh2)
+
 	c.Scene.Draw(screen, geom)
 }
 
