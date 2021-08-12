@@ -31,7 +31,7 @@ func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 		zoom = c.zoomBound
 	}
 
-	// If the configured centre still puts the camera out of bounds, move it.
+	// If the configured centre puts the camera out of bounds, move it.
 	centre := c.Centre
 	// Camera frame currently Rectangle{ centre ± (screen/(2*zoom)) }.
 	sw2, sh2 := float64(c.game.ScreenWidth/2), float64(c.game.ScreenHeight/2)
@@ -50,7 +50,7 @@ func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	}
 
 	// Apply camera controls to geom.
-	// 1. Move c.Centre to the origin
+	// 1. Move centre to the origin
 	opts.GeoM.Translate(-float64(centre.X), -float64(centre.Y))
 	// 2. Zoom and rotate
 	opts.GeoM.Scale(zoom, zoom)
