@@ -33,7 +33,7 @@ func (aw *Awakeman) Update() error {
 		restitution   = -0.3
 		gravity       = 0.3
 		airResistance = -0.01 // ⇒ terminal velocity = 30
-		jumpVelocity  = -4
+		jumpVelocity  = -4.2
 		runVelocity   = 1.4
 		coyoteTime    = 5
 	)
