@@ -29,12 +29,13 @@ type Awakeman struct {
 
 func (aw *Awakeman) Update() error {
 	const (
-		ε            = 0.2
-		restitution  = -0.3
-		gravity      = 0.3
-		jumpVelocity = -3.6
-		runVelocity  = 1.4
-		coyoteTime   = 5
+		ε             = 0.2
+		restitution   = -0.3
+		gravity       = 0.3
+		airResistance = -0.01 // ∴ terminal velocity = 30
+		jumpVelocity  = -4
+		runVelocity   = 1.4
+		coyoteTime    = 5
 	)
 
 	// High-school physics time! Under constant acceleration:
@@ -55,8 +56,8 @@ func (aw *Awakeman) Update() error {
 		aw.vy = 0
 		aw.coyoteTimer = coyoteTime
 	} else {
-		// Falling. v = v_0 + a, and a is gravity.
-		aw.vy += gravity
+		// Falling. v = v_0 + a, and a = gravity + airResistance(v)
+		aw.vy += gravity + airResistance*aw.vy
 		if aw.coyoteTimer > 0 {
 			aw.coyoteTimer--
 		}
