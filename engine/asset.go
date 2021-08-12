@@ -30,12 +30,13 @@ func (r *AnimRef) Anim() *Anim {
 	if r.anim != nil {
 		return r.anim
 	}
-	if ad := AnimDefs[r.Key]; ad != nil {
-		r.anim = &Anim{Def: ad}
-		return r.anim
+	ad := AnimDefs[r.Key]
+	if ad == nil {
+		log.Fatalf("Unknown AnimDef %q", r.Key)
+		return nil
 	}
-	log.Fatalf("Unknown AnimDef %q", r.Key)
-	return nil
+	r.anim = &Anim{Def: ad}
+	return r.anim
 }
 
 // ImageRef loads images from the AssetFS into *ebiten.Image form.
