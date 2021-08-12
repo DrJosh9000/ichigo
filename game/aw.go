@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/gob"
 	"image"
+	"math"
 
 	"drjosh.dev/gurgle/engine"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -28,7 +29,8 @@ type Awakeman struct {
 
 func (aw *Awakeman) Update() error {
 	const (
-		bounceDampen = 0.5
+		notFallingε  = 0.2
+		restitution  = -0.3
 		gravity      = 0.3
 		jumpVelocity = -3.6
 		runVelocity  = 1.4
@@ -46,10 +48,9 @@ func (aw *Awakeman) Update() error {
 	// Capture current v_0 to use later.
 	ux, uy := aw.vx, aw.vy
 
-	// Standing on something?
-	if aw.CollidesAt(aw.Pos.Add(image.Pt(0, 1))) {
-		// Not falling. Let's assume aw always lands safely.
-		// Setting a = -v_0 gives v = v_0 - v_0 = 0.
+	// Has traction?
+	if math.Abs(aw.vy) < notFallingε && aw.CollidesAt(aw.Pos.Add(image.Pt(0, 1))) {
+		// Not falling.
 		aw.vy = 0
 		aw.coyoteTimer = 5
 	} else {
@@ -95,8 +96,8 @@ func (aw *Awakeman) Update() error {
 
 	// s = (v_0 + v) / 2.
 	// On collision, bounce a little bit.
-	aw.MoveX((ux+aw.vx)/2, func() { aw.vx = -aw.vx * bounceDampen })
-	aw.MoveY((uy+aw.vy)/2, func() { aw.vy = -aw.vy * bounceDampen })
+	aw.MoveX((ux+aw.vx)/2, func() { aw.vx *= restitution })
+	aw.MoveY((uy+aw.vy)/2, func() { aw.vy *= restitution })
 	// aw.Pos is top-left corner, so add half size to get centre
 	aw.camera.Centre = aw.Pos.Add(aw.Size.Div(2))
 	return aw.Sprite.Update()
