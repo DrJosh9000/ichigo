@@ -29,11 +29,12 @@ type Awakeman struct {
 
 func (aw *Awakeman) Update() error {
 	const (
-		notFallingε  = 0.2
+		ε            = 0.2
 		restitution  = -0.3
 		gravity      = 0.3
 		jumpVelocity = -3.6
 		runVelocity  = 1.4
+		coyoteTime   = 5
 	)
 
 	// High-school physics time! Under constant acceleration:
@@ -49,10 +50,10 @@ func (aw *Awakeman) Update() error {
 	ux, uy := aw.vx, aw.vy
 
 	// Has traction?
-	if math.Abs(aw.vy) < notFallingε && aw.CollidesAt(aw.Pos.Add(image.Pt(0, 1))) {
-		// Not falling.
+	if aw.CollidesAt(aw.Pos.Add(image.Pt(0, 1))) {
+		// Not falling
 		aw.vy = 0
-		aw.coyoteTimer = 5
+		aw.coyoteTimer = coyoteTime
 	} else {
 		// Falling. v = v_0 + a, and a is gravity.
 		aw.vy += gravity
@@ -95,9 +96,15 @@ func (aw *Awakeman) Update() error {
 	*/
 
 	// s = (v_0 + v) / 2.
-	// On collision, bounce a little bit.
-	aw.MoveX((ux+aw.vx)/2, func() { aw.vx *= restitution })
-	aw.MoveY((uy+aw.vy)/2, func() { aw.vy *= restitution })
+	aw.MoveX((ux+aw.vx)/2, nil)
+	// For Y, on collision, bounce a little bit.
+	// Does not apply to X because controls override it anyway.
+	aw.MoveY((uy+aw.vy)/2, func() {
+		aw.vy *= restitution
+		if math.Abs(aw.vy) < ε {
+			aw.vy = 0
+		}
+	})
 	// aw.Pos is top-left corner, so add half size to get centre
 	aw.camera.Centre = aw.Pos.Add(aw.Size.Div(2))
 	return aw.Sprite.Update()
