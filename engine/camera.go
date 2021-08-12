@@ -16,7 +16,7 @@ type Camera struct {
 	//Rotation float64       // radians
 	Zoom float64 // unitless
 
-	Filter ebiten.Filter // Apply to game?
+	Filter ebiten.Filter
 
 	game *Game
 }
