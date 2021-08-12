@@ -22,13 +22,13 @@ type Scene struct {
 }
 
 // Draw draws all components in order.
-func (s *Scene) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
+func (s *Scene) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	if s.Hidden {
 		return
 	}
 	for _, i := range s.Components {
 		if d, ok := i.(Drawer); ok {
-			d.Draw(screen, geom)
+			d.Draw(screen, opts)
 		}
 	}
 }

@@ -52,25 +52,28 @@ func (t *Tilemap) CollidesWith(r image.Rectangle) bool {
 }
 
 // Draw draws the tilemap.
-func (t *Tilemap) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
+func (t *Tilemap) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	if t.Hidden {
 		return
 	}
 	src := t.Src.Image()
 	w, _ := src.Size()
+	og := opts.GeoM
+	var geom ebiten.GeoM
 	for j, row := range t.Map {
 		for i, tile := range row {
 			if tile == nil {
 				continue
 			}
-			var op ebiten.DrawImageOptions
-			op.GeoM.Translate(float64(i*t.TileSize), float64(j*t.TileSize))
-			op.GeoM.Concat(geom)
+			geom.Reset()
+			geom.Translate(float64(i*t.TileSize), float64(j*t.TileSize))
+			geom.Concat(og)
+			opts.GeoM = geom
 
 			s := tile.TileIndex() * t.TileSize
 			sx, sy := s%w, (s/w)*t.TileSize
 			src := src.SubImage(image.Rect(sx, sy, sx+t.TileSize, sy+t.TileSize)).(*ebiten.Image)
-			screen.DrawImage(src, &op)
+			screen.DrawImage(src, &opts)
 		}
 	}
 }

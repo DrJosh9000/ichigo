@@ -15,7 +15,7 @@ type Collider interface {
 // Each component is responsible for calling Draw on its child components
 // (so that hiding the parent can hide the children, etc).
 type Drawer interface {
-	Draw(screen *ebiten.Image, geom ebiten.GeoM)
+	Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions)
 }
 
 // Identifier components have a sense of self. This makes it easier for

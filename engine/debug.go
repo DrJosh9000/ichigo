@@ -23,7 +23,7 @@ type PerfDisplay struct {
 	Hidden bool
 }
 
-func (p PerfDisplay) Draw(screen *ebiten.Image, _ ebiten.GeoM) {
+func (p PerfDisplay) Draw(screen *ebiten.Image, _ ebiten.DrawImageOptions) {
 	if p.Hidden {
 		return
 	}

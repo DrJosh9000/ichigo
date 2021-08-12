@@ -24,21 +24,22 @@ type Sprite struct {
 	anim *Anim
 }
 
-func (s *Sprite) Draw(screen *ebiten.Image, geom ebiten.GeoM) {
+func (s *Sprite) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	if s.Hidden {
 		return
 	}
-	var op ebiten.DrawImageOptions
 	dp := s.Pos.Add(s.FrameOffset)
-	op.GeoM.Translate(float64(dp.X), float64(dp.Y))
-	op.GeoM.Concat(geom)
+	var geom ebiten.GeoM
+	geom.Translate(float64(dp.X), float64(dp.Y))
+	geom.Concat(opts.GeoM)
+	opts.GeoM = geom
 
 	frame := s.anim.CurrentFrame()
 	src := s.Src.Image()
 	w, _ := src.Size()
 	sp := image.Pt((frame*s.FrameSize.X)%w, ((frame*s.FrameSize.X)/w)*s.FrameSize.Y)
 
-	screen.DrawImage(src.SubImage(image.Rectangle{sp, sp.Add(s.FrameSize)}).(*ebiten.Image), &op)
+	screen.DrawImage(src.SubImage(image.Rectangle{sp, sp.Add(s.FrameSize)}).(*ebiten.Image), &opts)
 }
 
 func (s *Sprite) Scan() []interface{} { return []interface{}{&s.Actor} }

@@ -14,9 +14,9 @@ type Fill struct {
 	ZPos
 }
 
-func (f *Fill) Draw(screen *ebiten.Image, _ ebiten.GeoM) {
+func (f *Fill) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	if f.Hidden {
 		return
 	}
-	screen.Fill(f.Color)
+	screen.Fill(opts.ColorM.Apply(f.Color))
 }

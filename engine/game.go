@@ -21,7 +21,7 @@ type Game struct {
 
 // Draw draws the entire thing, with no geometric transform.
 func (g *Game) Draw(screen *ebiten.Image) {
-	g.Scene.Draw(screen, ebiten.GeoM{})
+	g.Scene.Draw(screen, ebiten.DrawImageOptions{})
 }
 
 // Layout returns the configured screen width/height.
