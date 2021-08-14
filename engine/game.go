@@ -10,8 +10,18 @@ func init() {
 	gob.Register(Game{})
 }
 
+type GameMode int
+
+const (
+	GameModeMenu = GameMode(iota)
+	GameModePlay
+	GameModePause
+	GameModeEdit
+)
+
 // Game implements the ebiten methods using a collection of components.
 type Game struct {
+	Mode         GameMode
 	ScreenWidth  int
 	ScreenHeight int
 	*Scene
