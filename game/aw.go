@@ -52,7 +52,8 @@ func (aw *Awakeman) Update() error {
 
 	// Has traction?
 	if aw.CollidesAt(aw.Pos.Add(image.Pt(0, 1))) {
-		// Not falling
+		// Not falling.
+		// Instantly decelerate (AW absorbs all kinetic E in legs, or something)
 		aw.vy = 0
 		aw.coyoteTimer = coyoteTime
 	} else {
