@@ -92,6 +92,23 @@ func (t *Tilemap) Update() error {
 	return nil
 }
 
+// TileAt returns the tile present at the given world coordinate.
+func (t *Tilemap) TileAt(wc image.Point) Tile {
+	return t.Map[wc.Sub(t.Offset).Div(t.TileSize)]
+}
+
+// SetTileAt sets the tile at the given world coordinate.
+func (t *Tilemap) SetTileAt(wc image.Point, tile Tile) {
+	t.Map[wc.Sub(t.Offset).Div(t.TileSize)] = tile
+}
+
+// TileBounds returns a rectangle describing the tile boundary for the tile
+// at the given world coordinate.
+func (t *Tilemap) TileBounds(wc image.Point) image.Rectangle {
+	p := wc.Sub(t.Offset).Div(t.TileSize).Mul(t.TileSize).Add(t.Offset)
+	return image.Rectangle{p, p.Add(image.Pt(t.TileSize, t.TileSize))}
+}
+
 // Tile is the interface needed by Tilemap.
 type Tile interface {
 	TileIndex() int
