@@ -29,7 +29,7 @@ type Game struct {
 	componentsByID map[string]interface{}
 }
 
-// Draw draws the entire thing, with no geometric transform.
+// Draw draws the entire thing, with default draw options.
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.Scene.Draw(screen, ebiten.DrawImageOptions{})
 }
@@ -54,6 +54,7 @@ func (g *Game) RegisterComponent(c interface{}) {
 }
 
 // UnregisterComponent tells the game the component is no more.
+// Note this does not remove any references held by other components.
 func (g *Game) UnregisterComponent(c interface{}) {
 	i, ok := c.(Identifier)
 	if !ok {
