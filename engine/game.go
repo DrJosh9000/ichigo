@@ -84,13 +84,15 @@ func Walk(c interface{}, v func(interface{}) bool) {
 	if !v(c) {
 		return
 	}
-	if sc, ok := c.(Scanner); ok {
-		for _, c := range sc.Scan() {
-			if !v(c) {
-				return
-			}
-			Walk(c, v)
+	sc, ok := c.(Scanner)
+	if !ok {
+		return
+	}
+	for _, c := range sc.Scan() {
+		if !v(c) {
+			return
 		}
+		Walk(c, v)
 	}
 }
 
