@@ -18,8 +18,9 @@ type Tilemap struct {
 	Disabled bool
 	Hidden   bool
 	ID
-	Map      [][]Tile
-	Ersatz   bool // "fake wall"
+	Map      map[image.Point]Tile
+	Ersatz   bool        // "fake wall"
+	Offset   image.Point // world coordinates
 	Src      ImageRef
 	TileSize int
 	ZPos
@@ -34,13 +35,13 @@ func (t *Tilemap) CollidesWith(r image.Rectangle) bool {
 	// If we round down r.Min, and round up r.Max, to the nearest tile
 	// coordinates, that gives the full range of tiles to test.
 	sm1 := t.TileSize - 1
+	r = r.Sub(t.Offset)
 	min := r.Min.Div(t.TileSize)
 	max := r.Max.Add(image.Pt(sm1, sm1)).Div(t.TileSize)
 
-	for j := min.Y; j <= max.Y && j < len(t.Map); j++ {
-		row := t.Map[j]
-		for i := min.X; i <= max.X && i < len(row); i++ {
-			if row[i] == nil {
+	for j := min.Y; j <= max.Y; j++ {
+		for i := min.X; i <= max.X; i++ {
+			if t.Map[image.Pt(i, j)] == nil {
 				continue
 			}
 			if r.Overlaps(image.Rect(i*t.TileSize, j*t.TileSize, (i+1)*t.TileSize, (j+1)*t.TileSize)) {
@@ -60,21 +61,19 @@ func (t *Tilemap) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	w, _ := src.Size()
 	og := opts.GeoM
 	var geom ebiten.GeoM
-	for j, row := range t.Map {
-		for i, tile := range row {
-			if tile == nil {
-				continue
-			}
-			geom.Reset()
-			geom.Translate(float64(i*t.TileSize), float64(j*t.TileSize))
-			geom.Concat(og)
-			opts.GeoM = geom
-
-			s := tile.TileIndex() * t.TileSize
-			sx, sy := s%w, (s/w)*t.TileSize
-			src := src.SubImage(image.Rect(sx, sy, sx+t.TileSize, sy+t.TileSize)).(*ebiten.Image)
-			screen.DrawImage(src, &opts)
+	for p, tile := range t.Map {
+		if tile == nil {
+			continue
 		}
+		geom.Reset()
+		geom.Translate(float64(p.X*t.TileSize+t.Offset.X), float64(p.Y*t.TileSize+t.Offset.Y))
+		geom.Concat(og)
+		opts.GeoM = geom
+
+		s := tile.TileIndex() * t.TileSize
+		sx, sy := s%w, (s/w)*t.TileSize
+		src := src.SubImage(image.Rect(sx, sy, sx+t.TileSize, sy+t.TileSize)).(*ebiten.Image)
+		screen.DrawImage(src, &opts)
 	}
 }
 
@@ -83,12 +82,10 @@ func (t *Tilemap) Update() error {
 	if t.Disabled {
 		return nil
 	}
-	for _, row := range t.Map {
-		for _, tile := range row {
-			if u, ok := tile.(Updater); ok {
-				if err := u.Update(); err != nil {
-					return err
-				}
+	for _, tile := range t.Map {
+		if u, ok := tile.(Updater); ok {
+			if err := u.Update(); err != nil {
+				return err
 			}
 		}
 	}
