@@ -34,6 +34,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.Scene.Draw(screen, ebiten.DrawImageOptions{})
 }
 
+// Update updates the current scene.
+func (g *Game) Update() error {
+	return g.Scene.Update()
+}
+
 // Layout returns the configured screen width/height.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
 	return g.ScreenWidth, g.ScreenHeight
