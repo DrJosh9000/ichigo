@@ -11,12 +11,6 @@ type Collider interface {
 	CollidesWith(image.Rectangle) bool
 }
 
-// ParallaxScaler components have a scaling factor. This is used for
-// parallax layers in a scene, and can be thought of as 1/distance.
-type ParallaxScaler interface {
-	ParallaxFactor() float64
-}
-
 // Drawer components can draw themselves. Draw is called often.
 // Each component is responsible for calling Draw on its child components
 // (so that hiding the parent can hide the children, etc).
@@ -33,6 +27,12 @@ type DrawOrderer interface {
 // components to find and interact with one another.
 type Identifier interface {
 	Ident() string
+}
+
+// ParallaxScaler components have a scaling factor. This is used for
+// parallax layers in a scene, and can be thought of as 1/distance.
+type ParallaxScaler interface {
+	ParallaxFactor() float64
 }
 
 // Prepper components can be prepared. It is called after the component
