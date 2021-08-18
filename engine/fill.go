@@ -11,7 +11,7 @@ type Fill struct {
 	Color  color.Color
 	Hidden bool
 	ID
-	ZPos
+	DrawOrder
 }
 
 func (f *Fill) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {

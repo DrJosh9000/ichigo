@@ -52,14 +52,14 @@ func main() {
 		Components: []interface{}{
 			&engine.Fill{
 				Color: color.Gray{100},
-				ZPos:  0,
+				DrawOrder:  0,
 			},
 			&engine.Tilemap{
 				ID:       "terrain",
 				Map:      tiles,
 				Src:      engine.ImageRef{Path: "assets/boxes.png"},
 				TileSize: 16,
-				ZPos:     1,
+				DrawOrder:     1,
 			},
 			&engine.SolidRect{
 				ID:   "ceiling",
@@ -85,7 +85,7 @@ func main() {
 					FrameOffset: image.Pt(-1, 0),
 					FrameSize:   image.Pt(10, 16),
 					Src:         engine.ImageRef{Path: "assets/aw.png"},
-					ZPos:        2,
+					DrawOrder:        2,
 				},
 			},
 		},

@@ -19,7 +19,7 @@ type Sprite struct {
 	Hidden      bool
 	ID
 	Src ImageRef
-	ZPos
+	DrawOrder
 
 	anim *Anim
 }

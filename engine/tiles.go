@@ -23,7 +23,7 @@ type Tilemap struct {
 	Offset   image.Point // world coordinates
 	Src      ImageRef
 	TileSize int
-	ZPos
+	DrawOrder
 }
 
 // CollidesWith implements Collider.

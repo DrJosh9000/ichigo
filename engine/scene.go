@@ -18,7 +18,7 @@ type Scene struct {
 	Disabled   bool
 	Hidden     bool
 	ID
-	ZPos
+	DrawOrder
 }
 
 // Draw draws all components in order.
@@ -34,17 +34,17 @@ func (s *Scene) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 }
 
 // Prepare does an initial Z-order sort.
-func (s *Scene) Prepare(*Game) { s.sortByZ() }
+func (s *Scene) Prepare(*Game) { s.sortByDrawOrder() }
 
-// sortByZ sorts the components by Z position.
+// sortByDrawOrder sorts the components by Z position.
 // Everything without a Z sorts first. Stable sort is used to avoid Z-fighting
 // (among layers without a Z, or those with equal Z).
-func (s *Scene) sortByZ() {
+func (s *Scene) sortByDrawOrder() {
 	sort.SliceStable(s.Components, func(i, j int) bool {
-		a, aok := s.Components[i].(ZPositioner)
-		b, bok := s.Components[j].(ZPositioner)
+		a, aok := s.Components[i].(DrawOrderer)
+		b, bok := s.Components[j].(DrawOrderer)
 		if aok && bok {
-			return a.Z() < b.Z()
+			return a.DrawOrder() < b.DrawOrder()
 		}
 		return !aok && bok
 	})
@@ -68,18 +68,18 @@ func (s *Scene) Update() error {
 		}
 	}
 	// Check if the updates put the components out of order; if so, sort
-	curZ := -math.MaxFloat64 // fun fact: this is min float64
+	cz := -math.MaxFloat64 // fun fact: this is min float64
 	for _, c := range s.Components {
-		z, ok := c.(ZPositioner)
+		z, ok := c.(DrawOrderer)
 		if !ok {
 			continue
 		}
-		t := z.Z()
-		if t < curZ {
-			s.sortByZ()
-			return nil
+		if t := z.DrawOrder(); t > cz {
+			cz = t
+			continue
 		}
-		curZ = t
+		s.sortByDrawOrder()
+		return nil
 	}
 	return nil
 }

@@ -45,7 +45,7 @@ type Updater interface {
 	Update() error
 }
 
-// ZPositioner is used to reorder layers.
-type ZPositioner interface {
-	Z() float64
+// DrawOrderer is used to reorder layers.
+type DrawOrderer interface {
+	DrawOrder() float64
 }
