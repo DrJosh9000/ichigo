@@ -23,9 +23,9 @@ func init() {
 type Image struct {
 	ID
 	Parallax
-	ZOrder
-	Src ImageRef
 	Pos image.Point
+	Src ImageRef
+	ZOrder
 }
 
 // Draw draws the image.
