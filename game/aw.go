@@ -23,11 +23,48 @@ type Awakeman struct {
 	vx, vy      float64
 	facingLeft  bool
 	coyoteTimer int
+	noclip      bool
 
 	animIdleLeft, animIdleRight, animRunLeft, animRunRight *engine.Anim
 }
 
 func (aw *Awakeman) Update() error {
+	// TODO: better cheat for noclip
+	if inpututil.IsKeyJustPressed(ebiten.KeyN) {
+		aw.noclip = !aw.noclip
+	}
+	upd := aw.realUpdate
+	if aw.noclip {
+		upd = aw.noclipUpdate
+	}
+	if err := upd(); err != nil {
+		return err
+	}
+	aw.camera.Zoom = 1
+	if ebiten.IsKeyPressed(ebiten.KeyShift) {
+		aw.camera.Zoom = 2
+	}
+	aw.camera.Centre = aw.Pos.Add(aw.Size.Div(2))
+	return nil
+}
+
+func (aw *Awakeman) noclipUpdate() error {
+	if ebiten.IsKeyPressed(ebiten.KeyUp) {
+		aw.Pos.Y--
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyDown) {
+		aw.Pos.Y++
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
+		aw.Pos.X--
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyRight) {
+		aw.Pos.X++
+	}
+	return nil
+}
+
+func (aw *Awakeman) realUpdate() error {
 	const (
 		ε             = 0.2
 		restitution   = -0.3
@@ -87,15 +124,6 @@ func (aw *Awakeman) Update() error {
 			aw.SetAnim(aw.animIdleLeft)
 		}
 	}
-	aw.camera.Zoom = 1
-	if ebiten.IsKeyPressed(ebiten.KeyShift) {
-		aw.camera.Zoom = 2
-	}
-	/*
-		if inpututil.IsKeyJustPressed(ebiten.KeyR) {
-			aw.camera.Rotation += math.Pi / 6
-		}
-	*/
 
 	// s = (v_0 + v) / 2.
 	aw.MoveX((ux+aw.vx)/2, nil)
@@ -108,7 +136,6 @@ func (aw *Awakeman) Update() error {
 		}
 	})
 	// aw.Pos is top-left corner, so add half size to get centre
-	aw.camera.Centre = aw.Pos.Add(aw.Size.Div(2))
 	return aw.Sprite.Update()
 }
 
