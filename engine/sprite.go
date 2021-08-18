@@ -7,6 +7,15 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+// Ensure Sprite satisfies interfaces.
+var (
+	_ Identifier  = &Sprite{}
+	_ Drawer      = &Sprite{}
+	_ DrawOrderer = &Sprite{}
+	_ Scanner     = &Sprite{}
+	_ Updater     = &Sprite{}
+)
+
 func init() {
 	gob.Register(Sprite{})
 }
@@ -14,7 +23,7 @@ func init() {
 // Sprite combines an Actor with the ability to Draw from a single spritesheet.
 type Sprite struct {
 	Actor
-	DrawOrder
+	ZOrder
 	FrameSize   image.Point
 	FrameOffset image.Point
 	Hidden      bool

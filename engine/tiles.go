@@ -7,6 +7,15 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+// Ensure Tilemap satisfies interfaces.
+var (
+	_ Identifier  = &Tilemap{}
+	_ Collider    = &Tilemap{}
+	_ Drawer      = &Tilemap{}
+	_ DrawOrderer = &Tilemap{}
+	_ Updater     = &Tilemap{}
+)
+
 func init() {
 	gob.Register(AnimatedTile{})
 	gob.Register(StaticTile(0))
@@ -16,7 +25,7 @@ func init() {
 // Tilemap renders a grid of tiles.
 type Tilemap struct {
 	Disabled bool
-	DrawOrder
+	ZOrder
 	Hidden bool
 	ID
 	Map      map[image.Point]Tile
@@ -113,6 +122,12 @@ func (t *Tilemap) TileBounds(wc image.Point) image.Rectangle {
 type Tile interface {
 	TileIndex() int
 }
+
+// Ensure StaticTile and AnimatedTile satisfy Tile.
+var (
+	_ Tile = StaticTile(0)
+	_ Tile = &AnimatedTile{}
+)
 
 // StaticTile returns a fixed tile index.
 type StaticTile int

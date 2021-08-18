@@ -51,15 +51,22 @@ func main() {
 		ID: "level_1",
 		Components: []interface{}{
 			&engine.Fill{
-				Color:     color.Gray{100},
-				DrawOrder: 0,
+				Color:  color.Gray{100},
+				ZOrder: 0,
+			},
+			&engine.Image{
+				ID:       "bg_image",
+				Parallax: 0.5,
+				ZOrder:   1,
+				Pos:      image.Pt(-160, -120),
+				Src:      engine.ImageRef{Path: "assets/space.png"},
 			},
 			&engine.Tilemap{
-				ID:        "terrain",
-				DrawOrder: 1,
-				Map:       tiles,
-				Src:       engine.ImageRef{Path: "assets/boxes.png"},
-				TileSize:  16,
+				ID:       "terrain",
+				ZOrder:   2,
+				Map:      tiles,
+				Src:      engine.ImageRef{Path: "assets/boxes.png"},
+				TileSize: 16,
 			},
 			&engine.SolidRect{
 				ID:   "ceiling",
@@ -82,7 +89,7 @@ func main() {
 						Pos:             image.Pt(100, 100),
 						Size:            image.Pt(8, 16),
 					},
-					DrawOrder:   2,
+					ZOrder:      3,
 					FrameOffset: image.Pt(-1, 0),
 					FrameSize:   image.Pt(10, 16),
 					Src:         engine.ImageRef{Path: "assets/aw.png"},

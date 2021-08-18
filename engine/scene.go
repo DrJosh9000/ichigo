@@ -8,6 +8,16 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+// Ensure Scene satisfies interfaces.
+var (
+	_ Identifier  = &Scene{}
+	_ Drawer      = &Scene{}
+	_ DrawOrderer = &Scene{}
+	_ Prepper     = &Scene{}
+	_ Scanner     = &Scene{}
+	_ Updater     = &Scene{}
+)
+
 func init() {
 	gob.Register(Scene{})
 }
@@ -16,7 +26,7 @@ func init() {
 type Scene struct {
 	Components []interface{}
 	Disabled   bool
-	DrawOrder
+	ZOrder
 	Hidden bool
 	ID
 }

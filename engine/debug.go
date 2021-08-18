@@ -13,6 +13,14 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
+var (
+	_ Drawer      = PerfDisplay{}
+	_ DrawOrderer = PerfDisplay{}
+
+	_ Prepper = &GobDumper{}
+	_ Updater = &GobDumper{}
+)
+
 func init() {
 	gob.Register(GobDumper{})
 	gob.Register(PerfDisplay{})

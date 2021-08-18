@@ -1,10 +1,24 @@
 package engine
 
 import (
+	"encoding/gob"
 	"image"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
+
+// Ensure Camera satisfies interfaces.
+var (
+	_ Identifier = &Camera{}
+	_ Drawer     = &Camera{}
+	_ Prepper    = &Camera{}
+	_ Scanner    = &Camera{}
+	_ Updater    = &Camera{}
+)
+
+func init() {
+	gob.Register(Camera{})
+}
 
 // Camera models a camera that is viewing a scene.
 // Changes to the configuration take effect immediately.
@@ -74,8 +88,8 @@ func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	for _, i := range c.Scene.Components {
 		if d, ok := i.(Drawer); ok {
 			cs := 1.0
-			if s, ok := i.(CoordScaler); ok {
-				cs = s.CoordScale()
+			if s, ok := i.(ParallaxScaler); ok {
+				cs = s.ParallaxFactor()
 			}
 			var geom ebiten.GeoM
 			// 1. Move centre to the origin, subject to CoordScale

@@ -5,6 +5,8 @@ import (
 	"image"
 )
 
+var _ Collider = SolidRect{}
+
 func init() {
 	gob.Register(SolidRect{})
 }

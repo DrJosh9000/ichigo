@@ -6,10 +6,13 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+// Ensure Fill satisfies Drawer.
+var _ Drawer = &Fill{}
+
 // Fill fills the screen with a colour.
 type Fill struct {
 	Color color.Color
-	DrawOrder
+	ZOrder
 	Hidden bool
 	ID
 }

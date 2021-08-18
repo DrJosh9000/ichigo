@@ -5,6 +5,9 @@ import (
 	"image"
 )
 
+// Ensure Actor satisfies interfaces.
+var _ Prepper = &Actor{}
+
 func init() {
 	gob.Register(Actor{})
 }
