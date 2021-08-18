@@ -11,6 +11,12 @@ type Collider interface {
 	CollidesWith(image.Rectangle) bool
 }
 
+// CoordScaler components have a scaling factor. This is used for
+// e.g. parallax layers in a scene, and can be thought of as 1/distance.
+type CoordScaler interface {
+	CoordScale() float64
+}
+
 // Drawer components can draw themselves. Draw is called often.
 // Each component is responsible for calling Draw on its child components
 // (so that hiding the parent can hide the children, etc).
