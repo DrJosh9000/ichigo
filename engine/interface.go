@@ -18,6 +18,11 @@ type Drawer interface {
 	Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions)
 }
 
+// DrawOrderer is used to reorder layers.
+type DrawOrderer interface {
+	DrawOrder() float64
+}
+
 // Identifier components have a sense of self. This makes it easier for
 // components to find and interact with one another.
 type Identifier interface {
@@ -43,9 +48,4 @@ type Scanner interface {
 // (so that disabling the parent prevents updates to the children, etc).
 type Updater interface {
 	Update() error
-}
-
-// DrawOrderer is used to reorder layers.
-type DrawOrderer interface {
-	DrawOrder() float64
 }
