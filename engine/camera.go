@@ -74,7 +74,7 @@ func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	// Apply other options
 	opts.Filter = c.Filter
 
-	// Compute common matrix (parts independent of CoordScale).
+	// Compute common matrix (parts independent of parallax).
 	// Moving centre to the origin happens per component.
 	var comm ebiten.GeoM
 	// 2. Zoom (this is also where rotation would be)
@@ -87,13 +87,13 @@ func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	// Draw everything.
 	for _, i := range c.Scene.Components {
 		if d, ok := i.(Drawer); ok {
-			cs := 1.0
+			pf := 1.0
 			if s, ok := i.(ParallaxScaler); ok {
-				cs = s.ParallaxFactor()
+				pf = s.ParallaxFactor()
 			}
 			var geom ebiten.GeoM
-			// 1. Move centre to the origin, subject to CoordScale
-			geom.Translate(-float64(centre.X)*cs, -float64(centre.Y)*cs)
+			// 1. Move centre to the origin, subject to parallax factor
+			geom.Translate(-float64(centre.X)*pf, -float64(centre.Y)*pf)
 			geom.Concat(comm)
 			opts.GeoM = geom
 			d.Draw(screen, opts)
