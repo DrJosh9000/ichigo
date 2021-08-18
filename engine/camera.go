@@ -28,8 +28,6 @@ func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 		return
 	}
 
-	// Compute the geometry matrix for the camera controls.
-
 	// The lower bound on zoom is the larger of
 	// { (ScreenWidth / BoundsWidth), (ScreenHeight / BoundsHeight) }
 	zoom := c.Zoom
@@ -62,8 +60,17 @@ func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	// Apply other options
 	opts.Filter = c.Filter
 
+	// Compute common matrix (parts independent of CoordScale).
+	// Moving centre to the origin happens per component.
+	var comm ebiten.GeoM
+	// 2. Zoom (this is also where rotation would be)
+	comm.Scale(zoom, zoom)
+	// 3. Move the origin to the centre of screen space.
+	comm.Translate(sw2, sh2)
+	// 4. Apply transforms from the caller.
+	comm.Concat(opts.GeoM)
+
 	// Draw everything.
-	og := opts.GeoM
 	for _, i := range c.Scene.Components {
 		if d, ok := i.(Drawer); ok {
 			cs := 1.0
@@ -73,12 +80,7 @@ func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 			var geom ebiten.GeoM
 			// 1. Move centre to the origin, subject to CoordScale
 			geom.Translate(-float64(centre.X)*cs, -float64(centre.Y)*cs)
-			// 2. Zoom (this is also where rotation would be)
-			geom.Scale(zoom, zoom)
-			// 3. Move the origin to the centre of screen space.
-			geom.Translate(sw2, sh2)
-			// 4. Apply transforms from the caller.
-			geom.Concat(og)
+			geom.Concat(comm)
 			opts.GeoM = geom
 			d.Draw(screen, opts)
 		}
