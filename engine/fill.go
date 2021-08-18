@@ -8,10 +8,10 @@ import (
 
 // Fill fills the screen with a colour.
 type Fill struct {
-	Color  color.Color
+	Color color.Color
+	DrawOrder
 	Hidden bool
 	ID
-	DrawOrder
 }
 
 func (f *Fill) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {

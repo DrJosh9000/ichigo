@@ -14,12 +14,12 @@ func init() {
 // Sprite combines an Actor with the ability to Draw from a single spritesheet.
 type Sprite struct {
 	Actor
+	DrawOrder
 	FrameSize   image.Point
 	FrameOffset image.Point
 	Hidden      bool
 	ID
 	Src ImageRef
-	DrawOrder
 
 	anim *Anim
 }

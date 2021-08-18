@@ -51,15 +51,15 @@ func main() {
 		ID: "level_1",
 		Components: []interface{}{
 			&engine.Fill{
-				Color: color.Gray{100},
-				DrawOrder:  0,
+				Color:     color.Gray{100},
+				DrawOrder: 0,
 			},
 			&engine.Tilemap{
-				ID:       "terrain",
-				Map:      tiles,
-				Src:      engine.ImageRef{Path: "assets/boxes.png"},
-				TileSize: 16,
-				DrawOrder:     1,
+				ID:        "terrain",
+				DrawOrder: 1,
+				Map:       tiles,
+				Src:       engine.ImageRef{Path: "assets/boxes.png"},
+				TileSize:  16,
 			},
 			&engine.SolidRect{
 				ID:   "ceiling",
@@ -74,7 +74,7 @@ func main() {
 				Rect: image.Rect(320, 0, 321, 240),
 			},
 			&game.Awakeman{
-				CameraID: "level_1_camera",
+				CameraID: "game_camera",
 				Sprite: engine.Sprite{
 					ID: "awakeman",
 					Actor: engine.Actor{
@@ -82,10 +82,10 @@ func main() {
 						Pos:             image.Pt(100, 100),
 						Size:            image.Pt(8, 16),
 					},
+					DrawOrder:   2,
 					FrameOffset: image.Pt(-1, 0),
 					FrameSize:   image.Pt(10, 16),
 					Src:         engine.ImageRef{Path: "assets/aw.png"},
-					DrawOrder:        2,
 				},
 			},
 		},
@@ -101,8 +101,8 @@ func main() {
 					KeyCombo: []ebiten.Key{ebiten.KeyControl, ebiten.KeyD},
 				},
 				&engine.Camera{
-					ID:     "level_1_camera",
 					Bounds: image.Rect(-32, -32, 320+32, 240+32),
+					ID:     "game_camera",
 					Scene:  level1,
 				},
 				engine.PerfDisplay{},

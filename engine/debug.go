@@ -30,7 +30,7 @@ func (p PerfDisplay) Draw(screen *ebiten.Image, _ ebiten.DrawImageOptions) {
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f  FPS: %0.2f", ebiten.CurrentTPS(), ebiten.CurrentFPS()))
 }
 
-func (PerfDisplay) Z() float64 {
+func (PerfDisplay) DrawOrder() float64 {
 	// Always draw on top
 	return math.MaxFloat64
 }

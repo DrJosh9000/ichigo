@@ -16,9 +16,9 @@ func init() {
 type Scene struct {
 	Components []interface{}
 	Disabled   bool
-	Hidden     bool
-	ID
 	DrawOrder
+	Hidden bool
+	ID
 }
 
 // Draw draws all components in order.
@@ -26,6 +26,7 @@ func (s *Scene) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	if s.Hidden {
 		return
 	}
+	// Draw everything.
 	for _, i := range s.Components {
 		if d, ok := i.(Drawer); ok {
 			d.Draw(screen, opts)
@@ -34,7 +35,7 @@ func (s *Scene) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 }
 
 // Prepare does an initial Z-order sort.
-func (s *Scene) Prepare(*Game) { s.sortByDrawOrder() }
+func (s *Scene) Prepare(game *Game) { s.sortByDrawOrder() }
 
 // sortByDrawOrder sorts the components by Z position.
 // Everything without a Z sorts first. Stable sort is used to avoid Z-fighting

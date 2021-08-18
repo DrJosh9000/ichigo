@@ -20,15 +20,20 @@ type Camera struct {
 
 	Filter ebiten.Filter
 
-	game      *Game
-	zoomBound float64
+	game *Game
 }
 
 // Draw applies transformations to opts, then calls c.Scene.Draw with it.
 func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
+	// The lower bound on zoom is the larger of
+	// { (ScreenWidth / BoundsWidth), (ScreenHeight / BoundsHeight) }
 	zoom := c.Zoom
-	if zoom < c.zoomBound {
-		zoom = c.zoomBound
+	sz := c.Bounds.Size()
+	if z := float64(c.game.ScreenWidth) / float64(sz.X); zoom < z {
+		zoom = z
+	}
+	if z := float64(c.game.ScreenHeight) / float64(sz.Y); zoom < z {
+		zoom = z
 	}
 
 	// If the configured centre puts the camera out of bounds, move it.
@@ -70,16 +75,5 @@ func (c *Camera) Update() error { return c.Scene.Update() }
 // Scan returns the only child (c.Scene).
 func (c *Camera) Scan() []interface{} { return []interface{}{c.Scene} }
 
-// Prepare, among other things, computes the lower bound for Zoom based on
-// c.Bounds and game.ScreenWidth/Height.
-func (c *Camera) Prepare(game *Game) {
-	c.game = game
-
-	// The lower bound on zoom is the larger of
-	// { (ScreenWidth / BoundsWidth), (ScreenHeight / BoundsHeight) }
-	sz := c.Bounds.Size()
-	c.zoomBound = float64(c.game.ScreenWidth) / float64(sz.X)
-	if z := float64(c.game.ScreenHeight) / float64(sz.Y); c.zoomBound < z {
-		c.zoomBound = z
-	}
-}
+// Prepare grabs a copy of game.
+func (c *Camera) Prepare(game *Game) { c.game = game }

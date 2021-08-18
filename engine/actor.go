@@ -23,7 +23,6 @@ type Actor struct {
 }
 
 func (a *Actor) CollidesAt(p image.Point) bool {
-	// TODO: more efficient test?
 	hit := false
 	Walk(a.collisionDomain, func(c interface{}) bool {
 		if coll, ok := c.(Collider); ok {
