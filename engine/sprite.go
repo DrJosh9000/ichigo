@@ -51,7 +51,12 @@ func (s *Sprite) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	screen.DrawImage(src.SubImage(image.Rectangle{sp, sp.Add(s.FrameSize)}).(*ebiten.Image), &opts)
 }
 
-func (s *Sprite) Scan() []interface{} { return []interface{}{&s.Actor} }
+func (s *Sprite) Scan() []interface{} {
+	return []interface{}{
+		&s.Actor,
+		&s.Src,
+	}
+}
 
 func (s *Sprite) SetAnim(a *Anim) {
 	if s.anim != a {

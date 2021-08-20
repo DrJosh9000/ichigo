@@ -20,7 +20,8 @@ var (
 
 	imageCache = make(map[string]*ebiten.Image)
 
-	// Ensure SceneRef does the same stuff as Scene.
+	// Ensure ref types satisfy interfaces.
+	_ Loader = &ImageRef{}
 	_ Scener = &SceneRef{}
 )
 
@@ -52,36 +53,43 @@ func (r *AnimRef) Anim() *Anim {
 
 // ImageRef loads images from the AssetFS into *ebiten.Image form.
 // It is your responsibility to import _ "image/..." for whatever
-// format the files are in.
+// format the files are in, and to load it (either return it as a
+// subcomponent from Scan so that Game will Load it, or call Load
+// yourself).
 type ImageRef struct {
 	Path string
 
 	image *ebiten.Image
 }
 
-// Image returns the image. If it hasn't been loaded yet, it loads.
+// Image returns the image, or nil if not loaded.
 // Multiple distinct ImageRefs can use the same path.
-// TODO: adopt Loader?
 func (r *ImageRef) Image() *ebiten.Image {
-	if r.image != nil {
-		return r.image
-	}
+	return r.image
+}
+
+// Load loads the image. Load is required before Image returns.
+// Loading the same path multiple times uses a cache to return
+// the same image.
+func (r *ImageRef) Load() error {
+	// Fast path load from cache
 	r.image = imageCache[r.Path]
 	if r.image != nil {
-		return r.image
+		return nil
 	}
+	// Slow path
 	f, err := AssetFS.Open(r.Path)
 	if err != nil {
-		log.Fatalf("Couldn't open asset: %v", err)
+		return err
 	}
 	defer f.Close()
 	i, _, err := image.Decode(f)
 	if err != nil {
-		log.Fatalf("Couldn't decode asset: %v", err)
+		return err
 	}
 	r.image = ebiten.NewImageFromImage(i)
 	imageCache[r.Path] = r.image
-	return r.image
+	return nil
 }
 
 // SceneRef loads a gzipped, gob-encoded Scene from the asset FS.

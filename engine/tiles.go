@@ -13,6 +13,7 @@ var (
 	_ Collider    = &Tilemap{}
 	_ Drawer      = &Tilemap{}
 	_ DrawOrderer = &Tilemap{}
+	_ Scanner     = &Tilemap{}
 	_ Updater     = &Tilemap{}
 )
 
@@ -85,6 +86,9 @@ func (t *Tilemap) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 		screen.DrawImage(src, &opts)
 	}
 }
+
+// Scan returns a slice containing Src.
+func (t *Tilemap) Scan() []interface{} { return []interface{}{&t.Src} }
 
 // Update calls Update on any tiles that are Updaters, e.g. AnimatedTile.
 func (t *Tilemap) Update() error {

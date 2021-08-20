@@ -13,6 +13,7 @@ var (
 	_ Drawer         = &Image{}
 	_ DrawOrderer    = &Image{}
 	_ ParallaxScaler = &Image{}
+	_ Scanner        = &Image{}
 )
 
 func init() {
@@ -36,3 +37,6 @@ func (i *Image) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	opts.GeoM = geom
 	screen.DrawImage(i.Src.Image(), &opts)
 }
+
+// Scan returns a slice containing Src.
+func (i *Image) Scan() []interface{} { return []interface{}{&i.Src} }
