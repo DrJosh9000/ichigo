@@ -10,21 +10,11 @@ func init() {
 	gob.Register(Game{})
 }
 
-type GameMode int
-
-const (
-	GameModeMenu = GameMode(iota)
-	GameModePlay
-	GameModePause
-	GameModeEdit
-)
-
 // Game implements the ebiten methods using a collection of components.
 type Game struct {
-	Mode         GameMode
 	ScreenWidth  int
 	ScreenHeight int
-	*Scene
+	Scene        *Scene
 
 	componentsByID map[string]interface{}
 }
@@ -79,21 +69,21 @@ func (g *Game) Component(id string) interface{} { return g.componentsByID[id] }
 func (g *Game) Scan() []interface{} { return []interface{}{g.Scene} }
 
 // Walk calls v with every component reachable from c via Scan, recursively,
-// for as long as visit returns true.
-func Walk(c interface{}, v func(interface{}) bool) {
-	if !v(c) {
-		return
+// for as long as visit returns nil.
+func Walk(c interface{}, v func(interface{}) error) error {
+	if err := v(c); err != nil {
+		return err
 	}
 	sc, ok := c.(Scanner)
 	if !ok {
-		return
+		return nil
 	}
 	for _, c := range sc.Scan() {
-		if !v(c) {
-			return
+		if err := Walk(c, v); err != nil {
+			return err
 		}
-		Walk(c, v)
 	}
+	return nil
 }
 
 // PrepareToRun builds the component database (using Walk) and then calls
@@ -101,14 +91,14 @@ func Walk(c interface{}, v func(interface{}) bool) {
 // ebiten.RunGame.
 func (g *Game) PrepareToRun() {
 	g.componentsByID = make(map[string]interface{})
-	Walk(g, func(c interface{}) bool {
+	Walk(g, func(c interface{}) error {
 		g.RegisterComponent(c)
-		return true
+		return nil
 	})
-	Walk(g, func(c interface{}) bool {
+	Walk(g, func(c interface{}) error {
 		if p, ok := c.(Prepper); ok {
 			p.Prepare(g)
 		}
-		return true
+		return nil
 	})
 }

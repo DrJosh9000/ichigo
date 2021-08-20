@@ -9,15 +9,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-// Ensure Scene satisfies interfaces.
-var (
-	_ Identifier  = &Scene{}
-	_ Drawer      = &Scene{}
-	_ DrawOrderer = &Scene{}
-	_ Prepper     = &Scene{}
-	_ Scanner     = &Scene{}
-	_ Updater     = &Scene{}
-)
+// Ensure Scene satisfies Scener.
+var _ Scener = &Scene{}
 
 func init() {
 	gob.Register(Scene{})
@@ -44,6 +37,20 @@ func (s *Scene) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 			d.Draw(screen, opts)
 		}
 	}
+}
+
+// Load loads any components that need loading.
+func (s *Scene) Load() error {
+	for _, i := range s.Components {
+		l, ok := i.(Loader)
+		if !ok {
+			continue
+		}
+		if err := l.Load(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Prepare does an initial Z-order sort.

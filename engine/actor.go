@@ -2,11 +2,14 @@ package engine
 
 import (
 	"encoding/gob"
+	"errors"
 	"image"
 )
 
 // Ensure Actor satisfies interfaces.
 var _ Prepper = &Actor{}
+
+var errCollision = errors.New("collision detected")
 
 func init() {
 	gob.Register(Actor{})
@@ -26,17 +29,16 @@ type Actor struct {
 }
 
 func (a *Actor) CollidesAt(p image.Point) bool {
-	hit := false
-	Walk(a.collisionDomain, func(c interface{}) bool {
-		if coll, ok := c.(Collider); ok {
-			if coll.CollidesWith(image.Rectangle{Min: p, Max: p.Add(a.Size)}) {
-				hit = true
-				return false
-			}
+	return nil != Walk(a.collisionDomain, func(c interface{}) error {
+		coll, ok := c.(Collider)
+		if !ok {
+			return nil
 		}
-		return true
+		if coll.CollidesWith(image.Rectangle{Min: p, Max: p.Add(a.Size)}) {
+			return errCollision
+		}
+		return nil
 	})
-	return hit
 }
 
 func (a *Actor) MoveX(dx float64, onCollide func()) {

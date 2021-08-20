@@ -29,6 +29,12 @@ type Identifier interface {
 	Ident() string
 }
 
+// Loader components get the chance to load themselves. This happens
+// before preparation.
+type Loader interface {
+	Load() error
+}
+
 // ParallaxScaler components have a scaling factor. This is used for
 // parallax layers in a scene, and can be thought of as 1/distance.
 type ParallaxScaler interface {
@@ -47,6 +53,18 @@ type Prepper interface {
 // Scan should return a slice containing all immediate subcomponents.
 type Scanner interface {
 	Scan() []interface{}
+}
+
+// Scener components do everything that a Scene can. The other implementation
+// is SceneRef.
+type Scener interface {
+	Drawer
+	DrawOrderer
+	Identifier
+	Loader
+	Prepper
+	Scanner
+	Updater
 }
 
 // Updater components can update themselves. Update is called repeatedly.

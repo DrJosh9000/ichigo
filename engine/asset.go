@@ -19,6 +19,9 @@ var (
 	AnimDefs map[string]*AnimDef
 
 	imageCache = make(map[string]*ebiten.Image)
+
+	// Ensure SceneRef does the same stuff as Scene.
+	_ Scener = &SceneRef{}
 )
 
 // AnimRef manages an Anim using a premade AnimDef from the cache.
@@ -78,26 +81,37 @@ func (r *ImageRef) Image() *ebiten.Image {
 type SceneRef struct {
 	Path string
 
-	scene *Scene
+	scene *Scene // not exported for gob reasons
 }
 
-func (r *SceneRef) Scene() *Scene {
-	if r.scene != nil {
-		return r.scene
-	}
+// Load loads the scene from the file and then calls Load
+// on the freshly-loaded Scene.
+func (r *SceneRef) Load() error {
 	f, err := AssetFS.Open(r.Path)
 	if err != nil {
-		log.Fatalf("Couldn't open asset: %v", err)
+		return err
 	}
 	defer f.Close()
 
 	gz, err := gzip.NewReader(f)
 	if err != nil {
-		log.Fatalf("Couldn't gunzip asset: %v", err)
+		return err
 	}
-	r.scene = new(Scene)
-	if err := gob.NewDecoder(gz).Decode(r.scene); err != nil {
-		log.Fatalf("Couldn't decode asset: %v", err)
+	sc := new(Scene)
+	if err := gob.NewDecoder(gz).Decode(sc); err != nil {
+		return err
 	}
-	return r.scene
+	r.scene = sc
+	return sc.Load()
 }
+
+// Implement Scener by forwarding all the other calls to r.scene
+
+func (r SceneRef) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
+	r.scene.Draw(screen, opts)
+}
+func (r SceneRef) DrawOrder() float64  { return r.scene.DrawOrder() }
+func (r SceneRef) Ident() string       { return r.scene.Ident() }
+func (r SceneRef) Prepare(g *Game)     { r.scene.Prepare(g) }
+func (r SceneRef) Scan() []interface{} { return r.scene.Scan() }
+func (r SceneRef) Update() error       { return r.scene.Update() }
