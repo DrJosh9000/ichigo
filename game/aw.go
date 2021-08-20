@@ -23,6 +23,7 @@ type Awakeman struct {
 	vx, vy      float64
 	facingLeft  bool
 	coyoteTimer int
+	jumpBuffer  int
 	noclip      bool
 
 	animIdleLeft, animIdleRight, animRunLeft, animRunRight *engine.Anim
@@ -40,10 +41,13 @@ func (aw *Awakeman) Update() error {
 	if err := upd(); err != nil {
 		return err
 	}
+
+	// Update the camera
 	aw.camera.Zoom = 1
 	if ebiten.IsKeyPressed(ebiten.KeyShift) {
 		aw.camera.Zoom = 2
 	}
+	// aw.Pos is top-left corner, so add half size to get centre
 	aw.camera.Centre = aw.Pos.Add(aw.Size.Div(2))
 	return nil
 }
@@ -66,13 +70,14 @@ func (aw *Awakeman) noclipUpdate() error {
 
 func (aw *Awakeman) realUpdate() error {
 	const (
-		ε             = 0.2
-		restitution   = -0.3
-		gravity       = 0.3
-		airResistance = -0.01 // ⇒ terminal velocity = 30
-		jumpVelocity  = -4.2
-		runVelocity   = 1.4
-		coyoteTime    = 5
+		ε              = 0.2
+		restitution    = -0.3
+		gravity        = 0.3
+		airResistance  = -0.01 // ⇒ terminal velocity = 30
+		jumpVelocity   = -4.2
+		runVelocity    = 1.4
+		coyoteTime     = 5
+		jumpBufferTime = 5
 	)
 
 	// High-school physics time! Under constant acceleration:
@@ -91,23 +96,40 @@ func (aw *Awakeman) realUpdate() error {
 	if aw.CollidesAt(aw.Pos.Add(image.Pt(0, 1))) {
 		// Not falling.
 		// Instantly decelerate (AW absorbs all kinetic E in legs, or something)
-		aw.vy = 0
-		aw.coyoteTimer = coyoteTime
+		if aw.jumpBuffer > 0 {
+			// Tried to jump recently -- so jump
+			aw.vy = jumpVelocity
+			aw.jumpBuffer = 0
+		} else {
+			// Can jump now or soon.
+			aw.vy = 0
+			aw.coyoteTimer = coyoteTime
+		}
 	} else {
 		// Falling. v = v_0 + a, and a = gravity + airResistance(v_0)
 		aw.vy += gravity + airResistance*aw.vy
 		if aw.coyoteTimer > 0 {
 			aw.coyoteTimer--
 		}
+		if aw.jumpBuffer > 0 {
+			aw.jumpBuffer--
+		}
 	}
 
 	// Handle controls
 
 	// NB: spacebar sometimes does things on web pages (scrolls down)
-	if aw.coyoteTimer > 0 && (inpututil.IsKeyJustPressed(ebiten.KeySpace) || inpututil.IsKeyJustPressed(ebiten.KeyZ)) {
-		// Jump. One frame of a = jumpVelocity (ignoring any gravity already applied this tick).
-		aw.vy = jumpVelocity
+	if inpututil.IsKeyJustPressed(ebiten.KeySpace) || inpututil.IsKeyJustPressed(ebiten.KeyZ) {
+		// On ground or recently on ground?
+		if aw.coyoteTimer > 0 {
+			// Jump. One frame of a = jumpVelocity (ignoring any gravity already applied this tick).
+			aw.vy += jumpVelocity
+		} else {
+			// Buffer the jump in case aw hits the ground soon.
+			aw.jumpBuffer = jumpBufferTime
+		}
 	}
+	// Left and right
 	switch {
 	case ebiten.IsKeyPressed(ebiten.KeyLeft) || ebiten.IsKeyPressed(ebiten.KeyA):
 		aw.vx = -runVelocity
@@ -135,7 +157,6 @@ func (aw *Awakeman) realUpdate() error {
 			aw.vy = 0
 		}
 	})
-	// aw.Pos is top-left corner, so add half size to get centre
 	return aw.Sprite.Update()
 }
 
