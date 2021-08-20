@@ -39,20 +39,6 @@ func (s *Scene) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	}
 }
 
-// Load loads any subcomponents that need loading.
-func (s *Scene) Load() error {
-	for _, i := range s.Components {
-		l, ok := i.(Loader)
-		if !ok {
-			continue
-		}
-		if err := l.Load(); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
 // Prepare does an initial Z-order sort.
 func (s *Scene) Prepare(game *Game) { s.sortByDrawOrder() }
 

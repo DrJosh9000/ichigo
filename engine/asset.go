@@ -99,8 +99,7 @@ type SceneRef struct {
 	scene *Scene // not exported for gob reasons
 }
 
-// Load loads the scene from the file and then calls Load
-// on the freshly-loaded Scene.
+// Load loads the scene from the file.
 func (r *SceneRef) Load() error {
 	f, err := AssetFS.Open(r.Path)
 	if err != nil {
@@ -114,9 +113,6 @@ func (r *SceneRef) Load() error {
 	}
 	sc := new(Scene)
 	if err := gob.NewDecoder(gz).Decode(sc); err != nil {
-		return err
-	}
-	if err := sc.Load(); err != nil {
 		return err
 	}
 	r.scene = sc

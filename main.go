@@ -43,6 +43,9 @@ func main() {
 	tiles := make(map[image.Point]engine.Tile)
 	for j, row := range denseTiles {
 		for i, tile := range row {
+			if tile == nil {
+				continue
+			}
 			tiles[image.Pt(i, j)] = tile
 		}
 	}

@@ -61,7 +61,7 @@ func (g *Game) UnregisterComponent(c interface{}) {
 func (g *Game) Component(id string) interface{} { return g.componentsByID[id] }
 
 // Scan implements Scanner.
-func (g *Game) Scan() []interface{} { return []interface{}{g.Scene} }
+func (g *Game) Scan() []interface{} { return []interface{}{g.Scener} }
 
 // Walk calls v with every component reachable from c via Scan, recursively,
 // for as long as visit returns nil.
@@ -81,17 +81,29 @@ func Walk(c interface{}, v func(interface{}) error) error {
 	return nil
 }
 
+// Load calls Load on all Loaders reachable via Scan (using Walk).
+// It stops on the first error.
+func (g *Game) Load() error {
+	return Walk(g.Scener, func(c interface{}) error {
+		l, ok := c.(Loader)
+		if !ok {
+			return nil
+		}
+		return l.Load()
+	})
+}
+
 // Prepare builds the component database (using Walk) and then calls
 // Prepare on every Preparer. You must call Prepare before any calls
 // to Component. You may call Prepare again (e.g. as an alternative to
 // fastidiously calling RegisterComponent/UnregisterComponent).
 func (g *Game) Prepare() {
 	g.componentsByID = make(map[string]interface{})
-	Walk(g, func(c interface{}) error {
+	Walk(g.Scener, func(c interface{}) error {
 		g.RegisterComponent(c)
 		return nil
 	})
-	Walk(g, func(c interface{}) error {
+	Walk(g.Scener, func(c interface{}) error {
 		if p, ok := c.(Prepper); ok {
 			p.Prepare(g)
 		}

@@ -70,7 +70,6 @@ type Scener interface {
 	Drawer
 	DrawOrderer
 	Identifier
-	Loader
 	Prepper
 	Scanner
 	Updater
