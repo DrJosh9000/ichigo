@@ -55,6 +55,7 @@ type ImageRef struct {
 
 // Image returns the image. If it hasn't been loaded yet, it loads.
 // Multiple distinct ImageRefs can use the same path.
+// TODO: adopt Loader?
 func (r *ImageRef) Image() *ebiten.Image {
 	if r.image != nil {
 		return r.image
@@ -78,6 +79,7 @@ func (r *ImageRef) Image() *ebiten.Image {
 }
 
 // SceneRef loads a gzipped, gob-encoded Scene from the asset FS.
+// After Load, Scene is usable.
 type SceneRef struct {
 	Path string
 
@@ -101,17 +103,12 @@ func (r *SceneRef) Load() error {
 	if err := gob.NewDecoder(gz).Decode(sc); err != nil {
 		return err
 	}
+	if err := sc.Load(); err != nil {
+		return err
+	}
 	r.scene = sc
-	return sc.Load()
+	return nil
 }
 
-// Implement Scener by forwarding all the other calls to r.scene
-
-func (r SceneRef) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
-	r.scene.Draw(screen, opts)
-}
-func (r SceneRef) DrawOrder() float64  { return r.scene.DrawOrder() }
-func (r SceneRef) Ident() string       { return r.scene.Ident() }
-func (r SceneRef) Prepare(g *Game)     { r.scene.Prepare(g) }
-func (r SceneRef) Scan() []interface{} { return r.scene.Scan() }
-func (r SceneRef) Update() error       { return r.scene.Update() }
+// Scene returns the loaded scene, or nil if not yet loaded.
+func (r SceneRef) Scene() *Scene { return r.scene }

@@ -18,7 +18,7 @@ type Drawer interface {
 	Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions)
 }
 
-// DrawOrderer is used to reorder layers.
+// DrawOrderer components can provide a number for determining draw order.
 type DrawOrderer interface {
 	DrawOrder() float64
 }
@@ -55,16 +55,10 @@ type Scanner interface {
 	Scan() []interface{}
 }
 
-// Scener components do everything that a Scene can. The other implementation
-// is SceneRef.
+// Scener components are a scene (Scene or SceneRef).
 type Scener interface {
-	Drawer
-	DrawOrderer
-	Identifier
 	Loader
-	Prepper
-	Scanner
-	Updater
+	Scene() *Scene
 }
 
 // Updater components can update themselves. Update is called repeatedly.

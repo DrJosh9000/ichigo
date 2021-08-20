@@ -102,7 +102,7 @@ func main() {
 	game := &engine.Game{
 		ScreenHeight: 240,
 		ScreenWidth:  320,
-		Scene: &engine.Scene{
+		Scener: &engine.Scene{
 			ID: "root",
 			Components: []interface{}{
 				&engine.GobDumper{
@@ -116,7 +116,7 @@ func main() {
 			},
 		},
 	}
-	game.PrepareToRun()
+	game.Prepare()
 
 	if err := ebiten.RunGame(game); err != nil {
 		log.Fatalf("Game error: %v", err)

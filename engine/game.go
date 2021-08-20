@@ -14,19 +14,19 @@ func init() {
 type Game struct {
 	ScreenWidth  int
 	ScreenHeight int
-	Scene        *Scene
+	Scener
 
 	componentsByID map[string]interface{}
 }
 
 // Draw draws the entire thing, with default draw options.
 func (g *Game) Draw(screen *ebiten.Image) {
-	g.Scene.Draw(screen, ebiten.DrawImageOptions{})
+	g.Scene().Draw(screen, ebiten.DrawImageOptions{})
 }
 
 // Update updates the current scene.
 func (g *Game) Update() error {
-	return g.Scene.Update()
+	return g.Scene().Update()
 }
 
 // Layout returns the configured screen width/height.
@@ -86,10 +86,10 @@ func Walk(c interface{}, v func(interface{}) error) error {
 	return nil
 }
 
-// PrepareToRun builds the component database (using Walk) and then calls
-// Prepare on every Preparer. You must call PrepareToRun before passing to
-// ebiten.RunGame.
-func (g *Game) PrepareToRun() {
+// Prepare builds the component database (using Walk) and then calls
+// Prepare on every Preparer. You must call Prepare before any calls
+// to Component.
+func (g *Game) Prepare() {
 	g.componentsByID = make(map[string]interface{})
 	Walk(g, func(c interface{}) error {
 		g.RegisterComponent(c)

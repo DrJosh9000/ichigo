@@ -84,7 +84,7 @@ func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	comm.Concat(opts.GeoM)
 
 	// Draw everything.
-	for _, i := range c.Scene.Components {
+	for _, i := range c.Scene.Scan() {
 		if d, ok := i.(Drawer); ok {
 			pf := 1.0
 			if s, ok := i.(ParallaxScaler); ok {
@@ -106,5 +106,5 @@ func (c *Camera) Update() error { return c.Scene.Update() }
 // Scan returns the only child (c.Scene).
 func (c *Camera) Scan() []interface{} { return []interface{}{c.Scene} }
 
-// Prepare grabs a copy of game.
+// Prepare grabs a copy of game (needed for screen dimensions)
 func (c *Camera) Prepare(game *Game) { c.game = game }

@@ -10,7 +10,16 @@ import (
 )
 
 // Ensure Scene satisfies Scener.
-var _ Scener = &Scene{}
+var (
+	_ Drawer      = &Scene{}
+	_ DrawOrderer = &Scene{}
+	_ Identifier  = &Scene{}
+	_ Loader      = &Scene{}
+	_ Scanner     = &Scene{}
+	_ Scener      = &Scene{}
+	_ Prepper     = &Scene{}
+	_ Updater     = &Scene{}
+)
 
 func init() {
 	gob.Register(Scene{})
@@ -72,6 +81,9 @@ func (s *Scene) sortByDrawOrder() {
 
 // Scan returns all immediate subcomponents.
 func (s *Scene) Scan() []interface{} { return s.Components }
+
+// Scene returns itself.
+func (s *Scene) Scene() *Scene { return s }
 
 // Update calls Update on all Updater components.
 func (s *Scene) Update() error {
