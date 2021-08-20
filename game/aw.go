@@ -122,8 +122,8 @@ func (aw *Awakeman) realUpdate() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeySpace) || inpututil.IsKeyJustPressed(ebiten.KeyZ) {
 		// On ground or recently on ground?
 		if aw.coyoteTimer > 0 {
-			// Jump. One frame of a = jumpVelocity (ignoring any gravity already applied this tick).
-			aw.vy += jumpVelocity
+			// Jump. One frame of v = jumpVelocity (ignoring any gravity already applied this tick).
+			aw.vy = jumpVelocity
 		} else {
 			// Buffer the jump in case aw hits the ground soon.
 			aw.jumpBuffer = jumpBufferTime
