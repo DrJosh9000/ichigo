@@ -10,16 +10,7 @@ import (
 )
 
 // Ensure Scene satisfies Scener.
-var (
-	_ Drawer      = &Scene{}
-	_ DrawOrderer = &Scene{}
-	_ Identifier  = &Scene{}
-	_ Loader      = &Scene{}
-	_ Scanner     = &Scene{}
-	_ Scener      = &Scene{}
-	_ Prepper     = &Scene{}
-	_ Updater     = &Scene{}
-)
+var _ Scener = &Scene{}
 
 func init() {
 	gob.Register(Scene{})
@@ -48,7 +39,7 @@ func (s *Scene) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	}
 }
 
-// Load loads any components that need loading.
+// Load loads any subcomponents that need loading.
 func (s *Scene) Load() error {
 	for _, i := range s.Components {
 		l, ok := i.(Loader)

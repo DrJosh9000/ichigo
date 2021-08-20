@@ -24,11 +24,6 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.Scene().Draw(screen, ebiten.DrawImageOptions{})
 }
 
-// Update updates the current scene.
-func (g *Game) Update() error {
-	return g.Scene().Update()
-}
-
 // Layout returns the configured screen width/height.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
 	return g.ScreenWidth, g.ScreenHeight
@@ -88,7 +83,8 @@ func Walk(c interface{}, v func(interface{}) error) error {
 
 // Prepare builds the component database (using Walk) and then calls
 // Prepare on every Preparer. You must call Prepare before any calls
-// to Component.
+// to Component. You may call Prepare again (e.g. as an alternative to
+// fastidiously calling RegisterComponent/UnregisterComponent).
 func (g *Game) Prepare() {
 	g.componentsByID = make(map[string]interface{})
 	Walk(g, func(c interface{}) error {

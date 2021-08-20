@@ -57,7 +57,24 @@ type Scanner interface {
 
 // Scener components are a scene (Scene or SceneRef).
 type Scener interface {
+	// Q: Why not make Scener a small interface with just Scene() ?
+	// A: Everything in the engine would then need to type switch for Scener or SceneRef, i.e.
+	// switch x := i.(type) {
+	// case Drawer:
+	//     i.Draw(screen, opts)
+	// case Scener:
+	//     i.Scene().Draw(screen, opts)
+	// }
+	// It seems cleaner to let the engine assert only for the interface it needs at that moment.
+
+	Drawer
+	DrawOrderer
+	Identifier
 	Loader
+	Prepper
+	Scanner
+	Updater
+
 	Scene() *Scene
 }
 

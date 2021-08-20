@@ -116,6 +116,9 @@ func main() {
 			},
 		},
 	}
+	if err := game.Load(); err != nil {
+		log.Fatalf("Loading error: %v", err)
+	}
 	game.Prepare()
 
 	if err := ebiten.RunGame(game); err != nil {
