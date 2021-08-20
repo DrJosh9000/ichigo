@@ -28,8 +28,7 @@ type Camera struct {
 	Scene *Scene
 
 	// Camera controls
-	Bounds image.Rectangle // world coordinates
-	Centre image.Point     // world coordinates
+	Centre image.Point // world coordinates
 	Filter ebiten.Filter
 	Zoom   float64 // unitless
 
@@ -45,7 +44,7 @@ func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	// The lower bound on zoom is the larger of
 	// { (ScreenWidth / BoundsWidth), (ScreenHeight / BoundsHeight) }
 	zoom := c.Zoom
-	sz := c.Bounds.Size()
+	sz := c.Scene.Bounds.Size()
 	if z := float64(c.game.ScreenWidth) / float64(sz.X); zoom < z {
 		zoom = z
 	}
@@ -58,17 +57,17 @@ func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	// Camera frame currently Rectangle{ centre ± (screen/(2*zoom)) }.
 	sw2, sh2 := float64(c.game.ScreenWidth/2), float64(c.game.ScreenHeight/2)
 	swz, shz := int(sw2/zoom), int(sh2/zoom)
-	if centre.X-swz < c.Bounds.Min.X {
-		centre.X = c.Bounds.Min.X + swz
+	if centre.X-swz < c.Scene.Bounds.Min.X {
+		centre.X = c.Scene.Bounds.Min.X + swz
 	}
-	if centre.Y-shz < c.Bounds.Min.Y {
-		centre.Y = c.Bounds.Min.Y + shz
+	if centre.Y-shz < c.Scene.Bounds.Min.Y {
+		centre.Y = c.Scene.Bounds.Min.Y + shz
 	}
-	if centre.X+swz > c.Bounds.Max.X {
-		centre.X = c.Bounds.Max.X - swz
+	if centre.X+swz > c.Scene.Bounds.Max.X {
+		centre.X = c.Scene.Bounds.Max.X - swz
 	}
-	if centre.Y+shz > c.Bounds.Max.Y {
-		centre.Y = c.Bounds.Max.Y - shz
+	if centre.Y+shz > c.Scene.Bounds.Max.Y {
+		centre.Y = c.Scene.Bounds.Max.Y - shz
 	}
 
 	// Apply other options

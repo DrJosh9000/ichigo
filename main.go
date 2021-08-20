@@ -48,7 +48,8 @@ func main() {
 	}
 
 	level1 := &engine.Scene{
-		ID: "level_1",
+		ID:     "level_1",
+		Bounds: image.Rect(-32, -32, 320+32, 240+32),
 		Components: []interface{}{
 			&engine.Fill{
 				Color:  color.Gray{100},
@@ -108,9 +109,8 @@ func main() {
 					KeyCombo: []ebiten.Key{ebiten.KeyControl, ebiten.KeyD},
 				},
 				&engine.Camera{
-					Bounds: image.Rect(-32, -32, 320+32, 240+32),
-					ID:     "game_camera",
-					Scene:  level1,
+					ID:    "game_camera",
+					Scene: level1,
 				},
 				engine.PerfDisplay{},
 			},

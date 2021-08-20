@@ -1,6 +1,8 @@
 package engine
 
 import (
+	"compress/gzip"
+	"encoding/gob"
 	"image"
 	"io/fs"
 	"log"
@@ -70,4 +72,32 @@ func (r *ImageRef) Image() *ebiten.Image {
 	r.image = ebiten.NewImageFromImage(i)
 	imageCache[r.Path] = r.image
 	return r.image
+}
+
+// SceneRef loads a gzipped, gob-encoded Scene from the asset FS.
+type SceneRef struct {
+	Path string
+
+	scene *Scene
+}
+
+func (r *SceneRef) Scene() *Scene {
+	if r.scene != nil {
+		return r.scene
+	}
+	f, err := AssetFS.Open(r.Path)
+	if err != nil {
+		log.Fatalf("Couldn't open asset: %v", err)
+	}
+	defer f.Close()
+
+	gz, err := gzip.NewReader(f)
+	if err != nil {
+		log.Fatalf("Couldn't gunzip asset: %v", err)
+	}
+	r.scene = new(Scene)
+	if err := gob.NewDecoder(gz).Decode(r.scene); err != nil {
+		log.Fatalf("Couldn't decode asset: %v", err)
+	}
+	return r.scene
 }
