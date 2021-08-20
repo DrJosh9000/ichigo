@@ -23,6 +23,13 @@ type DrawOrderer interface {
 	DrawOrder() float64
 }
 
+// DrawUpdater components can be both drawn and updated.
+// Same comments as for Drawer and Updater.
+type DrawUpdater interface {
+	Drawer
+	Updater
+}
+
 // Identifier components have a sense of self. This makes it easier for
 // components to find and interact with one another.
 type Identifier interface {

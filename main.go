@@ -105,7 +105,7 @@ func main() {
 	game := &engine.Game{
 		ScreenHeight: 240,
 		ScreenWidth:  320,
-		Scener: &engine.Scene{
+		Root: &engine.Scene{
 			ID: "root",
 			Components: []interface{}{
 				&engine.GobDumper{
