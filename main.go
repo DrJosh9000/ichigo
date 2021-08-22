@@ -20,7 +20,6 @@ func main() {
 	ebiten.SetWindowSize(640, 480)
 	ebiten.SetWindowTitle("TODO")
 
-	engine.AssetFS = assets
 	// engine.AnimDefs set in game/anims.go
 
 	denseTiles := [][]engine.Tile{
@@ -103,6 +102,7 @@ func main() {
 	}
 
 	game := &engine.Game{
+		AssetFS:      assets,
 		ScreenHeight: 240,
 		ScreenWidth:  320,
 		Root: &engine.Scene{

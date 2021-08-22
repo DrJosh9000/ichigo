@@ -4,16 +4,12 @@ import (
 	"compress/gzip"
 	"encoding/gob"
 	"image"
-	"io/fs"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 var (
-	// Assets (usually embed.FS)
-	AssetFS fs.FS
-
 	// AnimDefs are easier to write as Go expressions -
 	// so just set this.
 	AnimDefs map[string]*AnimDef
@@ -22,6 +18,7 @@ var (
 
 	// Ensure ref types satisfy interfaces.
 	_ Loader = &ImageRef{}
+	_ Loader = &SceneRef{}
 	_ Scener = &SceneRef{}
 )
 
@@ -71,14 +68,14 @@ func (r *ImageRef) Image() *ebiten.Image {
 // Load loads the image. Load is required before Image returns.
 // Loading the same path multiple times uses a cache to return
 // the same image.
-func (r *ImageRef) Load() error {
+func (r *ImageRef) Load(g *Game) error {
 	// Fast path load from cache
 	r.image = imageCache[r.Path]
 	if r.image != nil {
 		return nil
 	}
 	// Slow path
-	f, err := AssetFS.Open(r.Path)
+	f, err := g.AssetFS.Open(r.Path)
 	if err != nil {
 		return err
 	}
@@ -108,8 +105,8 @@ type SceneRef struct {
 }
 
 // Load loads the scene from the file.
-func (r *SceneRef) Load() error {
-	f, err := AssetFS.Open(r.Path)
+func (r *SceneRef) Load(g *Game) error {
+	f, err := g.AssetFS.Open(r.Path)
 	if err != nil {
 		return err
 	}

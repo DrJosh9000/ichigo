@@ -2,6 +2,7 @@ package engine
 
 import (
 	"encoding/gob"
+	"io/fs"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -14,6 +15,7 @@ func init() {
 // One component must be the designated root component - usually a
 // scene of some kind.
 type Game struct {
+	AssetFS      fs.FS
 	ScreenWidth  int
 	ScreenHeight int
 	Root         DrawUpdater // typically a *Scene or SceneRef though
@@ -94,7 +96,7 @@ func (g *Game) Load() error {
 		if !ok {
 			return nil
 		}
-		return l.Load()
+		return l.Load(g)
 	})
 }
 

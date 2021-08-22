@@ -39,7 +39,7 @@ type Identifier interface {
 // Loader components get the chance to load themselves. This happens
 // before preparation.
 type Loader interface {
-	Load() error
+	Load(game *Game) error
 }
 
 // ParallaxScaler components have a scaling factor. This is used for
