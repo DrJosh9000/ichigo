@@ -12,6 +12,7 @@ import (
 var (
 	// AnimDefs are easier to write as Go expressions -
 	// so just set this.
+	// TODO: put in Game
 	AnimDefs map[string]*AnimDef
 
 	imageCache = make(map[string]*ebiten.Image)
