@@ -24,7 +24,6 @@ var (
 func init() {
 	gob.Register(AnimRef{})
 	gob.Register(ImageRef{})
-	gob.Register(SceneRef{})
 }
 
 type assetKey struct {
