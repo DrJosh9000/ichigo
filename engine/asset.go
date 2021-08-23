@@ -17,10 +17,8 @@ var (
 
 	imageCache = make(map[assetKey]*ebiten.Image)
 
-	// Ensure ref types satisfy interfaces.
+	// Ensure ImageRef satisfies interfaces.
 	_ Loader = &ImageRef{}
-	_ Loader = &SceneRef{}
-	_ Scener = &SceneRef{}
 )
 
 func init() {

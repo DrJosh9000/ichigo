@@ -9,6 +9,12 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+// Ensure SceneRef satisfies interfaces.
+var (
+	_ Loader = &SceneRef{}
+	_ Scener = &SceneRef{}
+)
+
 // SceneRef loads a gzipped, gob-encoded Scene from the asset FS.
 // After Load, Scene is usable.
 // This is mostly useful for scenes that refer to other scenes, e.g.
