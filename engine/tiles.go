@@ -88,8 +88,15 @@ func (t *Tilemap) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	}
 }
 
-// Scan returns a slice containing Src.
-func (t *Tilemap) Scan() []interface{} { return []interface{}{&t.Src} }
+// Scan returns a slice containing Src and all non-nil tiles.
+func (t *Tilemap) Scan() []interface{} {
+	c := make([]interface{}, 1, len(t.Map)+1)
+	c[0] = &t.Src
+	for _, tile := range t.Map {
+		c = append(c, tile)
+	}
+	return c
+}
 
 // Update calls Update on any tiles that are Updaters, e.g. AnimatedTile.
 func (t *Tilemap) Update() error {
@@ -144,4 +151,7 @@ type AnimatedTile struct {
 	Animer
 }
 
-func (a *AnimatedTile) TileIndex() int { return a.CurrentFrame() }
+func (a AnimatedTile) TileIndex() int { return a.CurrentFrame() }
+
+// Scan returns a.Animer. (It could be a Loader.)
+func (a AnimatedTile) Scan() []interface{} { return []interface{}{a.Animer} }
