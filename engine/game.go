@@ -15,7 +15,6 @@ func init() {
 // One component must be the designated root component - usually a
 // scene of some kind.
 type Game struct {
-	AssetFS      fs.FS
 	ScreenWidth  int
 	ScreenHeight int
 	Root         DrawUpdater // typically a *Scene or SceneRef though
@@ -90,13 +89,13 @@ func Walk(c interface{}, v func(interface{}) error) error {
 
 // Load calls Load on all Loaders reachable via Scan (using Walk).
 // It stops on the first error.
-func (g *Game) Load() error {
+func (g *Game) Load(assets fs.FS) error {
 	return Walk(g.Root, func(c interface{}) error {
 		l, ok := c.(Loader)
 		if !ok {
 			return nil
 		}
-		return l.Load(g)
+		return l.Load(assets)
 	})
 }
 

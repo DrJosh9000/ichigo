@@ -2,6 +2,7 @@ package engine
 
 import (
 	"image"
+	"io/fs"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -39,7 +40,7 @@ type Identifier interface {
 // Loader components get the chance to load themselves. This happens
 // before preparation.
 type Loader interface {
-	Load(game *Game) error
+	Load(fs.FS) error
 }
 
 // ParallaxScaler components have a scaling factor. This is used for

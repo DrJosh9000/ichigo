@@ -4,6 +4,7 @@ import (
 	"compress/gzip"
 	"encoding/gob"
 	"image"
+	"io/fs"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -69,14 +70,14 @@ func (r *ImageRef) Image() *ebiten.Image {
 // Load loads the image. Load is required before Image returns.
 // Loading the same path multiple times uses a cache to return
 // the same image.
-func (r *ImageRef) Load(g *Game) error {
+func (r *ImageRef) Load(assets fs.FS) error {
 	// Fast path load from cache
 	r.image = imageCache[r.Path]
 	if r.image != nil {
 		return nil
 	}
 	// Slow path
-	f, err := g.AssetFS.Open(r.Path)
+	f, err := assets.Open(r.Path)
 	if err != nil {
 		return err
 	}
@@ -106,8 +107,8 @@ type SceneRef struct {
 }
 
 // Load loads the scene from the file.
-func (r *SceneRef) Load(g *Game) error {
-	f, err := g.AssetFS.Open(r.Path)
+func (r *SceneRef) Load(assets fs.FS) error {
+	f, err := assets.Open(r.Path)
 	if err != nil {
 		return err
 	}

@@ -102,7 +102,6 @@ func main() {
 	}
 
 	game := &engine.Game{
-		AssetFS:      assets,
 		ScreenHeight: 240,
 		ScreenWidth:  320,
 		Root: &engine.Scene{
@@ -119,7 +118,7 @@ func main() {
 			},
 		},
 	}
-	if err := game.Load(); err != nil {
+	if err := game.Load(assets); err != nil {
 		log.Fatalf("Loading error: %v", err)
 	}
 	game.Prepare()
