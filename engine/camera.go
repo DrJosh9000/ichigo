@@ -37,14 +37,16 @@ type Camera struct {
 
 // Draw applies transformations to opts, then calls c.Scene.Draw with it.
 func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
-	if c.Scene.Scene().Hidden {
+	if c.Scene.IsHidden() {
 		return
 	}
+
+	br := c.Scene.BoundingRect()
 
 	// The lower bound on zoom is the larger of
 	// { (ScreenWidth / BoundsWidth), (ScreenHeight / BoundsHeight) }
 	zoom := c.Zoom
-	sz := c.Scene.Scene().Bounds.Size()
+	sz := br.Size()
 	if z := float64(c.game.ScreenWidth) / float64(sz.X); zoom < z {
 		zoom = z
 	}
@@ -57,17 +59,17 @@ func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	// Camera frame currently Rectangle{ centre ± (screen/(2*zoom)) }.
 	sw2, sh2 := float64(c.game.ScreenWidth/2), float64(c.game.ScreenHeight/2)
 	swz, shz := int(sw2/zoom), int(sh2/zoom)
-	if centre.X-swz < c.Scene.Scene().Bounds.Min.X {
-		centre.X = c.Scene.Scene().Bounds.Min.X + swz
+	if centre.X-swz < br.Min.X {
+		centre.X = br.Min.X + swz
 	}
-	if centre.Y-shz < c.Scene.Scene().Bounds.Min.Y {
-		centre.Y = c.Scene.Scene().Bounds.Min.Y + shz
+	if centre.Y-shz < br.Min.Y {
+		centre.Y = br.Min.Y + shz
 	}
-	if centre.X+swz > c.Scene.Scene().Bounds.Max.X {
-		centre.X = c.Scene.Scene().Bounds.Max.X - swz
+	if centre.X+swz > br.Max.X {
+		centre.X = br.Max.X - swz
 	}
-	if centre.Y+shz > c.Scene.Scene().Bounds.Max.Y {
-		centre.Y = c.Scene.Scene().Bounds.Max.Y - shz
+	if centre.Y+shz > br.Max.Y {
+		centre.Y = br.Max.Y - shz
 	}
 
 	// Apply other options
@@ -101,7 +103,7 @@ func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 }
 
 // Update passes the call to c.Scene.
-func (c *Camera) Update() error { return c.Scene.Scene().Update() }
+func (c *Camera) Update() error { return c.Scene.Update() }
 
 // Scan returns the only child (c.Scene).
 func (c *Camera) Scan() []interface{} { return []interface{}{c.Scene} }

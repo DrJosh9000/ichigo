@@ -2,7 +2,6 @@ package engine
 
 import (
 	"encoding/gob"
-	"image"
 	"math"
 	"sort"
 
@@ -18,11 +17,11 @@ func init() {
 
 // Scene manages drawing and updating a bunch of components.
 type Scene struct {
-	Bounds     image.Rectangle // world coordinates
+	ID
+	Bounds     // world coordinates
 	Components []interface{}
 	Disabled   bool
-	Hidden     bool
-	ID
+	Hidden
 	ZOrder
 }
 

@@ -7,6 +7,11 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+// Bounder components have a bounding rectangle.
+type Bounder interface {
+	BoundingRect() image.Rectangle
+}
+
 // Collider components have tangible form.
 type Collider interface {
 	CollidesWith(image.Rectangle) bool
@@ -29,6 +34,13 @@ type DrawOrderer interface {
 type DrawUpdater interface {
 	Drawer
 	Updater
+}
+
+// Hider components can be hidden.
+type Hider interface {
+	IsHidden() bool
+	Hide()
+	Show()
 }
 
 // Identifier components have a sense of self. This makes it easier for
@@ -75,14 +87,14 @@ type Scener interface {
 	// }
 	// It seems cleaner to let the engine assert only for the interface it needs at that moment.
 
+	Bounder
 	Drawer
 	DrawOrderer
+	Hider
 	Identifier
 	Prepper
 	Scanner
 	Updater
-
-	Scene() *Scene
 }
 
 // Updater components can update themselves. Update is called repeatedly.

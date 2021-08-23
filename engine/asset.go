@@ -126,11 +126,11 @@ func (r *SceneRef) Load(assets fs.FS) error {
 	return nil
 }
 
-// Scene returns the loaded scene, or nil if not yet loaded.
-func (r SceneRef) Scene() *Scene { return r.scene }
-
 // The rest of the methods forward to r.scene, as such they will
 // panic if the scene isn't loaded.
+
+// BoundingRect returns the Bounds from the scene.
+func (r SceneRef) BoundingRect() image.Rectangle { return r.scene.BoundingRect() }
 
 // Draw draws the scene.
 func (r SceneRef) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
@@ -139,6 +139,15 @@ func (r SceneRef) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 
 // DrawOrder returns the value of DrawOrder from the scene.
 func (r SceneRef) DrawOrder() float64 { return r.scene.DrawOrder() }
+
+// IsHidden returns the value of IsHidden from the scene.
+func (r SceneRef) IsHidden() bool { return r.scene.IsHidden() }
+
+// Hide calls Hide on the scene.
+func (r SceneRef) Hide() { r.scene.Hide() }
+
+// Show calls Show on the scene.
+func (r SceneRef) Show() { r.scene.Show() }
 
 // Ident returns the value of Ident from the scene.
 func (r SceneRef) Ident() string { return r.scene.Ident() }

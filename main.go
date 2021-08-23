@@ -51,7 +51,7 @@ func main() {
 
 	level1 := &engine.Scene{
 		ID:     "level_1",
-		Bounds: image.Rect(-32, -32, 320+32, 240+32),
+		Bounds: engine.Bounds(image.Rect(-32, -32, 320+32, 240+32)),
 		Components: []interface{}{
 			&engine.Fill{
 				Color:  color.Gray{100},
@@ -72,16 +72,16 @@ func main() {
 				TileSize: 16,
 			},
 			&engine.SolidRect{
-				ID:   "ceiling",
-				Rect: image.Rect(0, -1, 320, 0),
+				ID:     "ceiling",
+				Bounds: engine.Bounds(image.Rect(0, -1, 320, 0)),
 			},
 			&engine.SolidRect{
-				ID:   "left_wall",
-				Rect: image.Rect(-1, 0, 0, 240),
+				ID:     "left_wall",
+				Bounds: engine.Bounds(image.Rect(-1, 0, 0, 240)),
 			},
 			&engine.SolidRect{
-				ID:   "right_wall",
-				Rect: image.Rect(320, 0, 321, 240),
+				ID:     "right_wall",
+				Bounds: engine.Bounds(image.Rect(320, 0, 321, 240)),
 			},
 			&game.Awakeman{
 				CameraID: "game_camera",
