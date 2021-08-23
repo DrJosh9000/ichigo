@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"compress/gzip"
 	"encoding/gob"
 	"image"
 	"io/fs"
@@ -16,7 +15,7 @@ var (
 	// TODO: put in Game
 	AnimDefs map[string]*AnimDef
 
-	imageCache = make(map[string]*ebiten.Image)
+	imageCache = make(map[assetKey]*ebiten.Image)
 
 	// Ensure ref types satisfy interfaces.
 	_ Loader = &ImageRef{}
@@ -28,6 +27,11 @@ func init() {
 	gob.Register(AnimRef{})
 	gob.Register(ImageRef{})
 	gob.Register(SceneRef{})
+}
+
+type assetKey struct {
+	assets fs.FS
+	path   string
 }
 
 // AnimRef manages an Anim using a premade AnimDef from the cache.
@@ -72,7 +76,7 @@ func (r *ImageRef) Image() *ebiten.Image {
 // the same image.
 func (r *ImageRef) Load(assets fs.FS) error {
 	// Fast path load from cache
-	r.image = imageCache[r.Path]
+	r.image = imageCache[assetKey{assets, r.Path}]
 	if r.image != nil {
 		return nil
 	}
@@ -87,76 +91,6 @@ func (r *ImageRef) Load(assets fs.FS) error {
 		return err
 	}
 	r.image = ebiten.NewImageFromImage(i)
-	imageCache[r.Path] = r.image
+	imageCache[assetKey{assets, r.Path}] = r.image
 	return nil
 }
-
-// SceneRef loads a gzipped, gob-encoded Scene from the asset FS.
-// After Load, Scene is usable.
-// This is mostly useful for scenes that refer to other scenes, e.g.
-//
-//    var sc = &Scene{
-//	    Components: []interface{}{
-//			SceneRef{Path: "assets/foo.gob.gz"}
-//		},
-//    }
-type SceneRef struct {
-	Path string
-
-	scene *Scene // not exported for gob reasons
-}
-
-// Load loads the scene from the file.
-func (r *SceneRef) Load(assets fs.FS) error {
-	f, err := assets.Open(r.Path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	gz, err := gzip.NewReader(f)
-	if err != nil {
-		return err
-	}
-	sc := new(Scene)
-	if err := gob.NewDecoder(gz).Decode(sc); err != nil {
-		return err
-	}
-	r.scene = sc
-	return nil
-}
-
-// The rest of the methods forward to r.scene, as such they will
-// panic if the scene isn't loaded.
-
-// BoundingRect returns the Bounds from the scene.
-func (r SceneRef) BoundingRect() image.Rectangle { return r.scene.BoundingRect() }
-
-// Draw draws the scene.
-func (r SceneRef) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
-	r.scene.Draw(screen, opts)
-}
-
-// DrawOrder returns the value of DrawOrder from the scene.
-func (r SceneRef) DrawOrder() float64 { return r.scene.DrawOrder() }
-
-// IsHidden returns the value of IsHidden from the scene.
-func (r SceneRef) IsHidden() bool { return r.scene.IsHidden() }
-
-// Hide calls Hide on the scene.
-func (r SceneRef) Hide() { r.scene.Hide() }
-
-// Show calls Show on the scene.
-func (r SceneRef) Show() { r.scene.Show() }
-
-// Ident returns the value of Ident from the scene.
-func (r SceneRef) Ident() string { return r.scene.Ident() }
-
-// Prepare prepares the scene.
-func (r SceneRef) Prepare(g *Game) { r.scene.Prepare(g) }
-
-// Scan returns the components in the scene.
-func (r SceneRef) Scan() []interface{} { return r.scene.Scan() }
-
-// Update updates the scene.
-func (r SceneRef) Update() error { return r.scene.Update() }

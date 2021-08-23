@@ -13,6 +13,7 @@ var (
 	_ Collider    = &Tilemap{}
 	_ Drawer      = &Tilemap{}
 	_ DrawOrderer = &Tilemap{}
+	_ Hider       = &Tilemap{}
 	_ Scanner     = &Tilemap{}
 	_ Updater     = &Tilemap{}
 )
@@ -25,10 +26,10 @@ func init() {
 
 // Tilemap renders a grid of tiles.
 type Tilemap struct {
+	ID
 	Disabled bool
 	ZOrder
-	Hidden bool
-	ID
+	Hidden
 	Map      map[image.Point]Tile
 	Ersatz   bool        // "fake wall"
 	Offset   image.Point // world coordinates
