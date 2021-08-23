@@ -141,9 +141,7 @@ func (s StaticTile) TileIndex() int { return int(s) }
 
 // AnimatedTile uses an Anim to choose a tile index.
 type AnimatedTile struct {
-	AnimRef
+	Animer
 }
 
-func (a *AnimatedTile) TileIndex() int { return a.Anim().CurrentFrame() }
-
-func (a *AnimatedTile) Update() error { return a.Anim().Update() }
+func (a *AnimatedTile) TileIndex() int { return a.CurrentFrame() }

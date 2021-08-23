@@ -26,7 +26,7 @@ type Awakeman struct {
 	jumpBuffer  int
 	noclip      bool
 
-	animIdleLeft, animIdleRight, animRunLeft, animRunRight *engine.Anim
+	animIdleLeft, animIdleRight, animRunLeft, animRunRight, animWalkLeft, animWalkRight *engine.Anim
 }
 
 func (aw *Awakeman) Update() error {
@@ -163,10 +163,40 @@ func (aw *Awakeman) realUpdate() error {
 func (aw *Awakeman) Prepare(game *engine.Game) {
 	aw.camera = game.Component(aw.CameraID).(*engine.Camera)
 
-	aw.animIdleLeft = &engine.Anim{Def: engine.AnimDefs["aw_idle_left"]}
-	aw.animIdleRight = &engine.Anim{Def: engine.AnimDefs["aw_idle_right"]}
-	aw.animRunLeft = &engine.Anim{Def: engine.AnimDefs["aw_run_left"]}
-	aw.animRunRight = &engine.Anim{Def: engine.AnimDefs["aw_run_right"]}
+	aw.animIdleLeft = &engine.Anim{Frames: []engine.AnimFrame{
+		{Frame: 1, Duration: 60},
+	}}
+	aw.animIdleRight = &engine.Anim{Frames: []engine.AnimFrame{
+		{Frame: 0, Duration: 60},
+	}}
+	aw.animRunLeft = &engine.Anim{Frames: []engine.AnimFrame{
+		{Frame: 14, Duration: 3},
+		{Frame: 15, Duration: 5},
+		{Frame: 16, Duration: 3},
+		{Frame: 17, Duration: 3},
+	}}
+	aw.animRunRight = &engine.Anim{Frames: []engine.AnimFrame{
+		{Frame: 10, Duration: 3},
+		{Frame: 11, Duration: 5},
+		{Frame: 12, Duration: 3},
+		{Frame: 13, Duration: 3},
+	}}
+	aw.animWalkRight = &engine.Anim{
+		Frames: []engine.AnimFrame{
+			{Frame: 2, Duration: 6},
+			{Frame: 3, Duration: 6},
+			{Frame: 4, Duration: 6},
+			{Frame: 5, Duration: 6},
+		},
+	}
+	aw.animWalkLeft = &engine.Anim{
+		Frames: []engine.AnimFrame{
+			{Frame: 6, Duration: 6},
+			{Frame: 7, Duration: 6},
+			{Frame: 8, Duration: 6},
+			{Frame: 9, Duration: 6},
+		},
+	}
 }
 
 func (aw *Awakeman) Scan() []interface{} { return []interface{}{&aw.Sprite} }

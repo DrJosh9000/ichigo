@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"compress/gzip"
 	"encoding/gob"
 	"image"
 	"io/fs"
@@ -36,18 +35,8 @@ type SceneRef struct {
 
 // Load loads the scene from the file.
 func (r *SceneRef) Load(assets fs.FS) error {
-	f, err := assets.Open(r.Path)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	gz, err := gzip.NewReader(f)
-	if err != nil {
-		return err
-	}
 	sc := new(Scene)
-	if err := gob.NewDecoder(gz).Decode(sc); err != nil {
+	if err := loadGobz(sc, assets, r.Path); err != nil {
 		return err
 	}
 	r.scene = sc

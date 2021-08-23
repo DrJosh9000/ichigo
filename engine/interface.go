@@ -7,6 +7,14 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+// Animer components have a current frame index.
+type Animer interface {
+	Updater
+
+	CurrentFrame() int
+	Reset()
+}
+
 // Bounder components have a bounding rectangle.
 type Bounder interface {
 	BoundingRect() image.Rectangle

@@ -1,28 +1,22 @@
 package engine
 
 import (
+	"compress/gzip"
 	"encoding/gob"
 	"image"
 	"io/fs"
-	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 var (
-	// AnimDefs are easier to write as Go expressions -
-	// so just set this.
-	// TODO: put in Game
-	AnimDefs map[string]*AnimDef
-
 	imageCache = make(map[assetKey]*ebiten.Image)
 
-	// Ensure ImageRef satisfies interfaces.
+	// Ensure types satisfy interfaces.
 	_ Loader = &ImageRef{}
 )
 
 func init() {
-	gob.Register(AnimRef{})
 	gob.Register(ImageRef{})
 }
 
@@ -31,24 +25,17 @@ type assetKey struct {
 	path   string
 }
 
-// AnimRef manages an Anim using a premade AnimDef from the cache.
-type AnimRef struct {
-	Key string
-
-	anim *Anim
-}
-
-func (r *AnimRef) Anim() *Anim {
-	if r.anim != nil {
-		return r.anim
+func loadGobz(dst interface{}, assets fs.FS, path string) error {
+	f, err := assets.Open(path)
+	if err != nil {
+		return err
 	}
-	ad := AnimDefs[r.Key]
-	if ad == nil {
-		log.Fatalf("Unknown AnimDef %q", r.Key)
-		return nil
+	defer f.Close()
+	gz, err := gzip.NewReader(f)
+	if err != nil {
+		return err
 	}
-	r.anim = &Anim{Def: ad}
-	return r.anim
+	return gob.NewDecoder(gz).Decode(dst)
 }
 
 // ImageRef loads images from the AssetFS into *ebiten.Image form.
