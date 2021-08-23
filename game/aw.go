@@ -181,22 +181,18 @@ func (aw *Awakeman) Prepare(game *engine.Game) {
 		{Frame: 12, Duration: 3},
 		{Frame: 13, Duration: 3},
 	}}
-	aw.animWalkRight = &engine.Anim{
-		Frames: []engine.AnimFrame{
-			{Frame: 2, Duration: 6},
-			{Frame: 3, Duration: 6},
-			{Frame: 4, Duration: 6},
-			{Frame: 5, Duration: 6},
-		},
-	}
-	aw.animWalkLeft = &engine.Anim{
-		Frames: []engine.AnimFrame{
-			{Frame: 6, Duration: 6},
-			{Frame: 7, Duration: 6},
-			{Frame: 8, Duration: 6},
-			{Frame: 9, Duration: 6},
-		},
-	}
+	aw.animWalkRight = &engine.Anim{Frames: []engine.AnimFrame{
+		{Frame: 2, Duration: 6},
+		{Frame: 3, Duration: 6},
+		{Frame: 4, Duration: 6},
+		{Frame: 5, Duration: 6},
+	}}
+	aw.animWalkLeft = &engine.Anim{Frames: []engine.AnimFrame{
+		{Frame: 6, Duration: 6},
+		{Frame: 7, Duration: 6},
+		{Frame: 8, Duration: 6},
+		{Frame: 9, Duration: 6},
+	}}
 }
 
 func (aw *Awakeman) Scan() []interface{} { return []interface{}{&aw.Sprite} }

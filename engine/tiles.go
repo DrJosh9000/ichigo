@@ -137,8 +137,9 @@ type Tile interface {
 
 // Ensure StaticTile and AnimatedTile satisfy Tile.
 var (
-	_ Tile = StaticTile(0)
-	_ Tile = &AnimatedTile{}
+	_ Tile    = StaticTile(0)
+	_ Tile    = AnimatedTile{}
+	_ Scanner = AnimatedTile{}
 )
 
 // StaticTile returns a fixed tile index.
