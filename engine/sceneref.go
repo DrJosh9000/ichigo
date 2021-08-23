@@ -56,6 +56,15 @@ func (r *SceneRef) Load(assets fs.FS) error {
 // BoundingRect returns the Bounds from the scene.
 func (r SceneRef) BoundingRect() image.Rectangle { return r.scene.BoundingRect() }
 
+// IsDisabled returns the value of IsDisabled from the scene.
+func (r SceneRef) IsDisabled() bool { return r.scene.IsDisabled() }
+
+// Disable calls Disable on the scene.
+func (r SceneRef) Disable() { r.scene.Disable() }
+
+// Enable calls Enable on the scene.
+func (r SceneRef) Enable() { r.scene.Enable() }
+
 // Draw draws the scene.
 func (r SceneRef) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	r.scene.Draw(screen, opts)

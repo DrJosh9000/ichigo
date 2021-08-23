@@ -27,14 +27,14 @@ func init() {
 // Tilemap renders a grid of tiles.
 type Tilemap struct {
 	ID
-	Disabled bool
-	ZOrder
+	Disabled
 	Hidden
 	Map      map[image.Point]Tile
 	Ersatz   bool        // "fake wall"
 	Offset   image.Point // world coordinates
 	Src      ImageRef
 	TileSize int
+	ZOrder
 }
 
 // CollidesWith implements Collider.

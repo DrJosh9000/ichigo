@@ -17,6 +17,13 @@ type Collider interface {
 	CollidesWith(image.Rectangle) bool
 }
 
+// Disabler components can be disabled.
+type Disabler interface {
+	IsDisabled() bool
+	Disable()
+	Enable()
+}
+
 // Drawer components can draw themselves. Draw is called often.
 // Each component is responsible for calling Draw on its child components
 // (so that hiding the parent can hide the children, etc).
@@ -88,6 +95,7 @@ type Scener interface {
 	// It seems cleaner to let the engine assert only for the interface it needs at that moment.
 
 	Bounder
+	Disabler
 	Drawer
 	DrawOrderer
 	Hider

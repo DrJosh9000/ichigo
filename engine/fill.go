@@ -11,10 +11,10 @@ var _ Drawer = &Fill{}
 
 // Fill fills the screen with a colour.
 type Fill struct {
-	Color color.Color
-	ZOrder
-	Hidden bool
 	ID
+	Color color.Color
+	Hidden
+	ZOrder
 }
 
 func (f *Fill) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {

@@ -14,6 +14,18 @@ type Bounds image.Rectangle
 // BoundingRect returns b as an image.Rectangle.
 func (b Bounds) BoundingRect() image.Rectangle { return image.Rectangle(b) }
 
+// Disabled implements Disabler directly (as a bool).
+type Disabled bool
+
+// IsHidden returns h as a bool.
+func (d Disabled) IsDisabled() bool { return bool(d) }
+
+// Hide sets h to true.
+func (d *Disabled) Disable() { *d = true }
+
+// Show sets h to false.
+func (d *Disabled) Enable() { *d = false }
+
 // Hidden implements Hider directly (as a bool).
 type Hidden bool
 

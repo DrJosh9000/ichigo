@@ -22,13 +22,13 @@ func init() {
 
 // Sprite combines an Actor with the ability to Draw from a single spritesheet.
 type Sprite struct {
+	ID
 	Actor
-	ZOrder
 	FrameSize   image.Point
 	FrameOffset image.Point
-	Hidden      bool
-	ID
+	Hidden
 	Src ImageRef
+	ZOrder
 
 	anim *Anim
 }

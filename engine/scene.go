@@ -20,7 +20,7 @@ type Scene struct {
 	ID
 	Bounds     // world coordinates
 	Components []interface{}
-	Disabled   bool
+	Disabled
 	Hidden
 	ZOrder
 }

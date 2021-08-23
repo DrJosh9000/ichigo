@@ -23,6 +23,7 @@ func init() {
 // Image draws an image at a position.
 type Image struct {
 	ID
+	Hidden
 	Parallax
 	Pos image.Point
 	Src ImageRef
@@ -31,6 +32,9 @@ type Image struct {
 
 // Draw draws the image.
 func (i *Image) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
+	if i.Hidden {
+		return
+	}
 	var geom ebiten.GeoM
 	geom.Translate(float64(i.Pos.X), float64(i.Pos.Y))
 	geom.Concat(opts.GeoM)
