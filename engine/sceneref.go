@@ -24,7 +24,7 @@ func init() {
 //
 //    var sc = &Scene{
 //	    Components: []interface{}{
-//			SceneRef{Path: "assets/foo.gob.gz"}
+//			SceneRef{Path: "assets/foo.gob.gz"}  // inflated at Load time
 //		},
 //    }
 type SceneRef struct {
