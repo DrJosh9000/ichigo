@@ -94,6 +94,7 @@ func main() {
 			},
 			&game.Awakeman{
 				CameraID: "game_camera",
+				ToastID:  "toast",
 				Sprite: engine.Sprite{
 					ID: "awakeman",
 					Actor: engine.Actor{
@@ -122,6 +123,9 @@ func main() {
 				&engine.Camera{
 					ID:    "game_camera",
 					Scene: level1,
+				},
+				&engine.DebugToast{
+					ID: "toast",
 				},
 				engine.PerfDisplay{},
 			},

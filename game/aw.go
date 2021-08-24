@@ -18,8 +18,10 @@ type Awakeman struct {
 	engine.Sprite
 
 	CameraID string
+	ToastID  string
 
 	camera      *engine.Camera
+	toast       *engine.DebugToast
 	vx, vy      float64
 	facingLeft  bool
 	coyoteTimer int
@@ -33,6 +35,13 @@ func (aw *Awakeman) Update() error {
 	// TODO: better cheat for noclip
 	if inpututil.IsKeyJustPressed(ebiten.KeyN) {
 		aw.noclip = !aw.noclip
+		if aw.toast != nil {
+			if aw.noclip {
+				aw.toast.Toast("noclip enabled")
+			} else {
+				aw.toast.Toast("noclip disabled")
+			}
+		}
 	}
 	upd := aw.realUpdate
 	if aw.noclip {
@@ -162,6 +171,7 @@ func (aw *Awakeman) realUpdate() error {
 
 func (aw *Awakeman) Prepare(game *engine.Game) {
 	aw.camera = game.Component(aw.CameraID).(*engine.Camera)
+	aw.toast, _ = game.Component(aw.ToastID).(*engine.DebugToast)
 
 	aw.animIdleLeft = &engine.Anim{Frames: []engine.AnimFrame{
 		{Frame: 1, Duration: 60},

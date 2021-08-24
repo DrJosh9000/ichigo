@@ -16,9 +16,11 @@ import (
 var (
 	_ Drawer      = PerfDisplay{}
 	_ DrawOrderer = PerfDisplay{}
+	_ Hider       = &PerfDisplay{}
 
-	_ Prepper = &GobDumper{}
-	_ Updater = &GobDumper{}
+	_ Disabler = &GobDumper{}
+	_ Prepper  = &GobDumper{}
+	_ Updater  = &GobDumper{}
 )
 
 func init() {
@@ -26,9 +28,41 @@ func init() {
 	gob.Register(PerfDisplay{})
 }
 
+// DebugToast debugprints a string for a while, then disappears.
+type DebugToast struct {
+	ID
+	Hidden
+	Timer int // ticks
+	Text  string
+}
+
+func (d *DebugToast) Draw(screen *ebiten.Image, _ ebiten.DrawImageOptions) {
+	if d.Hidden {
+		return
+	}
+	ebitenutil.DebugPrintAt(screen, d.Text, 0, 20)
+}
+
+func (d *DebugToast) DrawOrder() float64 {
+	return math.MaxFloat64
+}
+
+func (d *DebugToast) Toast(text string) {
+	d.Text = text
+	d.Timer = 120
+	d.Hidden = false
+}
+
+func (d *DebugToast) Update() error {
+	if d.Hidden = d.Timer <= 0; !d.Hidden {
+		d.Timer--
+	}
+	return nil
+}
+
 // PerfDisplay debugprints CurrentTPS and CurrentFPS in the top left.
 type PerfDisplay struct {
-	Hidden bool
+	Hidden
 }
 
 func (p PerfDisplay) Draw(screen *ebiten.Image, _ ebiten.DrawImageOptions) {
@@ -46,6 +80,7 @@ func (PerfDisplay) DrawOrder() float64 {
 // GobDumper waits for a given key combo, then dumps the game into a gob file
 // in the current directory.
 type GobDumper struct {
+	Disabled
 	KeyCombo []ebiten.Key
 
 	game *Game
@@ -56,6 +91,9 @@ func (d *GobDumper) Prepare(g *Game) { d.game = g }
 
 // Update waits for the key combo, then dumps the game state into a gzipped gob.
 func (d *GobDumper) Update() error {
+	if d.Disabled {
+		return nil
+	}
 	for _, key := range d.KeyCombo {
 		if !ebiten.IsKeyPressed(key) {
 			return nil
