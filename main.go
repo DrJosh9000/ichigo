@@ -5,6 +5,7 @@ import (
 	_ "image/png"
 	"log"
 	"os"
+	"runtime"
 	"strings"
 
 	"drjosh.dev/gurgle/engine"
@@ -47,6 +48,10 @@ func main() {
 }
 
 func repl(g *engine.Game) {
+	if runtime.GOOS == "js" {
+		// can't os.Stdin on js
+		return
+	}
 	sc := bufio.NewScanner(os.Stdin)
 	for sc.Scan() {
 		tok := strings.Split(sc.Text(), " ")

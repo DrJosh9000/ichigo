@@ -40,6 +40,7 @@ func loadGobz(dst interface{}, assets fs.FS, path string) error {
 }
 
 // saveGobz takes an object, gob-encodes it, gzips it, and writes to disk.
+// This requires running on something with a disk to write to (not JS)
 func saveGobz(src interface{}, name string) error {
 	f, err := os.CreateTemp(".", name)
 	if err != nil {
