@@ -87,18 +87,20 @@ func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 
 	// Draw everything.
 	for _, i := range c.Scene.Scan() {
-		if d, ok := i.(Drawer); ok {
-			pf := 1.0
-			if s, ok := i.(ParallaxScaler); ok {
-				pf = s.ParallaxFactor()
-			}
-			var geom ebiten.GeoM
-			// 1. Move centre to the origin, subject to parallax factor
-			geom.Translate(-float64(centre.X)*pf, -float64(centre.Y)*pf)
-			geom.Concat(comm)
-			opts.GeoM = geom
-			d.Draw(screen, opts)
+		d, ok := i.(Drawer)
+		if !ok {
+			continue
 		}
+		pf := 1.0
+		if s, ok := i.(ParallaxScaler); ok {
+			pf = s.ParallaxFactor()
+		}
+		var geom ebiten.GeoM
+		// 1. Move centre to the origin, subject to parallax factor
+		geom.Translate(-float64(centre.X)*pf, -float64(centre.Y)*pf)
+		geom.Concat(comm)
+		opts.GeoM = geom
+		d.Draw(screen, opts)
 	}
 }
 
