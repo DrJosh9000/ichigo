@@ -79,6 +79,15 @@ func repl(g *engine.Game) {
 			if err := s.Save(); err != nil {
 				log.Printf("Couldn't save %q: %v", id, err)
 			}
+		case "reload":
+			g.Disable()
+			g.Hide()
+			if err := g.Load(game.Assets); err != nil {
+				log.Printf("Couldn't load: %v", err)
+			}
+			g.Prepare()
+			g.Enable()
+			g.Show()
 		}
 	}
 	if err := sc.Err(); err != nil {
