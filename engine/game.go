@@ -8,7 +8,7 @@ import (
 )
 
 func init() {
-	gob.Register(Game{})
+	gob.Register(&Game{})
 }
 
 // Game implements the ebiten methods using a collection of components.

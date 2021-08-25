@@ -13,7 +13,7 @@ var (
 )
 
 func init() {
-	gob.Register(AnimRef{})
+	gob.Register(&AnimRef{})
 }
 
 // AnimRef manages an Anim using a premade AnimDef from the cache.

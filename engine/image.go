@@ -17,7 +17,7 @@ var (
 )
 
 func init() {
-	gob.Register(Image{})
+	gob.Register(&Image{})
 }
 
 // Image draws an image at a position.

@@ -8,7 +8,7 @@ import (
 var _ Collider = SolidRect{}
 
 func init() {
-	gob.Register(SolidRect{})
+	gob.Register(&SolidRect{})
 }
 
 type SolidRect struct {

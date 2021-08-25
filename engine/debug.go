@@ -24,8 +24,8 @@ var (
 )
 
 func init() {
-	gob.Register(GobDumper{})
-	gob.Register(PerfDisplay{})
+	gob.Register(&GobDumper{})
+	gob.Register(&PerfDisplay{})
 }
 
 // DebugToast debugprints a string for a while, then disappears.

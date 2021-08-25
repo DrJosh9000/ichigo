@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"encoding/gob"
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -8,6 +9,12 @@ import (
 
 // Ensure Fill satisfies Drawer.
 var _ Drawer = &Fill{}
+
+func init() {
+	gob.Register(Fill{})
+	gob.Register(color.Gray{})
+	gob.Register(color.RGBA{})
+}
 
 // Fill fills the screen with a colour.
 type Fill struct {

@@ -17,7 +17,7 @@ var (
 )
 
 func init() {
-	gob.Register(Camera{})
+	gob.Register(&Camera{})
 }
 
 // Camera models a camera that is viewing a scene.

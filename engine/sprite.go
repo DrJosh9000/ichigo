@@ -17,7 +17,7 @@ var (
 )
 
 func init() {
-	gob.Register(Sprite{})
+	gob.Register(&Sprite{})
 }
 
 // Sprite combines an Actor with the ability to Draw from a single spritesheet.

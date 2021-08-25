@@ -5,6 +5,7 @@ import (
 	"encoding/gob"
 	"image"
 	"io/fs"
+	"os"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -36,6 +37,28 @@ func loadGobz(dst interface{}, assets fs.FS, path string) error {
 		return err
 	}
 	return gob.NewDecoder(gz).Decode(dst)
+}
+
+// SaveGobz takes an object, gob-encodes it, gzips it, and writes to disk.
+func SaveGobz(src interface{}, name string) error {
+	f, err := os.CreateTemp(".", name)
+	if err != nil {
+		return err
+	}
+	defer os.Remove(f.Name())
+	defer f.Close()
+
+	gz := gzip.NewWriter(f)
+	if err := gob.NewEncoder(gz).Encode(src); err != nil {
+		return err
+	}
+	if err := gz.Close(); err != nil {
+		return err
+	}
+	if err := f.Close(); err != nil {
+		return err
+	}
+	return os.Rename(f.Name(), name)
 }
 
 // ImageRef loads images from the AssetFS into *ebiten.Image form.

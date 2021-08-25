@@ -12,7 +12,7 @@ import (
 var _ Scener = &Scene{}
 
 func init() {
-	gob.Register(Scene{})
+	gob.Register(&Scene{})
 }
 
 // Scene manages drawing and updating a bunch of components.

@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	gob.Register(Awakeman{})
+	gob.Register(&Awakeman{})
 }
 
 type Awakeman struct {

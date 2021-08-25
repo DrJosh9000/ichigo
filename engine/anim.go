@@ -1,7 +1,13 @@
 package engine
 
+import "encoding/gob"
+
 // Ensure Anim satisfies Animer.
 var _ Animer = &Anim{}
+
+func init() {
+	gob.Register(&Anim{})
+}
 
 // AnimFrame describes a frame in an animation.
 type AnimFrame struct {

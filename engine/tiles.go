@@ -19,9 +19,9 @@ var (
 )
 
 func init() {
-	gob.Register(AnimatedTile{})
+	gob.Register(&AnimatedTile{})
 	gob.Register(StaticTile(0))
-	gob.Register(Tilemap{})
+	gob.Register(&Tilemap{})
 }
 
 // Tilemap renders a grid of tiles.

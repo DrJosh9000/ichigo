@@ -12,7 +12,7 @@ var _ Prepper = &Actor{}
 var errCollision = errors.New("collision detected")
 
 func init() {
-	gob.Register(Actor{})
+	gob.Register(&Actor{})
 }
 
 // Thorson-style movement:
