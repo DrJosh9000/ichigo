@@ -1,7 +1,6 @@
 package main
 
 import (
-	"embed"
 	"image"
 	"image/color"
 	_ "image/png"
@@ -11,9 +10,6 @@ import (
 	"drjosh.dev/gurgle/game"
 	"github.com/hajimehoshi/ebiten/v2"
 )
-
-//go:embed assets
-var assets embed.FS
 
 func main() {
 	ebiten.SetWindowResizable(true)
@@ -111,7 +107,7 @@ func main() {
 		},
 	}
 
-	game := &engine.Game{
+	g := &engine.Game{
 		ScreenHeight: 240,
 		ScreenWidth:  320,
 		Root: &engine.Scene{
@@ -131,12 +127,12 @@ func main() {
 			},
 		},
 	}
-	if err := game.Load(assets); err != nil {
+	if err := g.Load(game.Assets); err != nil {
 		log.Fatalf("Loading error: %v", err)
 	}
-	game.Prepare()
+	g.Prepare()
 
-	if err := ebiten.RunGame(game); err != nil {
+	if err := ebiten.RunGame(g); err != nil {
 		log.Fatalf("Game error: %v", err)
 	}
 }
