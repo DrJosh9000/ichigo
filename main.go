@@ -84,6 +84,7 @@ func repl(g *engine.Game) {
 			g.Hide()
 			if err := g.Load(game.Assets); err != nil {
 				log.Printf("Couldn't load: %v", err)
+				break
 			}
 			g.Prepare()
 			g.Enable()
