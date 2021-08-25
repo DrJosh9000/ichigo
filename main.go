@@ -94,6 +94,45 @@ func repl(g *engine.Game) {
 			g.Prepare()
 			g.Enable()
 			g.Show()
+		case "tree":
+			var c interface{} = g
+			if len(tok) == 2 {
+				// subtree
+				id := tok[1]
+				c = g.Component(id)
+				if c == nil {
+					log.Printf("Component %q not found", id)
+					break
+				}
+			}
+			type item struct {
+				c     interface{}
+				depth int
+			}
+			stack := []item{{c, 0}}
+			for len(stack) > 0 {
+				tail := len(stack) - 1
+				x := stack[tail]
+				stack = stack[:tail]
+				c := x.c
+
+				indent := ""
+				if x.depth > 0 {
+					indent = strings.Repeat("  ", x.depth-1) + "↳ "
+				}
+				i, ok := c.(engine.Identifier)
+				if ok {
+					log.Printf("%s%T %s", indent, c, i.Ident())
+				} else {
+					log.Printf("%s%T", indent, c)
+				}
+
+				if s, ok := c.(engine.Scanner); ok {
+					for _, y := range s.Scan() {
+						stack = append(stack, item{y, x.depth + 1})
+					}
+				}
+			}
 		}
 	}
 	if err := sc.Err(); err != nil {

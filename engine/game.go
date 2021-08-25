@@ -3,6 +3,7 @@ package engine
 import (
 	"encoding/gob"
 	"io/fs"
+	"log"
 	"sync"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -59,6 +60,9 @@ func (g *Game) RegisterComponent(c interface{}) {
 		return
 	}
 	g.dbmu.Lock()
+	if _, exists := g.db[id]; exists {
+		log.Printf("duplicate id %q", id)
+	}
 	g.db[id] = c
 	g.dbmu.Unlock()
 }

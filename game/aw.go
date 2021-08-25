@@ -10,11 +10,24 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
+var (
+	_ engine.Identifier  = &Awakeman{}
+	_ engine.Drawer      = &Awakeman{} // provided by Sprite
+	_ engine.DrawOrderer = &Awakeman{} // provided by Sprite
+	_ engine.Disabler    = &Awakeman{}
+	_ engine.Hider       = &Awakeman{} // provided by Sprite
+	_ engine.Prepper     = &Awakeman{}
+	_ engine.Scanner     = &Awakeman{}
+	_ engine.Updater     = &Awakeman{}
+)
+
 func init() {
 	gob.Register(&Awakeman{})
 }
 
 type Awakeman struct {
+	engine.ID
+	engine.Disabled
 	engine.Sprite
 
 	CameraID string
@@ -32,6 +45,10 @@ type Awakeman struct {
 }
 
 func (aw *Awakeman) Update() error {
+	if aw.Disabled {
+		return nil
+	}
+
 	// TODO: better cheat for noclip
 	if inpututil.IsKeyJustPressed(ebiten.KeyN) {
 		aw.noclip = !aw.noclip
