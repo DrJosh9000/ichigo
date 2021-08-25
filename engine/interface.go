@@ -113,6 +113,11 @@ type Scener interface {
 	Updater
 }
 
+// Saver components can be saved to disk.
+type Saver interface {
+	Save() error
+}
+
 // Updater components can update themselves. Update is called repeatedly.
 // Each component is responsible for calling Update on its child components
 // (so that disabling the parent prevents updates to the children, etc).

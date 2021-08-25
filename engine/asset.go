@@ -39,8 +39,8 @@ func loadGobz(dst interface{}, assets fs.FS, path string) error {
 	return gob.NewDecoder(gz).Decode(dst)
 }
 
-// SaveGobz takes an object, gob-encodes it, gzips it, and writes to disk.
-func SaveGobz(src interface{}, name string) error {
+// saveGobz takes an object, gob-encodes it, gzips it, and writes to disk.
+func saveGobz(src interface{}, name string) error {
 	f, err := os.CreateTemp(".", name)
 	if err != nil {
 		return err

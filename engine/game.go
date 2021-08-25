@@ -3,6 +3,7 @@ package engine
 import (
 	"encoding/gob"
 	"io/fs"
+	"sync"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -15,15 +16,21 @@ func init() {
 // One component must be the designated root component - usually a
 // scene of some kind.
 type Game struct {
+	Disabled
+	Hidden
 	ScreenWidth  int
 	ScreenHeight int
 	Root         DrawUpdater // typically a *Scene or SceneRef though
 
-	componentsByID map[string]interface{}
+	dbmu sync.RWMutex
+	db   map[string]interface{}
 }
 
 // Draw draws the entire thing, with default draw options.
 func (g *Game) Draw(screen *ebiten.Image) {
+	if g.Hidden {
+		return
+	}
 	g.Root.Draw(screen, ebiten.DrawImageOptions{})
 }
 
@@ -33,7 +40,12 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
 }
 
 // Update updates the scene.
-func (g *Game) Update() error { return g.Root.Update() }
+func (g *Game) Update() error {
+	if g.Disabled {
+		return nil
+	}
+	return g.Root.Update()
+}
 
 // RegisterComponent tells the game there is a new component. Currently this is
 // only necessary for components with IDs.
@@ -46,7 +58,9 @@ func (g *Game) RegisterComponent(c interface{}) {
 	if id == "" {
 		return
 	}
-	g.componentsByID[id] = c
+	g.dbmu.Lock()
+	g.db[id] = c
+	g.dbmu.Unlock()
 }
 
 // UnregisterComponent tells the game the component is no more.
@@ -60,11 +74,17 @@ func (g *Game) UnregisterComponent(c interface{}) {
 	if id == "" {
 		return
 	}
-	delete(g.componentsByID, id)
+	g.dbmu.Lock()
+	delete(g.db, id)
+	g.dbmu.Unlock()
 }
 
 // Component returns the component with a given ID, or nil if there is none.
-func (g *Game) Component(id string) interface{} { return g.componentsByID[id] }
+func (g *Game) Component(id string) interface{} {
+	g.dbmu.RLock()
+	defer g.dbmu.RUnlock()
+	return g.db[id]
+}
 
 // Scan implements Scanner.
 func (g *Game) Scan() []interface{} { return []interface{}{g.Root} }
@@ -104,7 +124,10 @@ func (g *Game) Load(assets fs.FS) error {
 // to Component. You may call Prepare again (e.g. as an alternative to
 // fastidiously calling RegisterComponent/UnregisterComponent).
 func (g *Game) Prepare() {
-	g.componentsByID = make(map[string]interface{})
+	g.dbmu.Lock()
+	g.db = make(map[string]interface{})
+	g.dbmu.Unlock()
+	// Moment in time where db is empty... whatev.
 	Walk(g.Root, func(c interface{}) error {
 		g.RegisterComponent(c)
 		return nil

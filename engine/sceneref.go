@@ -4,6 +4,7 @@ import (
 	"encoding/gob"
 	"image"
 	"io/fs"
+	"path/filepath"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -42,6 +43,9 @@ func (r *SceneRef) Load(assets fs.FS) error {
 	r.scene = sc
 	return nil
 }
+
+// Save saves the scene to a file in the current directory.
+func (r *SceneRef) Save() error { return saveGobz(r.scene, filepath.Base(r.Path)) }
 
 // The rest of the methods forward to r.scene, as such they will
 // panic if the scene isn't loaded.
