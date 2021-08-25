@@ -119,9 +119,6 @@ func main() {
 		Root: &engine.Scene{
 			ID: "root",
 			Components: []interface{}{
-				&engine.GobDumper{
-					KeyCombo: []ebiten.Key{ebiten.KeyControl, ebiten.KeyD},
-				},
 				&engine.Camera{
 					ID:    "game_camera",
 					Scene: &engine.SceneRef{Path: "assets/level1.gobz"},
