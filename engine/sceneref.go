@@ -23,7 +23,7 @@ func init() {
 // After Load, Scene is usable.
 // This is mostly useful for scenes that refer to other scenes, e.g.
 //
-//    var sc = &Scene{
+//    sc := &Scene{
 //	    Components: []interface{}{
 //			&SceneRef{Path: "assets/foo.gob.gz"}  // inflated at Load time
 //		},
