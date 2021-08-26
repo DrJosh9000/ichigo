@@ -26,7 +26,6 @@ func init() {
 }
 
 type Awakeman struct {
-	engine.ID
 	engine.Disabled
 	engine.Sprite
 
@@ -43,6 +42,9 @@ type Awakeman struct {
 
 	animIdleLeft, animIdleRight, animRunLeft, animRunRight, animWalkLeft, animWalkRight *engine.Anim
 }
+
+// Ident returns "awakeman". There should be only one!
+func (aw *Awakeman) Ident() string { return "awakeman" }
 
 func (aw *Awakeman) Update() error {
 	if aw.Disabled {

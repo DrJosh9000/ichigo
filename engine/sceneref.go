@@ -37,7 +37,7 @@ type SceneRef struct {
 // Load loads the scene from the file.
 func (r *SceneRef) Load(assets fs.FS) error {
 	sc := new(Scene)
-	if err := loadGobz(sc, assets, r.Path); err != nil {
+	if err := LoadGobz(sc, assets, r.Path); err != nil {
 		return err
 	}
 	r.scene = sc
@@ -45,7 +45,7 @@ func (r *SceneRef) Load(assets fs.FS) error {
 }
 
 // Save saves the scene to a file in the current directory.
-func (r *SceneRef) Save() error { return saveGobz(r.scene, filepath.Base(r.Path)) }
+func (r *SceneRef) Save() error { return SaveGobz(r.scene, filepath.Base(r.Path)) }
 
 // The rest of the methods forward to r.scene, as such they will
 // panic if the scene isn't loaded.

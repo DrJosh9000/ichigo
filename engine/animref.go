@@ -31,7 +31,7 @@ func (r *AnimRef) Load(assets fs.FS) error {
 		return nil
 	}
 	// Slow path: load from gobz file
-	if err := loadGobz(&r.anim, assets, r.Path); err != nil {
+	if err := LoadGobz(&r.anim, assets, r.Path); err != nil {
 		return err
 	}
 	animCache[assetKey{assets, r.Path}] = r.anim
