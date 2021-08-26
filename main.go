@@ -18,7 +18,7 @@ func main() {
 	ebiten.SetWindowSize(640, 480)
 	ebiten.SetWindowTitle("TODO")
 
-	if true {
+	if false {
 		writeLevel1()
 	}
 
@@ -140,8 +140,10 @@ func writeLevel1() {
 					},
 					ZOrder:      3,
 					FrameOffset: image.Pt(-1, 0),
-					FrameSize:   image.Pt(10, 16),
-					Src:         engine.ImageRef{Path: "assets/aw.png"},
+					Sheet: engine.Sheet{
+						CellSize: image.Pt(10, 16),
+						Src:      engine.ImageRef{Path: "assets/aw.png"},
+					},
 				},
 			},
 		},

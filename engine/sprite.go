@@ -24,10 +24,9 @@ func init() {
 type Sprite struct {
 	ID
 	Actor
-	FrameSize   image.Point
 	FrameOffset image.Point
 	Hidden
-	Src ImageRef
+	Sheet Sheet
 	ZOrder
 
 	anim *Anim
@@ -43,18 +42,14 @@ func (s *Sprite) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	geom.Concat(opts.GeoM)
 	opts.GeoM = geom
 
-	frame := s.anim.CurrentFrame()
-	src := s.Src.Image()
-	w, _ := src.Size()
-	sp := image.Pt((frame*s.FrameSize.X)%w, ((frame*s.FrameSize.X)/w)*s.FrameSize.Y)
-
-	screen.DrawImage(src.SubImage(image.Rectangle{sp, sp.Add(s.FrameSize)}).(*ebiten.Image), &opts)
+	src := s.Sheet.SubImage(s.anim.CurrentFrame())
+	screen.DrawImage(src, &opts)
 }
 
 func (s *Sprite) Scan() []interface{} {
 	return []interface{}{
 		&s.Actor,
-		&s.Src,
+		&s.Sheet,
 	}
 }
 
