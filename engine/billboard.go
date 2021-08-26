@@ -7,7 +7,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-// Ensure Image satisfies interfaces.
+// Ensure Billboard satisfies interfaces.
 var (
 	_ Identifier     = &Billboard{}
 	_ Drawer         = &Billboard{}
