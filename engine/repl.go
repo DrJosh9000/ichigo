@@ -56,6 +56,9 @@ func (g *Game) REPL(src io.Reader, dst io.Writer, assets fs.FS) error {
 			g.Enable()
 			g.Show()
 		case "tree":
+			if len(tok) < 1 || len(tok) > 2 {
+				fmt.Println(dst, "Usage: tree [ID]")
+			}
 			var c interface{} = g
 			if len(tok) == 2 {
 				// subtree
