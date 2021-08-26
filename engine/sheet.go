@@ -28,7 +28,8 @@ func (s *Sheet) Prepare(*Game) {
 
 func (s *Sheet) Scan() []interface{} { return []interface{}{&s.Src} }
 
-// SubImage returns an *ebiten.Image corresponding to the cell of the given index.
+// SubImage returns an *ebiten.Image corresponding to the cell at the given
+// index.
 func (s *Sheet) SubImage(i int) *ebiten.Image {
 	p := mul2(image.Pt(i%s.w, i/s.w), s.CellSize)
 	r := image.Rectangle{p, p.Add(s.CellSize)}
