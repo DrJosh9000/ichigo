@@ -69,7 +69,6 @@ func (t *Tilemap) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 			continue
 		}
 		geom.Reset()
-		//geom.Translate(float64(p.X*t.Sheet.CellSize.X+t.Offset.X), float64(p.Y*t.Sheet.CellSize.Y+t.Offset.Y))
 		geom.Translate(float2(mul2(p, t.Sheet.CellSize).Add(t.Offset)))
 		geom.Concat(og)
 		opts.GeoM = geom
