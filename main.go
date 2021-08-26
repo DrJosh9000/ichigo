@@ -145,7 +145,7 @@ func writeLevel1() {
 		},
 	}
 
-	if err := engine.SaveGobz(level1, "level1.gobz"); err != nil {
+	if err := engine.SaveGobz(level1, "game/assets/level1.gobz"); err != nil {
 		log.Fatalf("Couldn't save level1.gobz: %v", err)
 	}
 
