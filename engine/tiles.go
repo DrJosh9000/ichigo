@@ -24,14 +24,14 @@ func init() {
 	gob.Register(&Tilemap{})
 }
 
-// Tilemap renders a grid of tiles.
+// Tilemap renders a grid of square tiles.
 type Tilemap struct {
 	ID
 	Disabled
 	Hidden
-	Map      map[image.Point]Tile
-	Ersatz   bool        // "fake wall"
-	Offset   image.Point // world coordinates
+	Map      map[image.Point]Tile // tilespace coordinate -> tile
+	Ersatz   bool                 // "fake wall"
+	Offset   image.Point          // world coordinates
 	Src      ImageRef
 	TileSize int
 	ZOrder
@@ -43,19 +43,14 @@ func (t *Tilemap) CollidesWith(r image.Rectangle) bool {
 		return false
 	}
 
-	// If we round down r.Min, and round up r.Max, to the nearest tile
-	// coordinates, that gives the full range of tiles to test.
-	sm1 := t.TileSize - 1
+	// Probe the map at all tilespace coordinates overlapping the rect.
 	r = r.Sub(t.Offset)
 	min := r.Min.Div(t.TileSize)
-	max := r.Max.Add(image.Pt(sm1, sm1)).Div(t.TileSize)
+	max := r.Max.Sub(image.Pt(1, 1)).Div(t.TileSize) // NB: fencepost
 
 	for j := min.Y; j <= max.Y; j++ {
 		for i := min.X; i <= max.X; i++ {
-			if t.Map[image.Pt(i, j)] == nil {
-				continue
-			}
-			if r.Overlaps(image.Rect(i*t.TileSize, j*t.TileSize, (i+1)*t.TileSize, (j+1)*t.TileSize)) {
+			if t.Map[image.Pt(i, j)] != nil {
 				return true
 			}
 		}
