@@ -18,7 +18,7 @@ func main() {
 	ebiten.SetWindowSize(640, 480)
 	ebiten.SetWindowTitle("TODO")
 
-	if false {
+	if true {
 		writeLevel1()
 	}
 
@@ -109,11 +109,13 @@ func writeLevel1() {
 				Src:      engine.ImageRef{Path: "assets/space.png"},
 			},
 			&engine.Tilemap{
-				ID:       "terrain",
-				ZOrder:   2,
-				Map:      tiles,
-				Src:      engine.ImageRef{Path: "assets/boxes.png"},
-				TileSize: 16,
+				ID:     "terrain",
+				ZOrder: 2,
+				Map:    tiles,
+				Sheet: engine.Sheet{
+					CellSize: image.Pt(16, 16),
+					Src:      engine.ImageRef{Path: "assets/boxes.png"},
+				},
 			},
 			&engine.SolidRect{
 				ID:     "ceiling",

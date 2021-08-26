@@ -24,16 +24,15 @@ func init() {
 	gob.Register(&Tilemap{})
 }
 
-// Tilemap renders a grid of square tiles.
+// Tilemap renders a grid of rectangular tiles at equal Z position.
 type Tilemap struct {
 	ID
 	Disabled
 	Hidden
-	Map      map[image.Point]Tile // tilespace coordinate -> tile
-	Ersatz   bool                 // "fake wall"
-	Offset   image.Point          // world coordinates
-	Src      ImageRef
-	TileSize int
+	Map    map[image.Point]Tile // tilespace coordinate -> tile
+	Ersatz bool                 // "fake wall"
+	Offset image.Point          // world coordinates
+	Sheet  Sheet
 	ZOrder
 }
 
@@ -45,8 +44,8 @@ func (t *Tilemap) CollidesWith(r image.Rectangle) bool {
 
 	// Probe the map at all tilespace coordinates overlapping the rect.
 	r = r.Sub(t.Offset)
-	min := r.Min.Div(t.TileSize)
-	max := r.Max.Sub(image.Pt(1, 1)).Div(t.TileSize) // NB: fencepost
+	min := div2(r.Min, t.Sheet.CellSize)
+	max := div2(r.Max.Sub(image.Pt(1, 1)), t.Sheet.CellSize) // NB: fencepost
 
 	for j := min.Y; j <= max.Y; j++ {
 		for i := min.X; i <= max.X; i++ {
@@ -63,8 +62,6 @@ func (t *Tilemap) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	if t.Hidden {
 		return
 	}
-	src := t.Src.Image()
-	w, _ := src.Size()
 	og := opts.GeoM
 	var geom ebiten.GeoM
 	for p, tile := range t.Map {
@@ -72,13 +69,12 @@ func (t *Tilemap) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 			continue
 		}
 		geom.Reset()
-		geom.Translate(float64(p.X*t.TileSize+t.Offset.X), float64(p.Y*t.TileSize+t.Offset.Y))
+		//geom.Translate(float64(p.X*t.Sheet.CellSize.X+t.Offset.X), float64(p.Y*t.Sheet.CellSize.Y+t.Offset.Y))
+		geom.Translate(float2(mul2(p, t.Sheet.CellSize).Add(t.Offset)))
 		geom.Concat(og)
 		opts.GeoM = geom
 
-		s := tile.TileIndex() * t.TileSize
-		sx, sy := s%w, (s/w)*t.TileSize
-		src := src.SubImage(image.Rect(sx, sy, sx+t.TileSize, sy+t.TileSize)).(*ebiten.Image)
+		src := t.Sheet.SubImage(tile.CellIndex())
 		screen.DrawImage(src, &opts)
 	}
 }
@@ -86,7 +82,7 @@ func (t *Tilemap) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 // Scan returns a slice containing Src and all non-nil tiles.
 func (t *Tilemap) Scan() []interface{} {
 	c := make([]interface{}, 1, len(t.Map)+1)
-	c[0] = &t.Src
+	c[0] = &t.Sheet
 	for _, tile := range t.Map {
 		c = append(c, tile)
 	}
@@ -110,24 +106,24 @@ func (t *Tilemap) Update() error {
 
 // TileAt returns the tile present at the given world coordinate.
 func (t *Tilemap) TileAt(wc image.Point) Tile {
-	return t.Map[wc.Sub(t.Offset).Div(t.TileSize)]
+	return t.Map[div2(wc.Sub(t.Offset), t.Sheet.CellSize)]
 }
 
 // SetTileAt sets the tile at the given world coordinate.
 func (t *Tilemap) SetTileAt(wc image.Point, tile Tile) {
-	t.Map[wc.Sub(t.Offset).Div(t.TileSize)] = tile
+	t.Map[div2(wc.Sub(t.Offset), t.Sheet.CellSize)] = tile
 }
 
 // TileBounds returns a rectangle describing the tile boundary for the tile
 // at the given world coordinate.
 func (t *Tilemap) TileBounds(wc image.Point) image.Rectangle {
-	p := wc.Sub(t.Offset).Div(t.TileSize).Mul(t.TileSize).Add(t.Offset)
-	return image.Rectangle{p, p.Add(image.Pt(t.TileSize, t.TileSize))}
+	p := mul2(div2(wc.Sub(t.Offset), t.Sheet.CellSize), t.Sheet.CellSize).Add(t.Offset)
+	return image.Rectangle{p, p.Add(t.Sheet.CellSize)}
 }
 
 // Tile is the interface needed by Tilemap.
 type Tile interface {
-	TileIndex() int
+	CellIndex() int
 }
 
 // Ensure StaticTile and AnimatedTile satisfy Tile.
@@ -140,14 +136,14 @@ var (
 // StaticTile returns a fixed tile index.
 type StaticTile int
 
-func (s StaticTile) TileIndex() int { return int(s) }
+func (s StaticTile) CellIndex() int { return int(s) }
 
 // AnimatedTile uses an Anim to choose a tile index.
 type AnimatedTile struct {
 	Animer
 }
 
-func (a AnimatedTile) TileIndex() int { return a.CurrentFrame() }
+func (a AnimatedTile) CellIndex() int { return a.CurrentFrame() }
 
 // Scan returns a.Animer. (It could be a Loader.)
 func (a AnimatedTile) Scan() []interface{} { return []interface{}{a.Animer} }
