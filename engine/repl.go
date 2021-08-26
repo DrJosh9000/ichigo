@@ -9,7 +9,10 @@ import (
 	"strings"
 )
 
+// REPL runs a read-evaluate-print-loop. Commands are taken from src and output
+// is written to dst. assets is needed for commands like reload.
 func (g *Game) REPL(src io.Reader, dst io.Writer, assets fs.FS) error {
+	fmt.Fprint(dst, "game>")
 	sc := bufio.NewScanner(src)
 	for sc.Scan() {
 		tok := strings.Split(sc.Text(), " ")
@@ -53,7 +56,6 @@ func (g *Game) REPL(src io.Reader, dst io.Writer, assets fs.FS) error {
 			g.Enable()
 			g.Show()
 		case "tree":
-
 			var c interface{} = g
 			if len(tok) == 2 {
 				// subtree
@@ -93,6 +95,7 @@ func (g *Game) REPL(src io.Reader, dst io.Writer, assets fs.FS) error {
 				}
 			}
 		}
+		fmt.Fprint(dst, "game>")
 	}
 	return sc.Err()
 }
