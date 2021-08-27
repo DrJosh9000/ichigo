@@ -101,7 +101,7 @@ func (g *Game) Scan() []interface{} { return []interface{}{g.Root} }
 // Walk calls v with every path of components reachable from c via Scan, for as
 // long as visit returns nil.
 func Walk(c interface{}, v func(interface{}, []interface{}) error) error {
-	return walk(c, nil, v)
+	return walk(c, make([]interface{}, 0, 16), v)
 }
 
 func walk(c interface{}, p []interface{}, v func(interface{}, []interface{}) error) error {
