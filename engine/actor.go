@@ -33,16 +33,6 @@ func (a *Actor) BoundingRect() image.Rectangle { return image.Rectangle{a.Pos, a
 
 func (a *Actor) CollidesAt(p image.Point) bool {
 	bounds := image.Rectangle{Min: p, Max: p.Add(a.Size)}
-	/*return nil != Walk(a.collisionDomain, func(c interface{}, _ []interface{}) error {
-		coll, ok := c.(Collider)
-		if !ok {
-			return nil
-		}
-		if coll.CollidesWith(bounds) {
-			return Collision{With: coll}
-		}
-		return nil
-	})*/
 	for _, c := range a.collisionDomain {
 		if c.CollidesWith(bounds) {
 			return true
@@ -92,8 +82,6 @@ func (a *Actor) MoveY(dy float64, onCollide func()) {
 }
 
 func (a *Actor) Prepare(g *Game) error {
-	//a.collisionDomain = g.Component(a.CollisionDomain)
-
 	cs := g.Query(g.Component(a.CollisionDomain), ColliderType)
 	a.collisionDomain = make([]Collider, 0, len(cs))
 	for _, c := range cs {
