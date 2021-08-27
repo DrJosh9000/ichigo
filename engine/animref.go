@@ -8,8 +8,10 @@ import (
 var (
 	animCache = make(map[assetKey]Anim)
 
-	_ Animer = &AnimRef{}
-	_ Loader = &AnimRef{}
+	_ interface {
+		Animer
+		Loader
+	} = &AnimRef{}
 )
 
 func init() {

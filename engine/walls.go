@@ -29,7 +29,7 @@ var (
 // But Wall is still responsible for collisions.
 type Wall struct {
 	ID
-	Ersatz     bool
+	Ersatz     bool        // fake wall - disables collisions
 	Offset     image.Point //  offset the whole wall
 	Sheet      Sheet
 	UnitOffset image.Point // drawing offset

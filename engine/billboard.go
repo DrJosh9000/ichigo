@@ -8,13 +8,13 @@ import (
 )
 
 // Ensure Billboard satisfies interfaces.
-var (
-	_ Identifier     = &Billboard{}
-	_ Drawer         = &Billboard{}
-	_ DrawOrderer    = &Billboard{}
-	_ ParallaxScaler = &Billboard{}
-	_ Scanner        = &Billboard{}
-)
+var _ interface {
+	Identifier
+	Drawer
+	DrawOrderer
+	ParallaxScaler
+	Scanner
+} = &Billboard{}
 
 func init() {
 	gob.Register(&Billboard{})

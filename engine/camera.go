@@ -8,13 +8,13 @@ import (
 )
 
 // Ensure Camera satisfies interfaces.
-var (
-	_ Identifier = &Camera{}
-	_ Drawer     = &Camera{}
-	_ Prepper    = &Camera{}
-	_ Scanner    = &Camera{}
-	_ Updater    = &Camera{}
-)
+var _ interface {
+	Identifier
+	Drawer
+	Prepper
+	Scanner
+	Updater
+} = &Camera{}
 
 func init() {
 	gob.Register(&Camera{})

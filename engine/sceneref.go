@@ -10,10 +10,10 @@ import (
 )
 
 // Ensure SceneRef satisfies interfaces.
-var (
-	_ Loader = &SceneRef{}
-	_ Scener = &SceneRef{}
-)
+var _ interface {
+	Loader
+	Scener
+} = &SceneRef{}
 
 func init() {
 	gob.Register(SceneRef{})

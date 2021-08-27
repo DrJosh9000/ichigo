@@ -9,11 +9,11 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-var (
-	_ Drawer      = PerfDisplay{}
-	_ DrawOrderer = PerfDisplay{}
-	_ Hider       = &PerfDisplay{}
-)
+var _ interface {
+	Drawer
+	DrawOrderer
+	Hider
+} = &PerfDisplay{}
 
 func init() {
 	gob.Register(&PerfDisplay{})

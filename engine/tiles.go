@@ -8,14 +8,23 @@ import (
 )
 
 // Ensure Tilemap satisfies interfaces.
+var _ interface {
+	Identifier
+	Collider
+	Drawer
+	DrawOrderer
+	Hider
+	Scanner
+	Updater
+} = &Tilemap{}
+
+// Ensure StaticTile and AnimatedTile satisfy Tile.
 var (
-	_ Identifier  = &Tilemap{}
-	_ Collider    = &Tilemap{}
-	_ Drawer      = &Tilemap{}
-	_ DrawOrderer = &Tilemap{}
-	_ Hider       = &Tilemap{}
-	_ Scanner     = &Tilemap{}
-	_ Updater     = &Tilemap{}
+	_ Tile = StaticTile(0)
+	_ interface {
+		Tile
+		Scanner
+	} = AnimatedTile{}
 )
 
 func init() {
@@ -124,13 +133,6 @@ func (t *Tilemap) TileBounds(wc image.Point) image.Rectangle {
 type Tile interface {
 	CellIndex() int
 }
-
-// Ensure StaticTile and AnimatedTile satisfy Tile.
-var (
-	_ Tile    = StaticTile(0)
-	_ Tile    = AnimatedTile{}
-	_ Scanner = AnimatedTile{}
-)
 
 // StaticTile returns a fixed tile index.
 type StaticTile int

@@ -6,10 +6,10 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-var (
-	_ Prepper = &Sheet{}
-	_ Scanner = &Sheet{}
-)
+var _ interface {
+	Prepper
+	Scanner
+} = &Sheet{}
 
 // Sheet handles images that consist of a grid of equally sized regions
 // (cells) and can produce subimages for the cell at an index. This is useful

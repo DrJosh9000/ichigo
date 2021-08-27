@@ -8,7 +8,12 @@ import (
 )
 
 // Ensure Fill satisfies Drawer.
-var _ Drawer = &Fill{}
+var _ interface {
+	Drawer
+	DrawOrderer
+	Hider
+	Identifier
+} = &Fill{}
 
 func init() {
 	gob.Register(Fill{})

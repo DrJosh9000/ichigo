@@ -8,13 +8,13 @@ import (
 )
 
 // Ensure Sprite satisfies interfaces.
-var (
-	_ Identifier  = &Sprite{}
-	_ Drawer      = &Sprite{}
-	_ DrawOrderer = &Sprite{}
-	_ Scanner     = &Sprite{}
-	_ Updater     = &Sprite{}
-)
+var _ interface {
+	Identifier
+	Drawer
+	DrawOrderer
+	Scanner
+	Updater
+} = &Sprite{}
 
 func init() {
 	gob.Register(&Sprite{})
