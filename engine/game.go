@@ -14,9 +14,9 @@ func init() {
 	gob.Register(&Game{})
 }
 
-// Game implements the ebiten methods using a collection of components.
-// One component must be the designated root component - usually a
-// scene of some kind.
+// Game implements the ebiten methods using a collection of components. One
+// component must be the designated root component - usually a scene of some
+// kind.
 type Game struct {
 	Disabled
 	Hidden
