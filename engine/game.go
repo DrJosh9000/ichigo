@@ -57,8 +57,8 @@ func (g *Game) Update() error {
 
 func (g *Game) registerComponent(c interface{}, path []interface{}) error {
 	// register in g.dex
+	ct := reflect.TypeOf(c)
 	for _, b := range Behaviours {
-		ct := reflect.TypeOf(c)
 		if !ct.Implements(b) {
 			continue
 		}
