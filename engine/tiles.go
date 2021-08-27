@@ -39,7 +39,7 @@ type Tilemap struct {
 	Disabled
 	Hidden
 	Map    map[image.Point]Tile // tilespace coordinate -> tile
-	Ersatz bool                 // "fake wall"
+	Ersatz bool                 // disables collisions ("fake wall")
 	Offset image.Point          // world coordinates
 	Sheet  Sheet
 	ZOrder
