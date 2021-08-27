@@ -37,7 +37,7 @@ func main() {
 					ID:    "game_camera",
 					Scene: &engine.SceneRef{Path: "assets/level1.gobz"},
 				},
-				&engine.DebugToast{ID: "toast", Pos: image.Pt(0, 20)},
+				&engine.DebugToast{ID: "toast", Pos: image.Pt(0, 15)},
 				engine.PerfDisplay{},
 			},
 		},
