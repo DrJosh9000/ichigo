@@ -3,6 +3,7 @@ package engine
 import (
 	"encoding/gob"
 	"fmt"
+	"image"
 	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -23,6 +24,7 @@ func init() {
 type DebugToast struct {
 	ID
 	Hidden
+	Pos   image.Point
 	Timer int // ticks
 	Text  string
 }
@@ -31,7 +33,7 @@ func (d *DebugToast) Draw(screen *ebiten.Image, _ ebiten.DrawImageOptions) {
 	if d.Hidden {
 		return
 	}
-	ebitenutil.DebugPrintAt(screen, d.Text, 0, 20)
+	ebitenutil.DebugPrintAt(screen, d.Text, d.Pos.X, d.Pos.Y)
 }
 
 func (d *DebugToast) DrawOrder() float64 {

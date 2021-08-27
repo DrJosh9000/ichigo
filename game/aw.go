@@ -77,7 +77,7 @@ func (aw *Awakeman) Update() error {
 	}
 	// aw.Pos is top-left corner, so add half size to get centre
 	aw.camera.Centre = aw.Pos.Add(aw.Size.Div(2))
-	return nil
+	return aw.Sprite.Update()
 }
 
 func (aw *Awakeman) noclipUpdate() error {
@@ -185,7 +185,7 @@ func (aw *Awakeman) realUpdate() error {
 			aw.vy = 0
 		}
 	})
-	return aw.Sprite.Update()
+	return nil
 }
 
 func (aw *Awakeman) Prepare(game *engine.Game) {
