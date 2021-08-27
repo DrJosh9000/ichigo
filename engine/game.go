@@ -24,7 +24,7 @@ type Game struct {
 	Root         DrawUpdater // typically a *Scene or SceneRef though
 
 	dbmu sync.RWMutex
-	db   map[string]interface{} // Components by ID
+	db   map[string]Identifier // Components by ID
 }
 
 // Draw draws the entire thing, with default draw options.
@@ -57,17 +57,15 @@ func (g *Game) registerComponent(c interface{}, p []interface{}) error {
 	if id == "" {
 		return nil
 	}
-	g.dbmu.Lock()
 	if _, exists := g.db[id]; exists {
 		return fmt.Errorf("duplicate id %q", id)
 	}
-	g.db[id] = c
-	g.dbmu.Unlock()
+	g.db[id] = i
 	return nil
 }
 
 // Component returns the component with a given ID, or nil if there is none.
-func (g *Game) Component(id string) interface{} {
+func (g *Game) Component(id string) Identifier {
 	g.dbmu.RLock()
 	defer g.dbmu.RUnlock()
 	return g.db[id]
@@ -105,6 +103,7 @@ func walk(c interface{}, p []interface{}, v func(interface{}, []interface{}) err
 // to Component. You may call Prepare again (e.g. as an alternative to
 // fastidiously calling RegisterComponent/UnregisterComponent).
 func (g *Game) LoadAndPrepare(assets fs.FS) error {
+	// Load all the Loaders
 	if err := Walk(g.Root, func(c interface{}, _ []interface{}) error {
 		l, ok := c.(Loader)
 		if !ok {
@@ -115,12 +114,15 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 		return err
 	}
 
+	// Build the component databases
 	g.dbmu.Lock()
-	g.db = make(map[string]interface{})
+	g.db = make(map[string]Identifier)
+	if err := Walk(g.Root, g.registerComponent); err != nil {
+		return err
+	}
 	g.dbmu.Unlock()
 
-	// -> here <- is the moment in time where db is empty.
-	Walk(g.Root, g.registerComponent)
+	// Prepare all the Preppers
 	Walk(g.Root, func(c interface{}, _ []interface{}) error {
 		if p, ok := c.(Prepper); ok {
 			p.Prepare(g)
