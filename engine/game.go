@@ -55,36 +55,6 @@ func (g *Game) Update() error {
 	return g.Root.Update()
 }
 
-func (g *Game) registerComponent(c interface{}, path []interface{}) error {
-	// register in g.dex
-	ct := reflect.TypeOf(c)
-	for _, b := range Behaviours {
-		if !ct.Implements(b) {
-			continue
-		}
-		// TODO: sub-quadratic?
-		for _, p := range append(path, c) {
-			k := dexKey{p, b}
-			g.dex[k] = append(g.dex[k], c)
-		}
-	}
-
-	// register in g.db
-	i, ok := c.(Identifier)
-	if !ok {
-		return nil
-	}
-	id := i.Ident()
-	if id == "" {
-		return nil
-	}
-	if _, exists := g.db[id]; exists {
-		return fmt.Errorf("duplicate id %q", id)
-	}
-	g.db[id] = i
-	return nil
-}
-
 // Component returns the component with a given ID, or nil if there is none.
 // This only returns sensible values after LoadAndPrepare.
 func (g *Game) Component(id string) Identifier {
@@ -158,5 +128,35 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 			return err
 		}
 	}
+	return nil
+}
+
+func (g *Game) registerComponent(c interface{}, path []interface{}) error {
+	// register in g.dex
+	ct := reflect.TypeOf(c)
+	for _, b := range Behaviours {
+		if !ct.Implements(b) {
+			continue
+		}
+		// TODO: sub-quadratic?
+		for _, p := range append(path, c) {
+			k := dexKey{p, b}
+			g.dex[k] = append(g.dex[k], c)
+		}
+	}
+
+	// register in g.db
+	i, ok := c.(Identifier)
+	if !ok {
+		return nil
+	}
+	id := i.Ident()
+	if id == "" {
+		return nil
+	}
+	if _, exists := g.db[id]; exists {
+		return fmt.Errorf("duplicate id %q", id)
+	}
+	g.db[id] = i
 	return nil
 }
