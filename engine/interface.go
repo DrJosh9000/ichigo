@@ -3,8 +3,51 @@ package engine
 import (
 	"image"
 	"io/fs"
+	"reflect"
 
 	"github.com/hajimehoshi/ebiten/v2"
+)
+
+// Reflection types used for queries... Is there a better way?
+var (
+	// TypeOf(pointer to interface).Elem() is "idiomatic" -
+	// see https://pkg.go.dev/reflect#example-TypeOf
+	AnimerType         = reflect.TypeOf((*Animer)(nil)).Elem()
+	BounderType        = reflect.TypeOf((*Bounder)(nil)).Elem()
+	ColliderType       = reflect.TypeOf((*Collider)(nil)).Elem()
+	DisablerType       = reflect.TypeOf((*Disabler)(nil)).Elem()
+	DrawerType         = reflect.TypeOf((*Drawer)(nil)).Elem()
+	DrawOrdererType    = reflect.TypeOf((*DrawOrderer)(nil)).Elem()
+	DrawUpdaterType    = reflect.TypeOf((*DrawUpdater)(nil)).Elem()
+	HiderType          = reflect.TypeOf((*Hider)(nil)).Elem()
+	IdentifierType     = reflect.TypeOf((*Identifier)(nil)).Elem()
+	LoaderType         = reflect.TypeOf((*Loader)(nil)).Elem()
+	ParallaxScalerType = reflect.TypeOf((*ParallaxScaler)(nil)).Elem()
+	PrepperType        = reflect.TypeOf((*Prepper)(nil)).Elem()
+	ScannerType        = reflect.TypeOf((*Scanner)(nil)).Elem()
+	ScenerType         = reflect.TypeOf((*Scener)(nil)).Elem()
+	SaverType          = reflect.TypeOf((*Saver)(nil)).Elem()
+	UpdaterType        = reflect.TypeOf((*Updater)(nil)).Elem()
+
+	// Behaviours lists all the behaviours that can be queried with Game.Query.
+	Behaviours = []reflect.Type{
+		AnimerType,
+		BounderType,
+		ColliderType,
+		DisablerType,
+		DrawerType,
+		DrawOrdererType,
+		DrawUpdaterType,
+		HiderType,
+		IdentifierType,
+		LoaderType,
+		ParallaxScalerType,
+		PrepperType,
+		ScannerType,
+		ScenerType,
+		SaverType,
+		UpdaterType,
+	}
 )
 
 // Animer components have a current frame index.

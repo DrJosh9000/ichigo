@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/fs"
 	"os"
+	"reflect"
 	"strings"
 )
 
@@ -33,6 +34,8 @@ func (g *Game) REPL(src io.Reader, dst io.Writer, assets fs.FS) error {
 			g.cmdReload(dst, assets)
 		case "tree":
 			g.cmdTree(dst, argv)
+		case "query":
+			g.cmdQuery(dst, argv)
 		}
 		fmt.Fprint(dst, prompt)
 	}
@@ -75,7 +78,7 @@ func (g *Game) cmdTree(dst io.Writer, argv []string) {
 	if len(argv) < 1 || len(argv) > 2 {
 		fmt.Println(dst, "Usage: tree [ID]")
 	}
-	var c interface{} = g
+	c := interface{}(g)
 	if len(argv) == 2 { // subtree
 		id := argv[1]
 		c = g.Component(id)
@@ -97,4 +100,45 @@ func (g *Game) cmdTree(dst io.Writer, argv []string) {
 		}
 		return nil
 	})
+}
+
+func (g *Game) cmdQuery(dst io.Writer, argv []string) {
+	if len(argv) < 2 || len(argv) > 3 {
+		fmt.Fprintln(dst, "Usage: query BEHAVIOUR [ANCESTOR_ID]")
+	}
+
+	var behav reflect.Type
+	for _, b := range Behaviours {
+		if b.Name() == argv[1] {
+			behav = b
+		}
+	}
+	if behav == nil {
+		fmt.Fprintf(dst, "Unknown behaviour %q\n", argv[1])
+	}
+
+	ances := interface{}(g)
+	if len(argv) == 3 {
+		id := argv[2]
+		ances = g.Component(id)
+		if ances == nil {
+			fmt.Fprintf(dst, "Component %q not found\n", id)
+			return
+		}
+	}
+
+	x := g.Query(ances, behav)
+	if len(x) == 0 {
+		fmt.Fprintln(dst, "No results")
+		return
+	}
+
+	for _, c := range x {
+		i, ok := c.(Identifier)
+		if ok {
+			fmt.Fprintf(dst, "%T %s\n", c, i.Ident())
+		} else {
+			fmt.Fprintf(dst, "%T\n", c)
+		}
+	}
 }

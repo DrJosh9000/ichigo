@@ -4,6 +4,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"io/fs"
+	"reflect"
 	"sync"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -24,7 +25,13 @@ type Game struct {
 	Root         DrawUpdater // typically a *Scene or SceneRef though
 
 	dbmu sync.RWMutex
-	db   map[string]Identifier // Components by ID
+	db   map[string]Identifier    // Named components by ID
+	dex  map[dexKey][]interface{} // Ancestor/behaviour index
+}
+
+type dexKey struct {
+	ancestor  interface{}
+	behaviour reflect.Type
 }
 
 // Draw draws the entire thing, with default draw options.
@@ -48,7 +55,22 @@ func (g *Game) Update() error {
 	return g.Root.Update()
 }
 
-func (g *Game) registerComponent(c interface{}, p []interface{}) error {
+func (g *Game) registerComponent(c interface{}, path []interface{}) error {
+	// register in g.dex
+	for _, b := range Behaviours {
+		ct := reflect.TypeOf(c)
+		if !ct.Implements(b) {
+			continue
+		}
+		k := dexKey{c, b}
+		g.dex[k] = append(g.dex[k], c)
+		for _, p := range path {
+			k := dexKey{p, b}
+			g.dex[k] = append(g.dex[k], c)
+		}
+	}
+
+	// register in g.db
 	i, ok := c.(Identifier)
 	if !ok {
 		return nil
@@ -65,10 +87,20 @@ func (g *Game) registerComponent(c interface{}, p []interface{}) error {
 }
 
 // Component returns the component with a given ID, or nil if there is none.
+// This only returns sensible values after LoadAndPrepare.
 func (g *Game) Component(id string) Identifier {
 	g.dbmu.RLock()
 	defer g.dbmu.RUnlock()
 	return g.db[id]
+}
+
+// Query looks for components having both a given ancestor and implementing
+// a given behaviour (see Behaviors in interface.go). This only returns sensible
+// values after LoadAndPrepare. Note that every component is its own ancestor.
+func (g *Game) Query(ancestor interface{}, behaviour reflect.Type) []interface{} {
+	g.dbmu.RLock()
+	defer g.dbmu.RUnlock()
+	return g.dex[dexKey{ancestor, behaviour}]
 }
 
 // Scan implements Scanner.
@@ -97,11 +129,9 @@ func walk(c interface{}, p []interface{}, v func(interface{}, []interface{}) err
 	return nil
 }
 
-// LoadAndPrepare first calls Load on all Loaders. Once loading is complete,
-// it builds the component database and then calls Prepare on every Preparer.
-//  You must call Prepare before any calls
-// to Component. You may call Prepare again (e.g. as an alternative to
-// fastidiously calling RegisterComponent/UnregisterComponent).
+// LoadAndPrepare first calls Load on all Loaders. Once loading is complete, it
+// builds the component databases and then calls Prepare on every Preparer.
+// LoadAndPrepare must be called before any calls to Component or Query.
 func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	// Load all the Loaders
 	if err := Walk(g, func(c interface{}, _ []interface{}) error {
@@ -117,6 +147,7 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	// Build the component databases
 	g.dbmu.Lock()
 	g.db = make(map[string]Identifier)
+	g.dex = make(map[dexKey][]interface{})
 	if err := Walk(g, g.registerComponent); err != nil {
 		return err
 	}

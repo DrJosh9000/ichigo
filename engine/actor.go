@@ -25,7 +25,7 @@ type Actor struct {
 	Pos             image.Point
 	Size            image.Point
 
-	collisionDomain interface{}
+	collisionDomain []Collider
 	xRem, yRem      float64
 }
 
@@ -33,7 +33,7 @@ func (a *Actor) BoundingRect() image.Rectangle { return image.Rectangle{a.Pos, a
 
 func (a *Actor) CollidesAt(p image.Point) bool {
 	bounds := image.Rectangle{Min: p, Max: p.Add(a.Size)}
-	return nil != Walk(a.collisionDomain, func(c interface{}, _ []interface{}) error {
+	/*return nil != Walk(a.collisionDomain, func(c interface{}, _ []interface{}) error {
 		coll, ok := c.(Collider)
 		if !ok {
 			return nil
@@ -42,7 +42,13 @@ func (a *Actor) CollidesAt(p image.Point) bool {
 			return Collision{With: coll}
 		}
 		return nil
-	})
+	})*/
+	for _, c := range a.collisionDomain {
+		if c.CollidesWith(bounds) {
+			return true
+		}
+	}
+	return false
 }
 
 func (a *Actor) MoveX(dx float64, onCollide func()) {
@@ -86,7 +92,13 @@ func (a *Actor) MoveY(dy float64, onCollide func()) {
 }
 
 func (a *Actor) Prepare(g *Game) error {
-	a.collisionDomain = g.Component(a.CollisionDomain)
+	//a.collisionDomain = g.Component(a.CollisionDomain)
+
+	cs := g.Query(g.Component(a.CollisionDomain), ColliderType)
+	a.collisionDomain = make([]Collider, 0, len(cs))
+	for _, c := range cs {
+		a.collisionDomain = append(a.collisionDomain, c.(Collider))
+	}
 	return nil
 }
 
