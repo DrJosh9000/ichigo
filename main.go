@@ -42,10 +42,9 @@ func main() {
 			},
 		},
 	}
-	if err := g.Load(game.Assets); err != nil {
-		log.Fatalf("Loading error: %v", err)
+	if err := g.LoadAndPrepare(game.Assets); err != nil {
+		log.Fatalf("Loading/preparing error: %v", err)
 	}
-	g.Prepare()
 
 	if runtime.GOOS != "js" {
 		// Run a repl on the console.

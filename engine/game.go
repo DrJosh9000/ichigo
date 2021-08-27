@@ -23,8 +23,13 @@ type Game struct {
 	ScreenHeight int
 	Root         DrawUpdater // typically a *Scene or SceneRef though
 
+	// Components by ID
 	dbmu sync.RWMutex
 	db   map[string]interface{}
+
+	// Collision domains - all Collider subcomponents
+	cdmu sync.RWMutex
+	cd   map[string]map[Collider]struct{}
 }
 
 // Draw draws the entire thing, with default draw options.
@@ -93,53 +98,63 @@ func (g *Game) Component(id string) interface{} {
 // Scan implements Scanner.
 func (g *Game) Scan() []interface{} { return []interface{}{g.Root} }
 
-// Walk calls v with every component reachable from c via Scan, recursively,
-// for as long as visit returns nil.
-func Walk(c interface{}, v func(interface{}) error) error {
-	if err := v(c); err != nil {
+// Walk calls v with every path of components reachable from c via Scan, for as
+// long as visit returns nil.
+func Walk(c interface{}, v func(interface{}, []interface{}) error) error {
+	return walk(c, nil, v)
+}
+
+func walk(c interface{}, p []interface{}, v func(interface{}, []interface{}) error) error {
+	if err := v(c, p); err != nil {
 		return err
 	}
 	sc, ok := c.(Scanner)
 	if !ok {
 		return nil
 	}
+	p = append(p, c)
 	for _, c := range sc.Scan() {
-		if err := Walk(c, v); err != nil {
+		if err := walk(c, p, v); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-// Load calls Load on all Loaders reachable via Scan (using Walk).
-// It stops on the first error.
-func (g *Game) Load(assets fs.FS) error {
-	return Walk(g.Root, func(c interface{}) error {
+// LoadAndPrepare first calls Load on all Loaders. Once loading is complete,
+// it builds the component database and then calls Prepare on every Preparer.
+//  You must call Prepare before any calls
+// to Component. You may call Prepare again (e.g. as an alternative to
+// fastidiously calling RegisterComponent/UnregisterComponent).
+func (g *Game) LoadAndPrepare(assets fs.FS) error {
+	if err := Walk(g.Root, func(c interface{}, _ []interface{}) error {
 		l, ok := c.(Loader)
 		if !ok {
 			return nil
 		}
 		return l.Load(assets)
-	})
-}
+	}); err != nil {
+		return err
+	}
 
-// Prepare builds the component database (using Walk) and then calls
-// Prepare on every Preparer. You must call Prepare before any calls
-// to Component. You may call Prepare again (e.g. as an alternative to
-// fastidiously calling RegisterComponent/UnregisterComponent).
-func (g *Game) Prepare() {
+	g.cdmu.Lock()
+	g.cd = make(map[string]map[Collider]struct{})
+	g.cdmu.Unlock()
+
 	g.dbmu.Lock()
 	g.db = make(map[string]interface{})
 	g.dbmu.Unlock()
-	// Moment in time where db is empty... whatev.
-	Walk(g.Root, func(c interface{}) error {
+
+	// -> here <- is the moment in time where db is empty.
+	Walk(g.Root, func(c interface{}, p []interface{}) error {
 		g.RegisterComponent(c)
 		return nil
 	})
-	Walk(g.Root, func(c interface{}) error {
+	Walk(g.Root, func(c interface{}, _ []interface{}) error {
 		if p, ok := c.(Prepper); ok {
 			p.Prepare(g)
 		}
 		return nil
 	})
+	return nil
 }

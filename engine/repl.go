@@ -62,11 +62,10 @@ func (g *Game) cmdSave(dst io.Writer, argv []string) {
 func (g *Game) cmdReload(dst io.Writer, assets fs.FS) {
 	g.Disable()
 	g.Hide()
-	if err := g.Load(assets); err != nil {
+	if err := g.LoadAndPrepare(assets); err != nil {
 		fmt.Fprintf(dst, "Couldn't load: %v\n", err)
 		return
 	}
-	g.Prepare()
 	g.Enable()
 	g.Show()
 }
@@ -84,11 +83,10 @@ func (g *Game) cmdTree(dst io.Writer, argv []string) {
 			return
 		}
 	}
-	var walk func(interface{}, int)
-	walk = func(c interface{}, depth int) {
+	Walk(c, func(c interface{}, p []interface{}) error {
 		indent := ""
-		if depth > 0 {
-			indent = strings.Repeat("  ", depth-1) + "↳ "
+		if len(p) > 0 {
+			indent = strings.Repeat("  ", len(p)-1) + "↳ "
 		}
 		i, ok := c.(Identifier)
 		if ok {
@@ -96,11 +94,6 @@ func (g *Game) cmdTree(dst io.Writer, argv []string) {
 		} else {
 			fmt.Fprintf(dst, "%s%T\n", indent, c)
 		}
-		if s, ok := c.(Scanner); ok {
-			for _, d := range s.Scan() {
-				walk(d, depth+1)
-			}
-		}
-	}
-	walk(c, 0)
+		return nil
+	})
 }

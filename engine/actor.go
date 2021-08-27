@@ -2,14 +2,15 @@ package engine
 
 import (
 	"encoding/gob"
-	"errors"
+	"fmt"
 	"image"
 )
 
 // Ensure Actor satisfies interfaces.
-var _ Prepper = &Actor{}
-
-var errCollision = errors.New("collision detected")
+var _ interface {
+	Bounder
+	Prepper
+} = &Actor{}
 
 func init() {
 	gob.Register(&Actor{})
@@ -28,14 +29,17 @@ type Actor struct {
 	xRem, yRem      float64
 }
 
+func (a *Actor) BoundingRect() image.Rectangle { return image.Rectangle{a.Pos, a.Pos.Add(a.Size)} }
+
 func (a *Actor) CollidesAt(p image.Point) bool {
-	return nil != Walk(a.collisionDomain, func(c interface{}) error {
+	bounds := image.Rectangle{Min: p, Max: p.Add(a.Size)}
+	return nil != Walk(a.collisionDomain, func(c interface{}, _ []interface{}) error {
 		coll, ok := c.(Collider)
 		if !ok {
 			return nil
 		}
-		if coll.CollidesWith(image.Rectangle{Min: p, Max: p.Add(a.Size)}) {
-			return errCollision
+		if coll.CollidesWith(bounds) {
+			return Collision{With: coll}
 		}
 		return nil
 	})
@@ -90,4 +94,14 @@ func sign(m int) int {
 		return -1
 	}
 	return 1
+}
+
+// Collision reports a collision occurred.
+type Collision struct {
+	With Collider
+}
+
+// Error is really only to implement the error interface.
+func (c Collision) Error() string {
+	return fmt.Sprintf("collision with %v", c.With)
 }
