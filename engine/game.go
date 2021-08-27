@@ -132,7 +132,7 @@ func walk(c interface{}, p []interface{}, v func(interface{}, []interface{}) err
 // builds the component databases and then calls Prepare on every Preparer.
 // LoadAndPrepare must be called before any calls to Component or Query.
 func (g *Game) LoadAndPrepare(assets fs.FS) error {
-	// Load all the Loaders
+	// Load all the Loaders.
 	if err := Walk(g, func(c interface{}, _ []interface{}) error {
 		l, ok := c.(Loader)
 		if !ok {
@@ -153,11 +153,10 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	g.dbmu.Unlock()
 
 	// Prepare all the Preppers
-	return Walk(g, func(c interface{}, _ []interface{}) error {
-		p, ok := c.(Prepper)
-		if !ok {
-			return nil
+	for _, p := range g.Query(g, PrepperType) {
+		if err := p.(Prepper).Prepare(g); err != nil {
+			return err
 		}
-		return p.Prepare(g)
-	})
+	}
+	return nil
 }
