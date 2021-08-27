@@ -2,8 +2,8 @@ package engine
 
 import (
 	"encoding/gob"
+	"fmt"
 	"io/fs"
-	"log"
 	"sync"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -23,13 +23,8 @@ type Game struct {
 	ScreenHeight int
 	Root         DrawUpdater // typically a *Scene or SceneRef though
 
-	// Components by ID
 	dbmu sync.RWMutex
-	db   map[string]interface{}
-
-	// Collision domains - all Collider subcomponents
-	cdmu sync.RWMutex
-	cd   map[string]map[Collider]struct{}
+	db   map[string]interface{} // Components by ID
 }
 
 // Draw draws the entire thing, with default draw options.
@@ -53,39 +48,22 @@ func (g *Game) Update() error {
 	return g.Root.Update()
 }
 
-// RegisterComponent tells the game there is a new component. Currently this is
-// only necessary for components with IDs.
-func (g *Game) RegisterComponent(c interface{}) {
+func (g *Game) registerComponent(c interface{}, p []interface{}) error {
 	i, ok := c.(Identifier)
 	if !ok {
-		return
+		return nil
 	}
 	id := i.Ident()
 	if id == "" {
-		return
+		return nil
 	}
 	g.dbmu.Lock()
 	if _, exists := g.db[id]; exists {
-		log.Printf("duplicate id %q", id)
+		return fmt.Errorf("duplicate id %q", id)
 	}
 	g.db[id] = c
 	g.dbmu.Unlock()
-}
-
-// UnregisterComponent tells the game the component is no more.
-// Note this does not remove any references held by other components.
-func (g *Game) UnregisterComponent(c interface{}) {
-	i, ok := c.(Identifier)
-	if !ok {
-		return
-	}
-	id := i.Ident()
-	if id == "" {
-		return
-	}
-	g.dbmu.Lock()
-	delete(g.db, id)
-	g.dbmu.Unlock()
+	return nil
 }
 
 // Component returns the component with a given ID, or nil if there is none.
@@ -137,19 +115,12 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 		return err
 	}
 
-	g.cdmu.Lock()
-	g.cd = make(map[string]map[Collider]struct{})
-	g.cdmu.Unlock()
-
 	g.dbmu.Lock()
 	g.db = make(map[string]interface{})
 	g.dbmu.Unlock()
 
 	// -> here <- is the moment in time where db is empty.
-	Walk(g.Root, func(c interface{}, p []interface{}) error {
-		g.RegisterComponent(c)
-		return nil
-	})
+	Walk(g.Root, g.registerComponent)
 	Walk(g.Root, func(c interface{}, _ []interface{}) error {
 		if p, ok := c.(Prepper); ok {
 			p.Prepare(g)
