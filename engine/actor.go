@@ -85,8 +85,9 @@ func (a *Actor) MoveY(dy float64, onCollide func()) {
 	}
 }
 
-func (a *Actor) Prepare(g *Game) {
+func (a *Actor) Prepare(g *Game) error {
 	a.collisionDomain = g.Component(a.CollisionDomain)
+	return nil
 }
 
 func sign(m int) int {

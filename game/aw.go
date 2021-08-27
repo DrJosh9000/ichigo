@@ -188,7 +188,7 @@ func (aw *Awakeman) realUpdate() error {
 	return nil
 }
 
-func (aw *Awakeman) Prepare(game *engine.Game) {
+func (aw *Awakeman) Prepare(game *engine.Game) error {
 	aw.camera = game.Component(aw.CameraID).(*engine.Camera)
 	aw.toast, _ = game.Component(aw.ToastID).(*engine.DebugToast)
 
@@ -222,6 +222,7 @@ func (aw *Awakeman) Prepare(game *engine.Game) {
 		{Frame: 8, Duration: 6},
 		{Frame: 9, Duration: 6},
 	}}
+	return nil
 }
 
 func (aw *Awakeman) Scan() []interface{} { return []interface{}{&aw.Sprite} }

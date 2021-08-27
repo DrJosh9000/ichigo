@@ -92,9 +92,10 @@ func (u *WallUnit) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	screen.DrawImage(src, &opts)
 }
 
-func (u *WallUnit) Prepare(g *Game) {
+func (u *WallUnit) Prepare(g *Game) error {
 	u.wall = g.Component(u.WallID).(*Wall)
 	u.wall.regUnit(u)
+	return nil
 }
 
 func (u *WallUnit) Update() error {

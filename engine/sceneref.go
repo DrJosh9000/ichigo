@@ -83,7 +83,7 @@ func (r SceneRef) Show() { r.scene.Show() }
 func (r SceneRef) Ident() string { return r.scene.Ident() }
 
 // Prepare prepares the scene.
-func (r SceneRef) Prepare(g *Game) { r.scene.Prepare(g) }
+func (r SceneRef) Prepare(g *Game) error { return r.scene.Prepare(g) }
 
 // Scan returns the components in the scene.
 func (r SceneRef) Scan() []interface{} { return r.scene.Scan() }

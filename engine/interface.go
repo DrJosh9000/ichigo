@@ -80,7 +80,7 @@ type ParallaxScaler interface {
 // database has been populated but before the game is run. The component can
 // store the reference to game, if needed, and also query the component database.
 type Prepper interface {
-	Prepare(game *Game)
+	Prepare(game *Game) error
 }
 
 // Scanner components can be scanned. It is called when the game tree is walked

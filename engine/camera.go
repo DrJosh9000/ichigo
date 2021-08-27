@@ -111,4 +111,7 @@ func (c *Camera) Update() error { return c.Scene.Update() }
 func (c *Camera) Scan() []interface{} { return []interface{}{c.Scene} }
 
 // Prepare grabs a copy of game (needed for screen dimensions)
-func (c *Camera) Prepare(game *Game) { c.game = game }
+func (c *Camera) Prepare(game *Game) error {
+	c.game = game
+	return nil
+}

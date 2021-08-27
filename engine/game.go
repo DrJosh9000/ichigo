@@ -104,7 +104,7 @@ func walk(c interface{}, p []interface{}, v func(interface{}, []interface{}) err
 // fastidiously calling RegisterComponent/UnregisterComponent).
 func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	// Load all the Loaders
-	if err := Walk(g.Root, func(c interface{}, _ []interface{}) error {
+	if err := Walk(g, func(c interface{}, _ []interface{}) error {
 		l, ok := c.(Loader)
 		if !ok {
 			return nil
@@ -117,17 +117,17 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	// Build the component databases
 	g.dbmu.Lock()
 	g.db = make(map[string]Identifier)
-	if err := Walk(g.Root, g.registerComponent); err != nil {
+	if err := Walk(g, g.registerComponent); err != nil {
 		return err
 	}
 	g.dbmu.Unlock()
 
 	// Prepare all the Preppers
-	Walk(g.Root, func(c interface{}, _ []interface{}) error {
-		if p, ok := c.(Prepper); ok {
-			p.Prepare(g)
+	return Walk(g, func(c interface{}, _ []interface{}) error {
+		p, ok := c.(Prepper)
+		if !ok {
+			return nil
 		}
-		return nil
+		return p.Prepare(g)
 	})
-	return nil
 }

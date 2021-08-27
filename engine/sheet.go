@@ -21,9 +21,10 @@ type Sheet struct {
 	w int // width as measured in number of cells
 }
 
-func (s *Sheet) Prepare(*Game) {
+func (s *Sheet) Prepare(*Game) error {
 	s.w, _ = s.Src.Image().Size()
 	s.w /= s.CellSize.X
+	return nil
 }
 
 func (s *Sheet) Scan() []interface{} { return []interface{}{&s.Src} }

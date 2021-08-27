@@ -39,7 +39,10 @@ func (s *Scene) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 }
 
 // Prepare does an initial Z-order sort.
-func (s *Scene) Prepare(game *Game) { s.sortByDrawOrder() }
+func (s *Scene) Prepare(game *Game) error {
+	s.sortByDrawOrder()
+	return nil
+}
 
 // sortByDrawOrder sorts the components by Z position.
 // Everything without a Z sorts first. Stable sort is used to avoid Z-fighting
