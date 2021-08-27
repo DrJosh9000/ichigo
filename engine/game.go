@@ -62,6 +62,7 @@ func (g *Game) registerComponent(c interface{}, path []interface{}) error {
 		if !ct.Implements(b) {
 			continue
 		}
+		// TODO: sub-quadratic?
 		k := dexKey{c, b}
 		g.dex[k] = append(g.dex[k], c)
 		for _, p := range path {
