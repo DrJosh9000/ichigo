@@ -2,7 +2,6 @@ package engine
 
 import (
 	"encoding/gob"
-	"fmt"
 	"image"
 )
 
@@ -95,14 +94,4 @@ func sign(m int) int {
 		return -1
 	}
 	return 1
-}
-
-// Collision reports a collision occurred.
-type Collision struct {
-	With Collider
-}
-
-// Error is really only to implement the error interface.
-func (c Collision) Error() string {
-	return fmt.Sprintf("collision with %v", c.With)
 }
