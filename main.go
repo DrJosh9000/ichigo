@@ -33,10 +33,7 @@ func main() {
 		Root: &engine.Scene{
 			ID: "root",
 			Components: []interface{}{
-				&engine.Camera{
-					ID:    "game_camera",
-					Scene: &engine.SceneRef{Path: "assets/level1.gobz"},
-				},
+				&engine.SceneRef{Path: "assets/level1.gobz"},
 				&engine.DebugToast{ID: "toast", Pos: image.Pt(0, 15)},
 				engine.PerfDisplay{},
 			},
@@ -100,6 +97,9 @@ func writeLevel1() {
 	level1 := &engine.Scene{
 		ID:     "level_1",
 		Bounds: engine.Bounds(image.Rect(-32, -32, 320+32, 240+32)),
+		Camera: &engine.Camera{
+			ID: "game_camera",
+		},
 		Components: []interface{}{
 			&engine.Fill{
 				Color:  color.Gray{100},
