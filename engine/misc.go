@@ -44,7 +44,7 @@ type Parallax float64
 // ParallaxFactor returns s as a float64.
 func (s Parallax) ParallaxFactor() float64 { return float64(s) }
 
-// ZOrder implements DrawOrderer directly (as a float64 value).
+// ZOrder implements DrawOrder (in Drawer) directly (as a float64 value).
 type ZOrder float64
 
 // DrawOrder returns z as a float64.
