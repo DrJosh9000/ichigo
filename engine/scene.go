@@ -85,7 +85,7 @@ func (s *Scene) Update() error {
 		if !ok {
 			continue
 		}
-		if t := z.DrawOrder(); t > cz {
+		if t := z.DrawOrder(); t >= cz {
 			cz = t
 			continue
 		}
