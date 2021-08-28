@@ -12,7 +12,6 @@ var _ interface {
 	Identifier
 	Collider
 	Drawer
-	DrawOrderer
 	Hider
 	Scanner
 	Updater

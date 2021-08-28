@@ -11,7 +11,6 @@ import (
 var _ interface {
 	Identifier
 	Drawer
-	DrawOrderer
 	Scanner
 	Updater
 } = &Sprite{}

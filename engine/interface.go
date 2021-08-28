@@ -17,7 +17,6 @@ var (
 	ColliderType       = reflect.TypeOf((*Collider)(nil)).Elem()
 	DisablerType       = reflect.TypeOf((*Disabler)(nil)).Elem()
 	DrawerType         = reflect.TypeOf((*Drawer)(nil)).Elem()
-	DrawOrdererType    = reflect.TypeOf((*DrawOrderer)(nil)).Elem()
 	DrawUpdaterType    = reflect.TypeOf((*DrawUpdater)(nil)).Elem()
 	HiderType          = reflect.TypeOf((*Hider)(nil)).Elem()
 	IdentifierType     = reflect.TypeOf((*Identifier)(nil)).Elem()
@@ -36,7 +35,6 @@ var (
 		ColliderType,
 		DisablerType,
 		DrawerType,
-		DrawOrdererType,
 		DrawUpdaterType,
 		HiderType,
 		IdentifierType,
@@ -80,10 +78,6 @@ type Disabler interface {
 // (so that hiding the parent can hide the children, etc).
 type Drawer interface {
 	Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions)
-}
-
-// DrawOrderer components can provide a number for determining draw order.
-type DrawOrderer interface {
 	DrawOrder() float64
 }
 
@@ -148,7 +142,6 @@ type Scener interface {
 	Bounder
 	Disabler
 	Drawer
-	DrawOrderer
 	Hider
 	Identifier
 	Prepper

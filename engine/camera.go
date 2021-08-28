@@ -35,7 +35,7 @@ type Camera struct {
 	game *Game
 }
 
-// Draw applies transformations to opts, then calls c.Scene.Draw with it.
+// Draw applies transformations to opts, then draws the contents of c.Scene.
 func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	if c.Scene.IsHidden() {
 		return
@@ -103,6 +103,9 @@ func (c *Camera) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 		d.Draw(screen, opts)
 	}
 }
+
+// DrawOrder passes the call to c.Scene.
+func (c *Camera) DrawOrder() float64 { return c.Scene.DrawOrder() }
 
 // Update passes the call to c.Scene.
 func (c *Camera) Update() error { return c.Scene.Update() }

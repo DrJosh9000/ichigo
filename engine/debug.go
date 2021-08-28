@@ -12,7 +12,6 @@ import (
 
 var _ interface {
 	Drawer
-	DrawOrderer
 	Hider
 } = &PerfDisplay{}
 

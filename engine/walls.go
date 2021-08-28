@@ -15,7 +15,6 @@ var (
 
 	_ interface {
 		Drawer
-		DrawOrderer
 		Disabler
 		Hider
 		Prepper

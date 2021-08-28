@@ -12,8 +12,7 @@ import (
 
 var _ interface {
 	engine.Identifier
-	engine.Drawer      // provided by Sprite
-	engine.DrawOrderer // provided by Sprite
+	engine.Drawer // provided by Sprite
 	engine.Disabler
 	engine.Hider // provided by Sprite
 	engine.Prepper

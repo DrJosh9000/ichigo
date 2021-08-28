@@ -10,7 +10,6 @@ import (
 // Ensure Fill satisfies Drawer.
 var _ interface {
 	Drawer
-	DrawOrderer
 	Hider
 	Identifier
 } = &Fill{}

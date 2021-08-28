@@ -49,8 +49,8 @@ func (s *Scene) Prepare(game *Game) error {
 // (among layers without a Z, or those with equal Z).
 func (s *Scene) sortByDrawOrder() {
 	sort.SliceStable(s.Components, func(i, j int) bool {
-		a, aok := s.Components[i].(DrawOrderer)
-		b, bok := s.Components[j].(DrawOrderer)
+		a, aok := s.Components[i].(Drawer)
+		b, bok := s.Components[j].(Drawer)
 		if aok && bok {
 			return a.DrawOrder() < b.DrawOrder()
 		}
@@ -81,7 +81,7 @@ func (s *Scene) Update() error {
 	// Check if the updates put the components out of order; if so, sort
 	cz := -math.MaxFloat64 // fun fact: this is min float64
 	for _, c := range s.Components {
-		z, ok := c.(DrawOrderer)
+		z, ok := c.(Drawer)
 		if !ok {
 			continue
 		}
