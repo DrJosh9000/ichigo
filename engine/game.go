@@ -10,6 +10,14 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+var _ interface {
+	Disabler
+	Hider
+	Identifier
+	Updater
+	Scanner
+} = &Game{}
+
 func init() {
 	gob.Register(&Game{})
 }
@@ -30,7 +38,7 @@ type Game struct {
 }
 
 type dexKey struct {
-	ancestor  interface{}
+	ancestor  string
 	behaviour reflect.Type
 }
 
@@ -55,6 +63,9 @@ func (g *Game) Update() error {
 	return g.Root.Update()
 }
 
+// Ident returns "__GAME__".
+func (g *Game) Ident() string { return "__GAME__" }
+
 // Component returns the component with a given ID, or nil if there is none.
 // This only returns sensible values after LoadAndPrepare.
 func (g *Game) Component(id string) Identifier {
@@ -66,10 +77,10 @@ func (g *Game) Component(id string) Identifier {
 // Query looks for components having both a given ancestor and implementing
 // a given behaviour (see Behaviors in interface.go). This only returns sensible
 // values after LoadAndPrepare. Note that every component is its own ancestor.
-func (g *Game) Query(ancestor interface{}, behaviour reflect.Type) []interface{} {
+func (g *Game) Query(ancestorID string, behaviour reflect.Type) []interface{} {
 	g.dbmu.RLock()
 	defer g.dbmu.RUnlock()
-	return g.dex[dexKey{ancestor, behaviour}]
+	return g.dex[dexKey{ancestorID, behaviour}]
 }
 
 // Scan implements Scanner.
@@ -123,7 +134,7 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	g.dbmu.Unlock()
 
 	// Prepare all the Preppers
-	for _, p := range g.Query(g, PrepperType) {
+	for _, p := range g.Query(g.Ident(), PrepperType) {
 		if err := p.(Prepper).Prepare(g); err != nil {
 			return err
 		}
@@ -140,7 +151,11 @@ func (g *Game) registerComponent(c interface{}, path []interface{}) error {
 		}
 		// TODO: sub-quadratic?
 		for _, p := range append(path, c) {
-			k := dexKey{p, b}
+			i, ok := p.(Identifier)
+			if !ok || i.Ident() == "" {
+				continue
+			}
+			k := dexKey{i.Ident(), b}
 			g.dex[k] = append(g.dex[k], c)
 		}
 	}

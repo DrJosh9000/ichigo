@@ -117,14 +117,9 @@ func (g *Game) cmdQuery(dst io.Writer, argv []string) {
 		fmt.Fprintf(dst, "Unknown behaviour %q\n", argv[1])
 	}
 
-	ances := interface{}(g)
+	ances := g.Ident()
 	if len(argv) == 3 {
-		id := argv[2]
-		ances = g.Component(id)
-		if ances == nil {
-			fmt.Fprintf(dst, "Component %q not found\n", id)
-			return
-		}
+		ances = argv[2]
 	}
 
 	x := g.Query(ances, behav)

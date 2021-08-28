@@ -81,7 +81,7 @@ func (a *Actor) MoveY(dy float64, onCollide func()) {
 }
 
 func (a *Actor) Prepare(g *Game) error {
-	cs := g.Query(g.Component(a.CollisionDomain), ColliderType)
+	cs := g.Query(a.CollisionDomain, ColliderType)
 	a.collisionDomain = make([]Collider, 0, len(cs))
 	for _, c := range cs {
 		a.collisionDomain = append(a.collisionDomain, c.(Collider))
