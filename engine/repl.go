@@ -77,6 +77,7 @@ func (g *Game) cmdReload(dst io.Writer, assets fs.FS) {
 func (g *Game) cmdTree(dst io.Writer, argv []string) {
 	if len(argv) < 1 || len(argv) > 2 {
 		fmt.Println(dst, "Usage: tree [ID]")
+		return
 	}
 	c := interface{}(g)
 	if len(argv) == 2 { // subtree
@@ -105,6 +106,7 @@ func (g *Game) cmdTree(dst io.Writer, argv []string) {
 func (g *Game) cmdQuery(dst io.Writer, argv []string) {
 	if len(argv) < 2 || len(argv) > 3 {
 		fmt.Fprintln(dst, "Usage: query BEHAVIOUR [ANCESTOR_ID]")
+		return
 	}
 
 	var behav reflect.Type
