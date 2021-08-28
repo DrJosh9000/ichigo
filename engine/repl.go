@@ -106,6 +106,10 @@ func (g *Game) cmdTree(dst io.Writer, argv []string) {
 func (g *Game) cmdQuery(dst io.Writer, argv []string) {
 	if len(argv) < 2 || len(argv) > 3 {
 		fmt.Fprintln(dst, "Usage: query BEHAVIOUR [ANCESTOR_ID]")
+		fmt.Fprint(dst, "Behaviours:")
+		for _, b := range Behaviours {
+			fmt.Fprintf(dst, " %s", b.Name())
+		}
 		return
 	}
 
