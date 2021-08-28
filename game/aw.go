@@ -99,8 +99,8 @@ func (aw *Awakeman) realUpdate() error {
 	const (
 		ε              = 0.2
 		restitution    = -0.3
-		gravity        = 0.3
-		airResistance  = -0.01 // ⇒ terminal velocity = 30
+		gravity        = 0.2
+		airResistance  = -0.02 // ⇒ terminal velocity = 10
 		jumpVelocity   = -4.2
 		runVelocity    = 1.4
 		coyoteTime     = 5

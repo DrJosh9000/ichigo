@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"image"
 	"image/color"
 	_ "image/png"
@@ -14,16 +13,12 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-var rewriteLevel1 = flag.Bool("rewrite_level_1", false, "Rewrites level1.gobz from an inbuilt struct literal")
-
 func main() {
-	flag.Parse()
-
 	ebiten.SetWindowResizable(true)
 	ebiten.SetWindowSize(640, 480)
 	ebiten.SetWindowTitle("TODO")
 
-	if *rewriteLevel1 {
+	if false {
 		writeLevel1()
 	}
 
