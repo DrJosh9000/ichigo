@@ -112,6 +112,7 @@ func writeLevel1() {
 		},
 		Components: []interface{}{
 			&engine.Fill{
+				ID:     "bg_fill",
 				Color:  color.Gray{100},
 				ZOrder: 0,
 			},

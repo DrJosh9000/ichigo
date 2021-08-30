@@ -15,7 +15,7 @@ var _ interface {
 } = &Fill{}
 
 func init() {
-	gob.Register(Fill{})
+	gob.Register(&Fill{})
 	gob.Register(color.Gray{})
 	gob.Register(color.RGBA{})
 }

@@ -16,7 +16,7 @@ var _ interface {
 } = &SceneRef{}
 
 func init() {
-	gob.Register(SceneRef{})
+	gob.Register(&SceneRef{})
 }
 
 // SceneRef loads a gzipped, gob-encoded Scene from the asset FS.
