@@ -137,7 +137,7 @@ func (g *Game) cmdQuery(dst io.Writer, argv []string) {
 	for c := range x {
 		i, ok := c.(Identifier)
 		if ok {
-			fmt.Fprintf(dst, "%T %s\n", c, i.Ident())
+			fmt.Fprintf(dst, "%T %q\n", c, i.Ident())
 		} else {
 			fmt.Fprintf(dst, "%T\n", c)
 		}
