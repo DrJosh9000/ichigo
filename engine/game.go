@@ -146,7 +146,7 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	g.byID = make(map[string]Identifier)
 	g.byAB = make(map[abKey]map[interface{}]struct{})
 	g.par = make(map[interface{}]interface{})
-	if err := Walk(g, g.registerComponent); err != nil {
+	if err := Walk(g, g.register); err != nil {
 		return err
 	}
 	g.dbmu.Unlock()
@@ -160,10 +160,10 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	return nil
 }
 
-// RegisterComponent registers a component into the component database (as the
+// Register registers a component into the component database (as the
 // child of a given parent). Passing a nil component or parent is an error.
 // Registering multiple components with the same ID is also an error.
-func (g *Game) RegisterComopnent(component, parent interface{}) error {
+func (g *Game) Register(component, parent interface{}) error {
 	if component == nil {
 		return errNilComponent
 	}
@@ -172,10 +172,10 @@ func (g *Game) RegisterComopnent(component, parent interface{}) error {
 	}
 	g.dbmu.Lock()
 	defer g.dbmu.Unlock()
-	return g.registerComponent(component, parent)
+	return g.register(component, parent)
 }
 
-func (g *Game) registerComponent(component, parent interface{}) error {
+func (g *Game) register(component, parent interface{}) error {
 	// register in g.par
 	if parent != nil {
 		g.par[component] = parent
@@ -214,18 +214,18 @@ func (g *Game) registerComponent(component, parent interface{}) error {
 	return nil
 }
 
-// UnregisterComponent removes the component from the component database.
+// Unregister removes the component from the component database.
 // Passing a nil component has no effect.
-func (g *Game) UnregisterComponent(component interface{}) {
+func (g *Game) Unregister(component interface{}) {
 	if component == nil {
 		return
 	}
 	g.dbmu.Lock()
-	g.unregisterComponent(component)
+	g.unregister(component)
 	g.dbmu.Unlock()
 }
 
-func (g *Game) unregisterComponent(component interface{}) {
+func (g *Game) unregister(component interface{}) {
 	// unregister from g.byAB, using g.par to trace the path
 	ct := reflect.TypeOf(component)
 	for _, b := range Behaviours {
