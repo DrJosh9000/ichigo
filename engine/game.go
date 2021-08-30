@@ -33,11 +33,11 @@ type Game struct {
 	Root         DrawUpdater // typically a *Scene or SceneRef though
 
 	dbmu sync.RWMutex
-	db   map[string]Identifier    // Named components by ID
-	dex  map[dexKey][]interface{} // Ancestor/behaviour index
+	byID map[string]Identifier   // Named components by ID
+	byAB map[abKey][]interface{} // Ancestor/behaviour index
 }
 
-type dexKey struct {
+type abKey struct {
 	ancestor  string
 	behaviour reflect.Type
 }
@@ -71,7 +71,7 @@ func (g *Game) Ident() string { return "__GAME__" }
 func (g *Game) Component(id string) Identifier {
 	g.dbmu.RLock()
 	defer g.dbmu.RUnlock()
-	return g.db[id]
+	return g.byID[id]
 }
 
 // Query looks for components having both a given ancestor and implementing
@@ -80,7 +80,7 @@ func (g *Game) Component(id string) Identifier {
 func (g *Game) Query(ancestorID string, behaviour reflect.Type) []interface{} {
 	g.dbmu.RLock()
 	defer g.dbmu.RUnlock()
-	return g.dex[dexKey{ancestorID, behaviour}]
+	return g.byAB[abKey{ancestorID, behaviour}]
 }
 
 // Scan implements Scanner.
@@ -126,8 +126,8 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 
 	// Build the component databases
 	g.dbmu.Lock()
-	g.db = make(map[string]Identifier)
-	g.dex = make(map[dexKey][]interface{})
+	g.byID = make(map[string]Identifier)
+	g.byAB = make(map[abKey][]interface{})
 	if err := Walk(g, g.registerComponent); err != nil {
 		return err
 	}
@@ -155,8 +155,8 @@ func (g *Game) registerComponent(c interface{}, path []interface{}) error {
 			if !ok || i.Ident() == "" {
 				continue
 			}
-			k := dexKey{i.Ident(), b}
-			g.dex[k] = append(g.dex[k], c)
+			k := abKey{i.Ident(), b}
+			g.byAB[k] = append(g.byAB[k], c)
 		}
 	}
 
@@ -169,9 +169,9 @@ func (g *Game) registerComponent(c interface{}, path []interface{}) error {
 	if id == "" {
 		return nil
 	}
-	if _, exists := g.db[id]; exists {
+	if _, exists := g.byID[id]; exists {
 		return fmt.Errorf("duplicate id %q", id)
 	}
-	g.db[id] = i
+	g.byID[id] = i
 	return nil
 }
