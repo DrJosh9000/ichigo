@@ -20,20 +20,20 @@ func init() {
 
 // Actor handles basic movement.
 type Actor struct {
-	CollisionDomain string
+	CollisionDomain string // id of component to look for colliders inside of
 	Pos             image.Point
 	Size            image.Point
 
-	collisionDomain []Collider
-	xRem, yRem      float64
+	xRem, yRem float64
+	game       *Game
 }
 
 func (a *Actor) BoundingRect() image.Rectangle { return image.Rectangle{a.Pos, a.Pos.Add(a.Size)} }
 
 func (a *Actor) CollidesAt(p image.Point) bool {
 	bounds := image.Rectangle{Min: p, Max: p.Add(a.Size)}
-	for _, c := range a.collisionDomain {
-		if c.CollidesWith(bounds) {
+	for c := range a.game.Query(a.CollisionDomain, ColliderType) {
+		if c.(Collider).CollidesWith(bounds) {
 			return true
 		}
 	}
@@ -81,11 +81,7 @@ func (a *Actor) MoveY(dy float64, onCollide func()) {
 }
 
 func (a *Actor) Prepare(g *Game) error {
-	cs := g.Query(a.CollisionDomain, ColliderType)
-	a.collisionDomain = make([]Collider, 0, len(cs))
-	for _, c := range cs {
-		a.collisionDomain = append(a.collisionDomain, c.(Collider))
-	}
+	a.game = g
 	return nil
 }
 

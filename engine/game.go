@@ -33,8 +33,8 @@ type Game struct {
 	Root         DrawUpdater // typically a *Scene or SceneRef though
 
 	dbmu sync.RWMutex
-	byID map[string]Identifier   // Named components by ID
-	byAB map[abKey][]interface{} // Ancestor/behaviour index
+	byID map[string]Identifier              // Named components by ID
+	byAB map[abKey]map[interface{}]struct{} // Ancestor/behaviour index
 }
 
 type abKey struct {
@@ -77,7 +77,7 @@ func (g *Game) Component(id string) Identifier {
 // Query looks for components having both a given ancestor and implementing
 // a given behaviour (see Behaviors in interface.go). This only returns sensible
 // values after LoadAndPrepare. Note that every component is its own ancestor.
-func (g *Game) Query(ancestorID string, behaviour reflect.Type) []interface{} {
+func (g *Game) Query(ancestorID string, behaviour reflect.Type) map[interface{}]struct{} {
 	g.dbmu.RLock()
 	defer g.dbmu.RUnlock()
 	return g.byAB[abKey{ancestorID, behaviour}]
@@ -127,14 +127,14 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	// Build the component databases
 	g.dbmu.Lock()
 	g.byID = make(map[string]Identifier)
-	g.byAB = make(map[abKey][]interface{})
+	g.byAB = make(map[abKey]map[interface{}]struct{})
 	if err := Walk(g, g.registerComponent); err != nil {
 		return err
 	}
 	g.dbmu.Unlock()
 
 	// Prepare all the Preppers
-	for _, p := range g.Query(g.Ident(), PrepperType) {
+	for p := range g.Query(g.Ident(), PrepperType) {
 		if err := p.(Prepper).Prepare(g); err != nil {
 			return err
 		}
@@ -156,7 +156,10 @@ func (g *Game) registerComponent(c interface{}, path []interface{}) error {
 				continue
 			}
 			k := abKey{i.Ident(), b}
-			g.byAB[k] = append(g.byAB[k], c)
+			if g.byAB[k] == nil {
+				g.byAB[k] = make(map[interface{}]struct{})
+			}
+			g.byAB[k][c] = struct{}{}
 		}
 	}
 
