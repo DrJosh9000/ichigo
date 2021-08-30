@@ -95,7 +95,7 @@ func (g *Game) cmdTree(dst io.Writer, argv []string) {
 		}
 		i, ok := c.(Identifier)
 		if ok {
-			fmt.Fprintf(dst, "%s%T %s\n", indent, c, i.Ident())
+			fmt.Fprintf(dst, "%s%T %q\n", indent, c, i.Ident())
 		} else {
 			fmt.Fprintf(dst, "%s%T\n", indent, c)
 		}
@@ -113,22 +113,22 @@ func (g *Game) cmdQuery(dst io.Writer, argv []string) {
 		return
 	}
 
-	var behav reflect.Type
+	var behaviour reflect.Type
 	for _, b := range Behaviours {
 		if b.Name() == argv[1] {
-			behav = b
+			behaviour = b
 		}
 	}
-	if behav == nil {
+	if behaviour == nil {
 		fmt.Fprintf(dst, "Unknown behaviour %q\n", argv[1])
 	}
 
-	ances := g.Ident()
+	ancestor := g.Ident()
 	if len(argv) == 3 {
-		ances = argv[2]
+		ancestor = argv[2]
 	}
 
-	x := g.Query(ances, behav)
+	x := g.Query(ancestor, behaviour)
 	if len(x) == 0 {
 		fmt.Fprintln(dst, "No results")
 		return

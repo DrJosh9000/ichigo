@@ -35,6 +35,7 @@ type Game struct {
 	dbmu sync.RWMutex
 	byID map[string]Identifier              // Named components by ID
 	byAB map[abKey]map[interface{}]struct{} // Ancestor/behaviour index
+	par  map[interface{}]interface{}        // par[x] is parent of x
 }
 
 type abKey struct {
@@ -67,11 +68,21 @@ func (g *Game) Update() error {
 func (g *Game) Ident() string { return "__GAME__" }
 
 // Component returns the component with a given ID, or nil if there is none.
-// This only returns sensible values after LoadAndPrepare.
+// This only returns sensible values for registered components (e.g. after
+// LoadAndPrepare).
 func (g *Game) Component(id string) Identifier {
 	g.dbmu.RLock()
 	defer g.dbmu.RUnlock()
 	return g.byID[id]
+}
+
+// Parent returns the parent of a given component, or nil if there is none.
+// This only returns sensible values for registered components (e.g. after
+// LoadAndPrepare).
+func (g *Game) Parent(c interface{}) interface{} {
+	g.dbmu.RLock()
+	defer g.dbmu.RUnlock()
+	return g.par[c]
 }
 
 // Query looks for components having both a given ancestor and implementing
@@ -128,6 +139,7 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	g.dbmu.Lock()
 	g.byID = make(map[string]Identifier)
 	g.byAB = make(map[abKey]map[interface{}]struct{})
+	g.par = make(map[interface{}]interface{})
 	if err := Walk(g, g.registerComponent); err != nil {
 		return err
 	}
@@ -143,16 +155,21 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 }
 
 func (g *Game) registerComponent(c interface{}, path []interface{}) error {
+	// register in g.par
+	if l := len(path); l > 0 {
+		g.par[c] = path[l-1]
+	}
+
 	// register in g.byAB
 	ct := reflect.TypeOf(c)
 	for _, b := range Behaviours {
 		if !ct.Implements(b) {
 			continue
 		}
-		// TODO: sub-quadratic?
+		// TODO: this is quadratic - do better?
 		for _, p := range append(path, c) {
 			i, ok := p.(Identifier)
-			if !ok || i.Ident() == "" {
+			if !ok {
 				continue
 			}
 			k := abKey{i.Ident(), b}
@@ -163,9 +180,9 @@ func (g *Game) registerComponent(c interface{}, path []interface{}) error {
 		}
 	}
 
-	// register in g.byID
+	// register in g.byID if needed
 	i, ok := c.(Identifier)
-	if !ok || i.Ident() == "" {
+	if !ok {
 		return nil
 	}
 	id := i.Ident()
@@ -176,16 +193,23 @@ func (g *Game) registerComponent(c interface{}, path []interface{}) error {
 	return nil
 }
 
-func (g *Game) unregisterComponent(c interface{}, path []interface{}) {
-	// unregister from g.byAB
+// UnregisterComponent removes the component from the component database.
+func (g *Game) UnregisterComponent(c interface{}) {
+	g.dbmu.Lock()
+	g.unregisterComponent(c)
+	g.dbmu.Unlock()
+}
+
+func (g *Game) unregisterComponent(c interface{}) {
+	// unregister from g.byAB, using g.par to trace the path
 	ct := reflect.TypeOf(c)
 	for _, b := range Behaviours {
 		if !ct.Implements(b) {
 			continue
 		}
-		for _, p := range append(path, c) {
+		for p := c; p != nil; p = g.par[p] {
 			i, ok := p.(Identifier)
-			if !ok || i.Ident() == "" {
+			if !ok {
 				continue
 			}
 			k := abKey{i.Ident(), b}
@@ -196,9 +220,12 @@ func (g *Game) unregisterComponent(c interface{}, path []interface{}) {
 		}
 	}
 
-	// unregister from g.byID
+	// unregister from g.par
+	delete(g.par, c)
+
+	// unregister from g.byID if needed
 	i, ok := c.(Identifier)
-	if !ok || i.Ident() == "" {
+	if !ok {
 		return
 	}
 	delete(g.byID, i.Ident())

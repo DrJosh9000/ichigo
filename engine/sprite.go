@@ -9,7 +9,6 @@ import (
 
 // Ensure Sprite satisfies interfaces.
 var _ interface {
-	Identifier
 	Drawer
 	Scanner
 	Updater
@@ -21,7 +20,6 @@ func init() {
 
 // Sprite combines an Actor with the ability to Draw from a single spritesheet.
 type Sprite struct {
-	ID
 	Actor
 	FrameOffset image.Point
 	Hidden
