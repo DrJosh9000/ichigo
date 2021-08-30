@@ -133,9 +133,6 @@ func (s *Scene) Scan() []interface{} {
 	return s.Components
 }
 
-// Scene returns itself.
-func (s *Scene) Scene() *Scene { return s }
-
 // Update calls Update on all Updater components.
 func (s *Scene) Update() error {
 	if s.Disabled {
