@@ -143,7 +143,7 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 }
 
 func (g *Game) registerComponent(c interface{}, path []interface{}) error {
-	// register in g.dex
+	// register in g.byAB
 	ct := reflect.TypeOf(c)
 	for _, b := range Behaviours {
 		if !ct.Implements(b) {
@@ -163,7 +163,7 @@ func (g *Game) registerComponent(c interface{}, path []interface{}) error {
 		}
 	}
 
-	// register in g.db
+	// register in g.byID
 	i, ok := c.(Identifier)
 	if !ok || i.Ident() == "" {
 		return nil
@@ -177,7 +177,7 @@ func (g *Game) registerComponent(c interface{}, path []interface{}) error {
 }
 
 func (g *Game) unregisterComponent(c interface{}, path []interface{}) {
-	// unregister from g.dex
+	// unregister from g.byAB
 	ct := reflect.TypeOf(c)
 	for _, b := range Behaviours {
 		if !ct.Implements(b) {
@@ -196,7 +196,7 @@ func (g *Game) unregisterComponent(c interface{}, path []interface{}) {
 		}
 	}
 
-	// unregister from g.db
+	// unregister from g.byID
 	i, ok := c.(Identifier)
 	if !ok || i.Ident() == "" {
 		return
