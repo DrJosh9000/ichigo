@@ -88,10 +88,14 @@ func (g *Game) cmdTree(dst io.Writer, argv []string) {
 			return
 		}
 	}
-	Walk(c, func(c interface{}, p []interface{}) error {
+	Walk(c, func(c, p interface{}) error {
 		indent := ""
-		if len(p) > 0 {
-			indent = strings.Repeat("  ", len(p)-1) + "↳ "
+		l := 0
+		for ; p != nil; p = g.par[p] {
+			l++
+		}
+		if l > 0 {
+			indent = strings.Repeat("  ", l-1) + "↳ "
 		}
 		i, ok := c.(Identifier)
 		if ok {

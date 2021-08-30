@@ -2,6 +2,7 @@ package engine
 
 import (
 	"encoding/gob"
+	"errors"
 	"fmt"
 	"io/fs"
 	"reflect"
@@ -17,6 +18,11 @@ var _ interface {
 	Updater
 	Scanner
 } = &Game{}
+
+var (
+	errNilComponent = errors.New("nil component")
+	errNilParent    = errors.New("nil parent")
+)
 
 func init() {
 	gob.Register(&Game{})
@@ -97,23 +103,23 @@ func (g *Game) Query(ancestorID string, behaviour reflect.Type) map[interface{}]
 // Scan implements Scanner.
 func (g *Game) Scan() []interface{} { return []interface{}{g.Root} }
 
-// Walk calls v with every path of components reachable from c via Scan, for as
-// long as visit returns nil.
-func Walk(c interface{}, v func(interface{}, []interface{}) error) error {
-	return walk(c, make([]interface{}, 0, 16), v)
+// Walk calls visit with every component and its parent, reachable from the
+// given component via Scan, for as long as visit returns nil. The parent of
+// the first component (as passed to visit) will be nil.
+func Walk(component interface{}, visit func(component, parent interface{}) error) error {
+	return walk(component, nil, visit)
 }
 
-func walk(c interface{}, p []interface{}, v func(interface{}, []interface{}) error) error {
-	if err := v(c, p); err != nil {
+func walk(component, parent interface{}, visit func(component, parent interface{}) error) error {
+	if err := visit(component, parent); err != nil {
 		return err
 	}
-	sc, ok := c.(Scanner)
+	sc, ok := component.(Scanner)
 	if !ok {
 		return nil
 	}
-	p = append(p, c)
 	for _, c := range sc.Scan() {
-		if err := walk(c, p, v); err != nil {
+		if err := walk(c, component, visit); err != nil {
 			return err
 		}
 	}
@@ -125,7 +131,7 @@ func walk(c interface{}, p []interface{}, v func(interface{}, []interface{}) err
 // LoadAndPrepare must be called before any calls to Component or Query.
 func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	// Load all the Loaders.
-	if err := Walk(g, func(c interface{}, _ []interface{}) error {
+	if err := Walk(g, func(c, _ interface{}) error {
 		l, ok := c.(Loader)
 		if !ok {
 			return nil
@@ -154,20 +160,35 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	return nil
 }
 
-func (g *Game) registerComponent(c interface{}, path []interface{}) error {
+// RegisterComponent registers a component into the component database (as the
+// child of a given parent). Passing a nil component or parent is an error.
+// Registering multiple components with the same ID is also an error.
+func (g *Game) RegisterComopnent(component, parent interface{}) error {
+	if component == nil {
+		return errNilComponent
+	}
+	if parent == nil && component != g {
+		return errNilParent
+	}
+	g.dbmu.Lock()
+	defer g.dbmu.Unlock()
+	return g.registerComponent(component, parent)
+}
+
+func (g *Game) registerComponent(component, parent interface{}) error {
 	// register in g.par
-	if l := len(path); l > 0 {
-		g.par[c] = path[l-1]
+	if parent != nil {
+		g.par[component] = parent
 	}
 
 	// register in g.byAB
-	ct := reflect.TypeOf(c)
+	ct := reflect.TypeOf(component)
 	for _, b := range Behaviours {
 		if !ct.Implements(b) {
 			continue
 		}
-		// TODO: this is quadratic - do better?
-		for _, p := range append(path, c) {
+		// TODO: better than O(len(path)^2) time and memory?
+		for p := component; p != nil; p = g.par[p] {
 			i, ok := p.(Identifier)
 			if !ok {
 				continue
@@ -176,12 +197,12 @@ func (g *Game) registerComponent(c interface{}, path []interface{}) error {
 			if g.byAB[k] == nil {
 				g.byAB[k] = make(map[interface{}]struct{})
 			}
-			g.byAB[k][c] = struct{}{}
+			g.byAB[k][component] = struct{}{}
 		}
 	}
 
 	// register in g.byID if needed
-	i, ok := c.(Identifier)
+	i, ok := component.(Identifier)
 	if !ok {
 		return nil
 	}
@@ -194,20 +215,24 @@ func (g *Game) registerComponent(c interface{}, path []interface{}) error {
 }
 
 // UnregisterComponent removes the component from the component database.
-func (g *Game) UnregisterComponent(c interface{}) {
+// Passing a nil component has no effect.
+func (g *Game) UnregisterComponent(component interface{}) {
+	if component == nil {
+		return
+	}
 	g.dbmu.Lock()
-	g.unregisterComponent(c)
+	g.unregisterComponent(component)
 	g.dbmu.Unlock()
 }
 
-func (g *Game) unregisterComponent(c interface{}) {
+func (g *Game) unregisterComponent(component interface{}) {
 	// unregister from g.byAB, using g.par to trace the path
-	ct := reflect.TypeOf(c)
+	ct := reflect.TypeOf(component)
 	for _, b := range Behaviours {
 		if !ct.Implements(b) {
 			continue
 		}
-		for p := c; p != nil; p = g.par[p] {
+		for p := component; p != nil; p = g.par[p] {
 			i, ok := p.(Identifier)
 			if !ok {
 				continue
@@ -216,15 +241,15 @@ func (g *Game) unregisterComponent(c interface{}) {
 			if g.byAB[k] == nil {
 				continue
 			}
-			delete(g.byAB[k], c)
+			delete(g.byAB[k], component)
 		}
 	}
 
 	// unregister from g.par
-	delete(g.par, c)
+	delete(g.par, component)
 
 	// unregister from g.byID if needed
-	i, ok := c.(Identifier)
+	i, ok := component.(Identifier)
 	if !ok {
 		return
 	}
