@@ -165,16 +165,41 @@ func (g *Game) registerComponent(c interface{}, path []interface{}) error {
 
 	// register in g.db
 	i, ok := c.(Identifier)
-	if !ok {
+	if !ok || i.Ident() == "" {
 		return nil
 	}
 	id := i.Ident()
-	if id == "" {
-		return nil
-	}
 	if _, exists := g.byID[id]; exists {
 		return fmt.Errorf("duplicate id %q", id)
 	}
 	g.byID[id] = i
 	return nil
+}
+
+func (g *Game) unregisterComponent(c interface{}, path []interface{}) {
+	// unregister from g.dex
+	ct := reflect.TypeOf(c)
+	for _, b := range Behaviours {
+		if !ct.Implements(b) {
+			continue
+		}
+		for _, p := range append(path, c) {
+			i, ok := p.(Identifier)
+			if !ok || i.Ident() == "" {
+				continue
+			}
+			k := abKey{i.Ident(), b}
+			if g.byAB[k] == nil {
+				continue
+			}
+			delete(g.byAB[k], c)
+		}
+	}
+
+	// unregister from g.db
+	i, ok := c.(Identifier)
+	if !ok || i.Ident() == "" {
+		return
+	}
+	delete(g.byID, i.Ident())
 }
