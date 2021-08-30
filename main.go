@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"runtime/pprof"
 
 	"drjosh.dev/gurgle/engine"
 	"drjosh.dev/gurgle/game"
@@ -14,11 +15,25 @@ import (
 )
 
 func main() {
+	// Change to true to enable cpu profile
+	if false && runtime.GOOS != "js" {
+		f, err := os.Create("cpuprofile.pprof")
+		if err != nil {
+			log.Fatal("could not create CPU profile: ", err)
+		}
+		defer f.Close()
+		if err := pprof.StartCPUProfile(f); err != nil {
+			log.Fatal("could not start CPU profile: ", err)
+		}
+		defer pprof.StopCPUProfile()
+	}
+
 	ebiten.SetWindowResizable(true)
 	ebiten.SetWindowSize(640, 480)
 	ebiten.SetWindowTitle("TODO")
 
-	if false {
+	// Change to true to rewrite level1.gobz
+	if false && runtime.GOOS != "js" {
 		writeLevel1()
 	}
 
