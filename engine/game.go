@@ -13,6 +13,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+const gameDoesEverything = false
+
 var _ interface {
 	Disabler
 	Hider
@@ -71,13 +73,55 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if g.Hidden {
 		return
 	}
-	//g.Root.Draw(screen, ebiten.DrawImageOptions{})
-	// draw everything
-	for _, d := range g.drawList {
-		if h, ok := d.(Hider); ok && h.IsHidden() {
-			continue
+	if !gameDoesEverything {
+		g.Root.Draw(screen, ebiten.DrawImageOptions{})
+	}
+	if gameDoesEverything {
+		hidden := map[interface{}]bool{
+			g: false, // g.Hidden checked above
 		}
-		d.Draw(screen, ebiten.DrawImageOptions{})
+		transform := map[interface{}]ebiten.DrawImageOptions{
+			g: {},
+		}
+		// draw everything
+		for _, d := range g.drawList {
+			// directly hidden?
+			if h, ok := d.(Hider); ok && h.IsHidden() {
+				hidden[d] = true
+				continue
+			}
+			// hidden by parent?
+			// walk up the parents to find the lowest known
+			hid := false
+			stack := []interface{}{d}
+			for p := g.par[d]; p != nil; p = g.par[p] {
+				if h, found := hidden[p]; found {
+					hid = h
+					break
+				}
+				stack = append(stack, p)
+			}
+			// unwind the stack, setting known values
+			for len(stack) > 0 {
+				l1 := len(stack) - 1
+				p := stack[l1]
+				stack = stack[:l1]
+				if h, ok := p.(Hider); ok {
+					hid = hid || h.IsHidden()
+					hidden[p] = hid
+				}
+			}
+
+			// now...skip if hidden
+			if hid {
+				continue
+			}
+
+			if t, ok := d.(Transformer); ok {
+				transform[t] = t.Transform() // concatted with parent transform...
+			}
+			d.Draw(screen, ebiten.DrawImageOptions{})
+		}
 	}
 }
 
@@ -95,13 +139,14 @@ func (g *Game) Update() error {
 	if err := g.Root.Update(); err != nil {
 		return err
 	}
-
-	// sort the draw list (yes, on every frame)
-	sort.Stable(g.drawList)
-	// slice out any tombstones
-	for i := len(g.drawList) - 1; i >= 0; i-- {
-		if g.drawList[i] == (tombstone{}) {
-			g.drawList = g.drawList[:i]
+	if gameDoesEverything {
+		// sort the draw list (yes, on every frame)
+		sort.Stable(g.drawList)
+		// slice out any tombstones
+		for i := len(g.drawList) - 1; i >= 0; i-- {
+			if g.drawList[i] == (tombstone{}) {
+				g.drawList = g.drawList[:i]
+			}
 		}
 	}
 	return nil

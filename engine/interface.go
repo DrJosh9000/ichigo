@@ -26,6 +26,7 @@ var (
 	ScannerType        = reflect.TypeOf((*Scanner)(nil)).Elem()
 	ScenerType         = reflect.TypeOf((*Scener)(nil)).Elem()
 	SaverType          = reflect.TypeOf((*Saver)(nil)).Elem()
+	TransformerType    = reflect.TypeOf((*Transformer)(nil)).Elem()
 	UpdaterType        = reflect.TypeOf((*Updater)(nil)).Elem()
 
 	// Behaviours lists all the behaviours that can be queried with Game.Query.
@@ -44,6 +45,7 @@ var (
 		ScannerType,
 		ScenerType,
 		SaverType,
+		TransformerType,
 		UpdaterType,
 	}
 )
@@ -160,6 +162,11 @@ type Scener interface {
 // Saver components can be saved to disk.
 type Saver interface {
 	Save() error
+}
+
+// Transformer components can transform their child components.
+type Transformer interface {
+	Transform() ebiten.DrawImageOptions
 }
 
 // Updater components can update themselves. Update is called repeatedly.
