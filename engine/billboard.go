@@ -13,6 +13,7 @@ var _ interface {
 	Drawer
 	ParallaxScaler
 	Scanner
+	Transformer
 } = &Billboard{}
 
 func init() {

@@ -18,6 +18,8 @@ var (
 		Disabler
 		Hider
 		Prepper
+		Scanner
+		Transformer
 	} = &WallUnit{}
 )
 
