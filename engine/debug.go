@@ -10,12 +10,21 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-var _ interface {
-	Drawer
-	Hider
-} = &PerfDisplay{}
+var (
+	_ interface {
+		Drawer
+		Hider
+	} = &PerfDisplay{}
+
+	_ interface {
+		Drawer
+		Hider
+		Updater
+	} = &DebugToast{}
+)
 
 func init() {
+	gob.Register(&DebugToast{})
 	gob.Register(&PerfDisplay{})
 }
 
@@ -28,7 +37,7 @@ type DebugToast struct {
 	Text  string
 }
 
-func (d *DebugToast) Draw(screen *ebiten.Image, _ ebiten.DrawImageOptions) {
+func (d *DebugToast) Draw(screen *ebiten.Image, _ *ebiten.DrawImageOptions) {
 	ebitenutil.DebugPrintAt(screen, d.Text, d.Pos.X, d.Pos.Y)
 }
 
@@ -54,7 +63,7 @@ type PerfDisplay struct {
 	Hidden
 }
 
-func (p PerfDisplay) Draw(screen *ebiten.Image, _ ebiten.DrawImageOptions) {
+func (p PerfDisplay) Draw(screen *ebiten.Image, _ *ebiten.DrawImageOptions) {
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f  FPS: %0.2f", ebiten.CurrentTPS(), ebiten.CurrentFPS()))
 }
 

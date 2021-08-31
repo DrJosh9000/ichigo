@@ -30,13 +30,14 @@ type Billboard struct {
 }
 
 // Draw draws the image.
-func (b *Billboard) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
-	var geom ebiten.GeoM
-	geom.Translate(float64(b.Pos.X), float64(b.Pos.Y))
-	geom.Concat(opts.GeoM)
-	opts.GeoM = geom
-	screen.DrawImage(b.Src.Image(), &opts)
+func (b *Billboard) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
+	screen.DrawImage(b.Src.Image(), opts)
 }
 
 // Scan returns a slice containing Src.
 func (b *Billboard) Scan() []interface{} { return []interface{}{&b.Src} }
+
+func (b *Billboard) Transform() (opts ebiten.DrawImageOptions) {
+	opts.GeoM.Translate(float2(b.Pos))
+	return opts
+}

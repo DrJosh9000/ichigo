@@ -30,8 +30,8 @@ type Sprite struct {
 	anim *Anim
 }
 
-func (s *Sprite) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
-	screen.DrawImage(s.Sheet.SubImage(s.anim.CurrentFrame()), &opts)
+func (s *Sprite) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
+	screen.DrawImage(s.Sheet.SubImage(s.anim.CurrentFrame()), opts)
 }
 
 func (s *Sprite) Scan() []interface{} {
@@ -53,5 +53,6 @@ func (s *Sprite) Transform() (opts ebiten.DrawImageOptions) {
 	return opts
 }
 
-// anim isn't returned from Scan so we must update it ourselves
+// anim can change a bit so we don't tell Game about it, but that means it must
+// be updated here.
 func (s *Sprite) Update() error { return s.anim.Update() }

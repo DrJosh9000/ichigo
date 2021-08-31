@@ -79,7 +79,7 @@ type Disabler interface {
 // must call Draw on any internal components not known to the engine (i.e. not
 // passed to Game.Register or returned from Scan).
 type Drawer interface {
-	Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions)
+	Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions)
 	DrawOrder() float64
 }
 

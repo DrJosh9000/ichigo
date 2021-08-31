@@ -28,6 +28,6 @@ type Fill struct {
 	ZOrder
 }
 
-func (f *Fill) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
+func (f *Fill) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	screen.Fill(opts.ColorM.Apply(f.Color))
 }

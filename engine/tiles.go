@@ -65,7 +65,7 @@ func (t *Tilemap) CollidesWith(r image.Rectangle) bool {
 }
 
 // Draw draws the tilemap.
-func (t *Tilemap) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
+func (t *Tilemap) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	og := opts.GeoM
 	var geom ebiten.GeoM
 	for p, tile := range t.Map {
@@ -78,7 +78,7 @@ func (t *Tilemap) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 		opts.GeoM = geom
 
 		src := t.Sheet.SubImage(tile.CellIndex())
-		screen.DrawImage(src, &opts)
+		screen.DrawImage(src, opts)
 	}
 }
 

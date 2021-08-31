@@ -78,14 +78,8 @@ type WallUnit struct {
 	wall *Wall
 }
 
-func (u *WallUnit) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
-	var geom ebiten.GeoM
-	geom.Translate(float2(mul2(u.Pos, u.wall.UnitSize).Add(u.wall.UnitOffset).Add(u.wall.Offset)))
-	geom.Concat(opts.GeoM)
-	opts.GeoM = geom
-
-	src := u.wall.Sheet.SubImage(u.Tile.CellIndex())
-	screen.DrawImage(src, &opts)
+func (u *WallUnit) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
+	screen.DrawImage(u.wall.Sheet.SubImage(u.Tile.CellIndex()), opts)
 }
 
 func (u *WallUnit) Prepare(g *Game) error {
@@ -95,3 +89,8 @@ func (u *WallUnit) Prepare(g *Game) error {
 }
 
 func (u *WallUnit) Scan() []interface{} { return []interface{}{u.Tile} }
+
+func (u *WallUnit) Transform() (opts ebiten.DrawImageOptions) {
+	opts.GeoM.Translate(float2(mul2(u.Pos, u.wall.UnitSize).Add(u.wall.UnitOffset).Add(u.wall.Offset)))
+	return opts
+}

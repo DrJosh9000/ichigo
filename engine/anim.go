@@ -16,6 +16,7 @@ type AnimFrame struct {
 }
 
 // Anim is n animation being displayed, together with the current state.
+// A nil *Anim can be used, but always returns 0 for the current frame.
 type Anim struct {
 	Frames  []AnimFrame
 	OneShot bool
@@ -25,18 +26,34 @@ type Anim struct {
 
 // Copy makes a shallow copy of the anim.
 func (a *Anim) Copy() *Anim {
+	if a == nil {
+		return nil
+	}
 	a2 := *a
 	return &a2
 }
 
 // CurrentFrame returns the frame number for the current index.
-func (a *Anim) CurrentFrame() int { return a.Frames[a.Index].Frame }
+func (a *Anim) CurrentFrame() int {
+	if a == nil {
+		return 0
+	}
+	return a.Frames[a.Index].Frame
+}
 
 // Reset resets both Index and Ticks to 0.
-func (a *Anim) Reset() { a.Index, a.Ticks = 0, 0 }
+func (a *Anim) Reset() {
+	if a == nil {
+		return
+	}
+	a.Index, a.Ticks = 0, 0
+}
 
 // Update increments the tick count and advances the frame if necessary.
 func (a *Anim) Update() error {
+	if a == nil {
+		return nil
+	}
 	a.Ticks++
 	if a.OneShot && a.Index == len(a.Frames)-1 {
 		// on the last frame of a one shot so remain on final frame

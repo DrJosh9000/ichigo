@@ -104,7 +104,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if st.hidden {
 			continue
 		}
-		d.Draw(screen, st.opts)
+		d.Draw(screen, &st.opts)
 	}
 }
 
@@ -390,7 +390,7 @@ var _ Drawer = tombstone{}
 
 type tombstone struct{}
 
-func (tombstone) Draw(*ebiten.Image, ebiten.DrawImageOptions) {}
+func (tombstone) Draw(*ebiten.Image, *ebiten.DrawImageOptions) {}
 
 func (tombstone) DrawOrder() float64 { return math.Inf(1) }
 
