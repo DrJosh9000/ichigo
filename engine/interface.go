@@ -156,6 +156,7 @@ type Scener interface {
 	Identifier
 	Prepper
 	Scanner
+	Transformer
 	Updater
 }
 

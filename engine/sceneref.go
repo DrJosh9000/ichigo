@@ -88,5 +88,8 @@ func (r SceneRef) Prepare(g *Game) error { return r.scene.Prepare(g) }
 // Scan returns the components in the scene.
 func (r SceneRef) Scan() []interface{} { return r.scene.Scan() }
 
+// Transform returns the value of Transform from the scene.
+func (r SceneRef) Transform() ebiten.DrawImageOptions { return r.scene.Transform() }
+
 // Update updates the scene.
 func (r SceneRef) Update() error { return r.scene.Update() }

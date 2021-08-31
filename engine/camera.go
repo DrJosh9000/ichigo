@@ -11,6 +11,7 @@ import (
 var _ interface {
 	Identifier
 	Prepper
+	Transformer
 } = &Camera{}
 
 func init() {
@@ -36,4 +37,14 @@ type Camera struct {
 func (c *Camera) Prepare(game *Game) error {
 	c.game = game
 	return nil
+}
+
+// Transform returns the camera transform.
+func (c *Camera) Transform() ebiten.DrawImageOptions {
+	var opts ebiten.DrawImageOptions
+	opts.GeoM.Translate(float2(c.Centre.Mul(-1)))
+	opts.GeoM.Scale(c.Zoom, c.Zoom)
+	opts.GeoM.Rotate(c.Rotation)
+	opts.GeoM.Translate(float64(c.game.ScreenWidth/2), float64(c.game.ScreenHeight/2))
+	return opts
 }

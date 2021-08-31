@@ -13,7 +13,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const gameDoesEverything = false
+const gameDoesEverything = true
 
 var _ interface {
 	Disabler
@@ -68,60 +68,71 @@ func (d drawers) Less(i, j int) bool { return d[i].DrawOrder() < d[j].DrawOrder(
 func (d drawers) Len() int           { return len(d) }
 func (d drawers) Swap(i, j int)      { d[i], d[j] = d[j], d[i] }
 
+func concatOpts(a, b ebiten.DrawImageOptions) ebiten.DrawImageOptions {
+	a.ColorM.Concat(b.ColorM)
+	a.GeoM.Concat(b.GeoM)
+	a.CompositeMode = b.CompositeMode
+	a.Filter = b.Filter
+	return a
+}
+
 // Draw draws the entire thing, with default draw options.
 func (g *Game) Draw(screen *ebiten.Image) {
 	if g.Hidden {
 		return
 	}
-	if !gameDoesEverything {
-		g.Root.Draw(screen, ebiten.DrawImageOptions{})
-	}
+
 	if gameDoesEverything {
-		hidden := map[interface{}]bool{
-			g: false, // g.Hidden checked above
+		type state struct {
+			hidden bool
+			opts   ebiten.DrawImageOptions
 		}
-		transform := map[interface{}]ebiten.DrawImageOptions{
-			g: {},
+		accum := map[interface{}]state{
+			g: {hidden: false},
 		}
 		// draw everything
 		for _, d := range g.drawList {
-			// directly hidden?
+			// is d directly hidden?
 			if h, ok := d.(Hider); ok && h.IsHidden() {
-				hidden[d] = true
-				continue
+				accum[d] = state{hidden: true}
+				continue // skip drawing
 			}
-			// hidden by parent?
-			// walk up the parents to find the lowest known
-			hid := false
+			// walk up g.par to find the nearest parent state in accum
+			var st state
 			stack := []interface{}{d}
-			for p := g.par[d]; p != nil; p = g.par[p] {
-				if h, found := hidden[p]; found {
-					hid = h
+			for p := g.par[d]; ; p = g.par[p] {
+				if s, found := accum[p]; found {
+					st = s
 					break
 				}
 				stack = append(stack, p)
 			}
-			// unwind the stack, setting known values
+			// unwind the stack, accumulating state along the way
 			for len(stack) > 0 {
 				l1 := len(stack) - 1
 				p := stack[l1]
 				stack = stack[:l1]
 				if h, ok := p.(Hider); ok {
-					hid = hid || h.IsHidden()
-					hidden[p] = hid
+					st.hidden = st.hidden || h.IsHidden()
 				}
+				if st.hidden {
+					accum[p] = state{hidden: true}
+					continue
+				}
+				if t, ok := p.(Transformer); ok {
+					st.opts = concatOpts(t.Transform(), st.opts)
+				}
+				accum[p] = st
 			}
 
-			// now...skip if hidden
-			if hid {
+			// now...skip drawing if hidden :P
+			if st.hidden {
 				continue
 			}
-
-			if t, ok := d.(Transformer); ok {
-				transform[t] = t.Transform() // concatted with parent transform...
-			}
-			d.Draw(screen, ebiten.DrawImageOptions{})
+			d.Draw(screen, st.opts)
 		}
+	} else { // !gameDoesEverything
+		g.Root.Draw(screen, ebiten.DrawImageOptions{})
 	}
 }
 

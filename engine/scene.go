@@ -28,7 +28,7 @@ type Scene struct {
 
 // Draw draws all components in order.
 func (s *Scene) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
-	if s.Hidden {
+	if s.Hidden || gameDoesEverything {
 		return
 	}
 	if s.Camera == nil {
@@ -104,6 +104,14 @@ func (s *Scene) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 		opts.GeoM = geom
 		d.Draw(screen, opts)
 	}
+}
+
+// Transform returns the camera transform
+func (s *Scene) Transform() ebiten.DrawImageOptions {
+	if s.Camera == nil {
+		return ebiten.DrawImageOptions{}
+	}
+	return s.Camera.Transform()
 }
 
 // Prepare does an initial Z-order sort.
