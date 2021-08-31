@@ -79,8 +79,9 @@ func (s *Scene) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	// Compute common matrix (parts independent of parallax, which is step 1).
 	// Moving centre to the origin happens per component.
 	var comm ebiten.GeoM
-	// 2. Zoom (this is also where rotation would be)
+	// 2. Zoom and rotate
 	comm.Scale(zoom, zoom)
+	comm.Rotate(s.Camera.Rotation)
 	// 3. Move the origin to the centre of screen space.
 	comm.Translate(sw2, sh2)
 	// 4. Apply transforms from the caller.

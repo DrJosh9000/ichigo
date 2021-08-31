@@ -24,9 +24,10 @@ type Camera struct {
 	ID
 
 	// Camera controls
-	Centre image.Point // world coordinates
-	Filter ebiten.Filter
-	Zoom   float64 // unitless
+	Centre   image.Point // world coordinates
+	Filter   ebiten.Filter
+	Rotation float64 // radians
+	Zoom     float64 // unitless
 
 	game *Game
 }
