@@ -66,7 +66,8 @@ func (w *Wall) CollidesWith(r image.Rectangle) bool {
 
 func (w *Wall) Scan() []interface{} { return []interface{}{&w.Sheet} }
 
-// WallUnit
+// WallUnit is a unit in a wall. Unlike a tile in a tilemap, WallUnit is
+// responsible for drawing itself.
 type WallUnit struct {
 	Disabled
 	Hidden
