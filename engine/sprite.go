@@ -11,6 +11,7 @@ import (
 var _ interface {
 	Drawer
 	Scanner
+	Transformer
 	Updater
 } = &Sprite{}
 
@@ -30,14 +31,7 @@ type Sprite struct {
 }
 
 func (s *Sprite) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
-	dp := s.Actor.Pos.Add(s.FrameOffset)
-	var geom ebiten.GeoM
-	geom.Translate(float64(dp.X), float64(dp.Y))
-	geom.Concat(opts.GeoM)
-	opts.GeoM = geom
-
-	src := s.Sheet.SubImage(s.anim.CurrentFrame())
-	screen.DrawImage(src, &opts)
+	screen.DrawImage(s.Sheet.SubImage(s.anim.CurrentFrame()), &opts)
 }
 
 func (s *Sprite) Scan() []interface{} {
@@ -52,6 +46,11 @@ func (s *Sprite) SetAnim(a *Anim) {
 		a.Reset()
 	}
 	s.anim = a
+}
+
+func (s *Sprite) Transform() (opts ebiten.DrawImageOptions) {
+	opts.GeoM.Translate(float2(s.Actor.Pos.Add(s.FrameOffset)))
+	return opts
 }
 
 // anim isn't returned from Scan so we must update it ourselves
