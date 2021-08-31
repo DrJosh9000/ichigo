@@ -5,6 +5,9 @@ import (
 	"io/fs"
 )
 
+// TODO: tidy this crap up
+// Anims probably belong with Sheet
+
 var (
 	animCache = make(map[assetKey]Anim)
 
