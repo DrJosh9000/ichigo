@@ -29,9 +29,6 @@ type DebugToast struct {
 }
 
 func (d *DebugToast) Draw(screen *ebiten.Image, _ ebiten.DrawImageOptions) {
-	if d.Hidden {
-		return
-	}
 	ebitenutil.DebugPrintAt(screen, d.Text, d.Pos.X, d.Pos.Y)
 }
 
@@ -58,9 +55,6 @@ type PerfDisplay struct {
 }
 
 func (p PerfDisplay) Draw(screen *ebiten.Image, _ ebiten.DrawImageOptions) {
-	if p.Hidden {
-		return
-	}
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f  FPS: %0.2f", ebiten.CurrentTPS(), ebiten.CurrentFPS()))
 }
 

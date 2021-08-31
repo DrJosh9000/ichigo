@@ -62,9 +62,6 @@ func (r SceneRef) Disable() { r.scene.Disable() }
 // Enable calls Enable on the scene.
 func (r SceneRef) Enable() { r.scene.Enable() }
 
-// DrawOrder returns the value of DrawOrder from the scene.
-func (r SceneRef) DrawOrder() float64 { return r.scene.DrawOrder() }
-
 // IsHidden returns the value of IsHidden from the scene.
 func (r SceneRef) IsHidden() bool { return r.scene.IsHidden() }
 

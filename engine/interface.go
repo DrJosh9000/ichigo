@@ -75,9 +75,9 @@ type Disabler interface {
 	Enable()
 }
 
-// Drawer components can draw themselves. Draw is called often.
-// Each component is responsible for calling Draw on its child components
-// (so that hiding the parent can hide the children, etc).
+// Drawer components can draw themselves. Draw is called often. Each component
+// must call Draw on any internal components not known to the engine (i.e. not
+// passed to Game.Register or returned from Scan).
 type Drawer interface {
 	Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions)
 	DrawOrder() float64
@@ -167,9 +167,9 @@ type Transformer interface {
 	Transform() ebiten.DrawImageOptions
 }
 
-// Updater components can update themselves. Update is called repeatedly.
-// Each component is responsible for calling Update on its child components
-// (so that disabling the parent prevents updates to the children, etc).
+// Updater components can update themselves. Update is called repeatedly. Each
+// component must call Update on any internal components not known to the engine
+//  (i.e. not passed to Game.Register or returned from Scan).
 type Updater interface {
 	Update() error
 }

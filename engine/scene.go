@@ -21,7 +21,6 @@ type Scene struct {
 	Components []interface{}
 	Disabled
 	Hidden
-	ZOrder
 }
 
 /*
