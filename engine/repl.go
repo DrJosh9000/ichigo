@@ -15,7 +15,7 @@ import (
 func (g *Game) REPL(src io.Reader, dst io.Writer, assets fs.FS) error {
 	const prompt = "game> "
 	fmt.Fprint(dst, prompt)
-	sc := bufio.NewScanner(src)
+	sc := bufio.NewScanner(src) // TODO: use a repl library?
 	for sc.Scan() {
 		argv := strings.Split(sc.Text(), " ")
 		if len(argv) == 0 {
