@@ -29,8 +29,5 @@ type Fill struct {
 }
 
 func (f *Fill) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
-	if f.Hidden {
-		return
-	}
 	screen.Fill(opts.ColorM.Apply(f.Color))
 }

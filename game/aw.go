@@ -12,9 +12,7 @@ import (
 
 var _ interface {
 	engine.Identifier
-	engine.Drawer // provided by Sprite
 	engine.Disabler
-	engine.Hider // provided by Sprite
 	engine.Prepper
 	engine.Scanner
 	engine.Updater
@@ -24,10 +22,10 @@ func init() {
 	gob.Register(&Awakeman{})
 }
 
+// Awakeman is a bit of a god object for now...
 type Awakeman struct {
 	engine.Disabled
-	engine.Sprite
-
+	Sprite   engine.Sprite
 	CameraID string
 	ToastID  string
 
@@ -46,10 +44,6 @@ type Awakeman struct {
 func (aw *Awakeman) Ident() string { return "awakeman" }
 
 func (aw *Awakeman) Update() error {
-	if aw.Disabled {
-		return nil
-	}
-
 	// TODO: better cheat for noclip
 	if inpututil.IsKeyJustPressed(ebiten.KeyN) {
 		aw.noclip = !aw.noclip
@@ -75,22 +69,22 @@ func (aw *Awakeman) Update() error {
 		aw.camera.Zoom = 2
 	}
 	// aw.Pos is top-left corner, so add half size to get centre
-	aw.camera.Centre = aw.Pos.Add(aw.Size.Div(2))
-	return aw.Sprite.Update()
+	aw.camera.Centre = aw.Sprite.Actor.Pos.Add(aw.Sprite.Actor.Size.Div(2))
+	return nil
 }
 
 func (aw *Awakeman) noclipUpdate() error {
 	if ebiten.IsKeyPressed(ebiten.KeyUp) {
-		aw.Pos.Y--
+		aw.Sprite.Actor.Pos.Y--
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyDown) {
-		aw.Pos.Y++
+		aw.Sprite.Actor.Pos.Y++
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyLeft) {
-		aw.Pos.X--
+		aw.Sprite.Actor.Pos.X--
 	}
 	if ebiten.IsKeyPressed(ebiten.KeyRight) {
-		aw.Pos.X++
+		aw.Sprite.Actor.Pos.X++
 	}
 	return nil
 }
@@ -120,7 +114,7 @@ func (aw *Awakeman) realUpdate() error {
 	ux, uy := aw.vx, aw.vy
 
 	// Has traction?
-	if aw.CollidesAt(aw.Pos.Add(image.Pt(0, 1))) {
+	if aw.Sprite.Actor.CollidesAt(aw.Sprite.Actor.Pos.Add(image.Pt(0, 1))) {
 		// Not falling.
 		// Instantly decelerate (AW absorbs all kinetic E in legs, or something)
 		if aw.jumpBuffer > 0 {
@@ -160,25 +154,25 @@ func (aw *Awakeman) realUpdate() error {
 	switch {
 	case ebiten.IsKeyPressed(ebiten.KeyLeft) || ebiten.IsKeyPressed(ebiten.KeyA):
 		aw.vx = -runVelocity
-		aw.SetAnim(aw.animRunLeft)
+		aw.Sprite.SetAnim(aw.animRunLeft)
 		aw.facingLeft = true
 	case ebiten.IsKeyPressed(ebiten.KeyRight) || ebiten.IsKeyPressed(ebiten.KeyD):
 		aw.vx = runVelocity
-		aw.SetAnim(aw.animRunRight)
+		aw.Sprite.SetAnim(aw.animRunRight)
 		aw.facingLeft = false
 	default:
 		aw.vx = 0
-		aw.SetAnim(aw.animIdleRight)
+		aw.Sprite.SetAnim(aw.animIdleRight)
 		if aw.facingLeft {
-			aw.SetAnim(aw.animIdleLeft)
+			aw.Sprite.SetAnim(aw.animIdleLeft)
 		}
 	}
 
 	// s = (v_0 + v) / 2.
-	aw.MoveX((ux+aw.vx)/2, nil)
+	aw.Sprite.Actor.MoveX((ux+aw.vx)/2, nil)
 	// For Y, on collision, bounce a little bit.
 	// Does not apply to X because controls override it anyway.
-	aw.MoveY((uy+aw.vy)/2, func() {
+	aw.Sprite.Actor.MoveY((uy+aw.vy)/2, func() {
 		aw.vy *= restitution
 		if math.Abs(aw.vy) < ε {
 			aw.vy = 0

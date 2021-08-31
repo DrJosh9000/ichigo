@@ -20,7 +20,7 @@ func init() {
 
 // Sprite combines an Actor with the ability to Draw from a single spritesheet.
 type Sprite struct {
-	Actor
+	Actor       Actor
 	FrameOffset image.Point
 	Hidden
 	Sheet Sheet
@@ -30,10 +30,7 @@ type Sprite struct {
 }
 
 func (s *Sprite) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
-	if s.Hidden {
-		return
-	}
-	dp := s.Pos.Add(s.FrameOffset)
+	dp := s.Actor.Pos.Add(s.FrameOffset)
 	var geom ebiten.GeoM
 	geom.Translate(float64(dp.X), float64(dp.Y))
 	geom.Concat(opts.GeoM)
@@ -57,4 +54,5 @@ func (s *Sprite) SetAnim(a *Anim) {
 	s.anim = a
 }
 
+// anim isn't returned from Scan so we must update it ourselves
 func (s *Sprite) Update() error { return s.anim.Update() }

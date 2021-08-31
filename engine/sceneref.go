@@ -62,11 +62,6 @@ func (r SceneRef) Disable() { r.scene.Disable() }
 // Enable calls Enable on the scene.
 func (r SceneRef) Enable() { r.scene.Enable() }
 
-// Draw draws the scene.
-func (r SceneRef) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
-	r.scene.Draw(screen, opts)
-}
-
 // DrawOrder returns the value of DrawOrder from the scene.
 func (r SceneRef) DrawOrder() float64 { return r.scene.DrawOrder() }
 
@@ -82,14 +77,8 @@ func (r SceneRef) Show() { r.scene.Show() }
 // Ident returns the value of Ident from the scene.
 func (r SceneRef) Ident() string { return r.scene.Ident() }
 
-// Prepare prepares the scene.
-func (r SceneRef) Prepare(g *Game) error { return r.scene.Prepare(g) }
-
 // Scan returns the components in the scene.
 func (r SceneRef) Scan() []interface{} { return r.scene.Scan() }
 
 // Transform returns the value of Transform from the scene.
 func (r SceneRef) Transform() ebiten.DrawImageOptions { return r.scene.Transform() }
-
-// Update updates the scene.
-func (r SceneRef) Update() error { return r.scene.Update() }

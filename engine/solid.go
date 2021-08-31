@@ -16,4 +16,6 @@ type SolidRect struct {
 	Bounds
 }
 
-func (s SolidRect) CollidesWith(r image.Rectangle) bool { return s.BoundingRect().Overlaps(r) }
+func (s SolidRect) CollidesWith(r image.Rectangle) bool {
+	return s.BoundingRect().Overlaps(r)
+}

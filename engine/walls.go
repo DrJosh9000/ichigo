@@ -18,7 +18,6 @@ var (
 		Disabler
 		Hider
 		Prepper
-		Updater
 	} = &WallUnit{}
 )
 
@@ -80,9 +79,6 @@ type WallUnit struct {
 }
 
 func (u *WallUnit) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
-	if u.Hidden {
-		return
-	}
 	var geom ebiten.GeoM
 	geom.Translate(float2(mul2(u.Pos, u.wall.UnitSize).Add(u.wall.UnitOffset).Add(u.wall.Offset)))
 	geom.Concat(opts.GeoM)
@@ -98,12 +94,4 @@ func (u *WallUnit) Prepare(g *Game) error {
 	return nil
 }
 
-func (u *WallUnit) Update() error {
-	if u.Disabled {
-		return nil
-	}
-	if up, ok := u.Tile.(Updater); ok {
-		return up.Update()
-	}
-	return nil
-}
+func (u *WallUnit) Scan() []interface{} { return []interface{}{u.Tile} }

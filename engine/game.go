@@ -13,8 +13,6 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const gameDoesEverything = true
-
 var _ interface {
 	Disabler
 	Hider
@@ -40,99 +38,73 @@ type Game struct {
 	Hidden
 	ScreenWidth  int
 	ScreenHeight int
-	Root         DrawUpdater // typically a *Scene or SceneRef though
+	Root         interface{} // typically a *Scene or SceneRef though
 
 	dbmu     sync.RWMutex
 	byID     map[string]Identifier              // Named components by ID
 	byAB     map[abKey]map[interface{}]struct{} // Ancestor/behaviour index
-	drawList drawers                            // draw list :|
+	drawList drawList                           // draw list :|
 	par      map[interface{}]interface{}        // par[x] is parent of x
 }
 
-type abKey struct {
-	ancestor  string
-	behaviour reflect.Type
-}
-
-var _ Drawer = tombstone{}
-
-type tombstone struct{}
-
-func (tombstone) Draw(*ebiten.Image, ebiten.DrawImageOptions) {}
-
-func (tombstone) DrawOrder() float64 { return math.Inf(1) }
-
-type drawers []Drawer
-
-func (d drawers) Less(i, j int) bool { return d[i].DrawOrder() < d[j].DrawOrder() }
-func (d drawers) Len() int           { return len(d) }
-func (d drawers) Swap(i, j int)      { d[i], d[j] = d[j], d[i] }
-
-func concatOpts(a, b ebiten.DrawImageOptions) ebiten.DrawImageOptions {
-	a.ColorM.Concat(b.ColorM)
-	a.GeoM.Concat(b.GeoM)
-	a.CompositeMode = b.CompositeMode
-	a.Filter = b.Filter
-	return a
-}
-
-// Draw draws the entire thing, with default draw options.
+// Draw draws everything.
 func (g *Game) Draw(screen *ebiten.Image) {
 	if g.Hidden {
 		return
 	}
 
-	if gameDoesEverything {
-		type state struct {
-			hidden bool
-			opts   ebiten.DrawImageOptions
+	// Hiding a parent component should hide the child objects, and the
+	// transform applied to a child should be the cumulative transform of all
+	// parents as well.
+	// accum memoises the results for each component.
+	type state struct {
+		hidden bool
+		opts   ebiten.DrawImageOptions
+	}
+	accum := map[interface{}]state{
+		g: {hidden: false},
+	}
+	// Draw everything in g.drawList, where not hidden (itself or any parent)
+	for _, d := range g.drawList {
+		// Is d hidden itself?
+		if h, ok := d.(Hider); ok && h.IsHidden() {
+			accum[d] = state{hidden: true}
+			continue // skip drawing
 		}
-		accum := map[interface{}]state{
-			g: {hidden: false},
+		// Walk up g.par to find the nearest state in accum.
+		var st state
+		stack := []interface{}{d}
+		for p := g.par[d]; ; p = g.par[p] {
+			if s, found := accum[p]; found {
+				st = s
+				break
+			}
+			stack = append(stack, p)
 		}
-		// draw everything
-		for _, d := range g.drawList {
-			// is d directly hidden?
-			if h, ok := d.(Hider); ok && h.IsHidden() {
-				accum[d] = state{hidden: true}
-				continue // skip drawing
+		// Unwind the stack, accumulating state along the way.
+		for len(stack) > 0 {
+			l1 := len(stack) - 1
+			p := stack[l1]
+			stack = stack[:l1]
+			if h, ok := p.(Hider); ok {
+				st.hidden = st.hidden || h.IsHidden()
 			}
-			// walk up g.par to find the nearest parent state in accum
-			var st state
-			stack := []interface{}{d}
-			for p := g.par[d]; ; p = g.par[p] {
-				if s, found := accum[p]; found {
-					st = s
-					break
-				}
-				stack = append(stack, p)
-			}
-			// unwind the stack, accumulating state along the way
-			for len(stack) > 0 {
-				l1 := len(stack) - 1
-				p := stack[l1]
-				stack = stack[:l1]
-				if h, ok := p.(Hider); ok {
-					st.hidden = st.hidden || h.IsHidden()
-				}
-				if st.hidden {
-					accum[p] = state{hidden: true}
-					continue
-				}
-				if t, ok := p.(Transformer); ok {
-					st.opts = concatOpts(t.Transform(), st.opts)
-				}
-				accum[p] = st
-			}
-
-			// now...skip drawing if hidden :P
 			if st.hidden {
+				accum[p] = state{hidden: true}
 				continue
 			}
-			d.Draw(screen, st.opts)
+			// p is not hidden, so compute its cumulative transform.
+			if t, ok := p.(Transformer); ok {
+				st.opts = concatOpts(t.Transform(), st.opts)
+			}
+			accum[p] = st
 		}
-	} else { // !gameDoesEverything
-		g.Root.Draw(screen, ebiten.DrawImageOptions{})
+
+		// Skip drawing if hidden.
+		if st.hidden {
+			continue
+		}
+		d.Draw(screen, st.opts)
 	}
 }
 
@@ -141,23 +113,69 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
 	return g.ScreenWidth, g.ScreenHeight
 }
 
-// Update updates the scene.
+// Update updates everything.
 func (g *Game) Update() error {
 	if g.Disabled {
 		return nil
 	}
 
-	if err := g.Root.Update(); err != nil {
-		return err
+	// Need to do a similar trick for Draw: disabling a parent object should
+	// disable the child objects.
+	// accum memoises the disabled state for each component.
+	accum := map[interface{}]bool{
+		g: false,
 	}
-	if gameDoesEverything {
-		// sort the draw list (yes, on every frame)
-		sort.Stable(g.drawList)
-		// slice out any tombstones
-		for i := len(g.drawList) - 1; i >= 0; i-- {
-			if g.drawList[i] == (tombstone{}) {
-				g.drawList = g.drawList[:i]
+
+	// Update everything that is not disabled.
+	for u := range g.Query(g.Ident(), UpdaterType) {
+		// Skip g (note g satisfies Updater, so this would infinitely recurse)
+		if u == g {
+			continue
+		}
+
+		// Is u disabled itself?
+		if d, ok := u.(Disabler); ok && d.IsDisabled() {
+			accum[u] = true
+			continue
+		}
+
+		// Walk up g.par to find the nearest state in accum.
+		var st bool
+		stack := []interface{}{u}
+		for p := g.par[u]; ; p = g.par[p] {
+			if s, found := accum[p]; found {
+				st = s
+				break
 			}
+			stack = append(stack, p)
+		}
+		// Unwind the stack, accumulating state along the way.
+		for len(stack) > 0 {
+			l1 := len(stack) - 1
+			p := stack[l1]
+			stack = stack[:l1]
+			if d, ok := p.(Disabler); ok {
+				st = st || d.IsDisabled()
+			}
+			accum[p] = st
+		}
+
+		// Skip updating if disabled.
+		if st {
+			continue
+		}
+
+		if err := u.(Updater).Update(); err != nil {
+			return err
+		}
+	}
+
+	// Sort the draw list (on every frame - this isn't as bad as it sounds)
+	sort.Stable(g.drawList)
+	// Truncate tombstones from the end.
+	for i := len(g.drawList) - 1; i >= 0; i-- {
+		if g.drawList[i] == (tombstone{}) {
+			g.drawList = g.drawList[:i]
 		}
 	}
 	return nil
@@ -359,4 +377,37 @@ func (g *Game) unregister(component interface{}) {
 		return
 	}
 	delete(g.byID, i.Ident())
+}
+
+// --------- Helper types ---------
+
+type abKey struct {
+	ancestor  string
+	behaviour reflect.Type
+}
+
+var _ Drawer = tombstone{}
+
+type tombstone struct{}
+
+func (tombstone) Draw(*ebiten.Image, ebiten.DrawImageOptions) {}
+
+func (tombstone) DrawOrder() float64 { return math.Inf(1) }
+
+type drawList []Drawer
+
+func (d drawList) Less(i, j int) bool { return d[i].DrawOrder() < d[j].DrawOrder() }
+func (d drawList) Len() int           { return len(d) }
+func (d drawList) Swap(i, j int)      { d[i], d[j] = d[j], d[i] }
+
+func concatOpts(a, b ebiten.DrawImageOptions) ebiten.DrawImageOptions {
+	a.ColorM.Concat(b.ColorM)
+	a.GeoM.Concat(b.GeoM)
+	if b.CompositeMode != 0 {
+		a.CompositeMode = b.CompositeMode
+	}
+	if b.Filter != 0 {
+		a.Filter = b.Filter
+	}
+	return a
 }

@@ -2,8 +2,6 @@ package engine
 
 import (
 	"encoding/gob"
-	"math"
-	"sort"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -26,9 +24,10 @@ type Scene struct {
 	ZOrder
 }
 
+/*
 // Draw draws all components in order.
 func (s *Scene) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
-	if s.Hidden || gameDoesEverything {
+	if s.Hidden {
 		return
 	}
 	if s.Camera == nil {
@@ -105,6 +104,7 @@ func (s *Scene) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 		d.Draw(screen, opts)
 	}
 }
+*/
 
 // Transform returns the camera transform
 func (s *Scene) Transform() ebiten.DrawImageOptions {
@@ -114,61 +114,10 @@ func (s *Scene) Transform() ebiten.DrawImageOptions {
 	return s.Camera.Transform()
 }
 
-// Prepare does an initial Z-order sort.
-func (s *Scene) Prepare(game *Game) error {
-	s.sortByDrawOrder()
-	return nil
-}
-
-// sortByDrawOrder sorts the components by Z position.
-// Everything without a Z sorts first. Stable sort is used to avoid Z-fighting
-// (among layers without a Z, or those with equal Z).
-func (s *Scene) sortByDrawOrder() {
-	sort.SliceStable(s.Components, func(i, j int) bool {
-		a, aok := s.Components[i].(Drawer)
-		b, bok := s.Components[j].(Drawer)
-		if aok && bok {
-			return a.DrawOrder() < b.DrawOrder()
-		}
-		return !aok && bok
-	})
-}
-
 // Scan returns all immediate subcomponents (including the camera, if not nil).
 func (s *Scene) Scan() []interface{} {
 	if s.Camera != nil {
 		return append(s.Components, s.Camera)
 	}
 	return s.Components
-}
-
-// Update calls Update on all Updater components.
-func (s *Scene) Update() error {
-	if s.Disabled {
-		return nil
-	}
-
-	for _, c := range s.Components {
-		// Update each updater in turn
-		if u, ok := c.(Updater); ok {
-			if err := u.Update(); err != nil {
-				return err
-			}
-		}
-	}
-	// Check if the updates put the components out of order; if so, sort
-	cz := -math.MaxFloat64 // fun fact: this is min float64
-	for _, c := range s.Components {
-		z, ok := c.(Drawer)
-		if !ok {
-			continue
-		}
-		if t := z.DrawOrder(); t >= cz {
-			cz = t
-			continue
-		}
-		s.sortByDrawOrder()
-		return nil
-	}
-	return nil
 }

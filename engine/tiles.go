@@ -14,7 +14,6 @@ var _ interface {
 	Drawer
 	Hider
 	Scanner
-	Updater
 } = &Tilemap{}
 
 // Ensure StaticTile and AnimatedTile satisfy Tile.
@@ -67,9 +66,6 @@ func (t *Tilemap) CollidesWith(r image.Rectangle) bool {
 
 // Draw draws the tilemap.
 func (t *Tilemap) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
-	if t.Hidden {
-		return
-	}
 	og := opts.GeoM
 	var geom ebiten.GeoM
 	for p, tile := range t.Map {
@@ -94,21 +90,6 @@ func (t *Tilemap) Scan() []interface{} {
 		c = append(c, tile)
 	}
 	return c
-}
-
-// Update calls Update on any tiles that are Updaters, e.g. AnimatedTile.
-func (t *Tilemap) Update() error {
-	if t.Disabled {
-		return nil
-	}
-	for _, tile := range t.Map {
-		if u, ok := tile.(Updater); ok {
-			if err := u.Update(); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
 }
 
 // TileAt returns the tile present at the given world coordinate.

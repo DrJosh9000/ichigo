@@ -151,13 +151,10 @@ type Scener interface {
 
 	Bounder
 	Disabler
-	Drawer
 	Hider
 	Identifier
-	Prepper
 	Scanner
 	Transformer
-	Updater
 }
 
 // Saver components can be saved to disk.
