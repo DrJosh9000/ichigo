@@ -25,7 +25,7 @@ var (
 
 // Wall is a more flexible kind of tilemap. WallUnits can be added at the same
 // level as other components and are responsible for their own drawing, so that
-// Scene can do draw ordering, e.g. hide the player character behind a wall.
+// Game can do draw ordering, e.g. hide the player character behind a wall.
 // But Wall is still responsible for collisions.
 type Wall struct {
 	ID
