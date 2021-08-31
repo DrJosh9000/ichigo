@@ -19,6 +19,7 @@ type IsoProjection struct {
 // in a game to exaggerate the Z position, and integers are used to preserve
 // "pixel perfect" calculation in case you are making the next Celeste.
 func (π IsoProjection) Project(x, y, z int) (xp, yp int) {
+	// I'm using the π character because I'm a maths wanker
 	xp, yp = x, y
 	if π.ZX != 0 {
 		xp += z / π.ZX
