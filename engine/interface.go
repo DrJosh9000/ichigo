@@ -129,15 +129,23 @@ type Scanner interface {
 
 // Scener components are a scene (Scene or SceneRef).
 type Scener interface {
-	// Q: Why not make Scener a small interface with just Scene() ?
-	// A: Everything in the engine would then need to type switch for Scener or SceneRef, i.e.
-	// switch x := i.(type) {
-	// case Drawer:
-	//     i.Draw(screen, opts)
-	// case Scener:
-	//     i.Scene().Draw(screen, opts)
-	// }
-	// It seems cleaner to let the engine assert only for the interface it needs at that moment.
+	// Q: Why not make Scene able to load itself?
+	// A: Having separate types makes it easier to reason about what is loading
+	//    what. There is less ambiguity about what "save" means (the contents of
+	//    the scene, or the path to the file?) Additionally, the gob decoder
+	//    decodes over existing fields, which could lead to some fun bugs.
+	//
+	// Q: Why not make Scener a small interface, e.g. with just Scene() ?
+	// A: Everything in the engine would then need to type switch for Scener or
+	//    SceneRef, i.e.
+	//        switch x := i.(type) {
+	//        case Drawer:
+	//            i.Draw(screen, opts)
+	//        case Scener:
+	//            i.Scene().Draw(screen, opts)
+	//        }
+	//    It seems cleaner to let the engine assert only for the interface it
+	//    needs at that moment.
 
 	Bounder
 	Disabler
