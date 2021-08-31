@@ -36,6 +36,10 @@ func (g *Game) REPL(src io.Reader, dst io.Writer, assets fs.FS) error {
 			g.cmdTree(dst, argv)
 		case "query":
 			g.cmdQuery(dst, argv)
+		case "hide":
+			g.cmdHide(dst, argv)
+		case "show":
+			g.cmdShow(dst, argv)
 		}
 		fmt.Fprint(dst, prompt)
 	}
@@ -43,23 +47,17 @@ func (g *Game) REPL(src io.Reader, dst io.Writer, assets fs.FS) error {
 }
 
 func (g *Game) cmdSave(dst io.Writer, argv []string) {
-	if len(argv) != 2 {
-		fmt.Fprintln(dst, "Usage: save ID")
-		return
-	}
-	id := argv[1]
-	c := g.Component(id)
+	c := g.cmdutilComponentArg1(dst, argv)
 	if c == nil {
-		fmt.Fprintf(dst, "Component %q not found\n", id)
 		return
 	}
 	s, ok := c.(Saver)
 	if !ok {
-		fmt.Fprintf(dst, "Component %q not a Saver (type %T)\n", id, c)
+		fmt.Fprintf(dst, "Component not saveable (type %T)\n", c)
 		return
 	}
 	if err := s.Save(); err != nil {
-		fmt.Fprintf(dst, "Couldn't save %q: %v\n", id, err)
+		fmt.Fprintf(dst, "Couldn't save: %v\n", err)
 	}
 }
 
@@ -146,4 +144,43 @@ func (g *Game) cmdQuery(dst io.Writer, argv []string) {
 			fmt.Fprintf(dst, "%T\n", c)
 		}
 	}
+}
+
+func (g *Game) cmdutilComponentArg1(dst io.Writer, argv []string) interface{} {
+	if len(argv) != 2 {
+		fmt.Fprintln(dst, "Usage: hide ID")
+		return nil
+	}
+	id := argv[1]
+	c := g.Component(id)
+	if c == nil {
+		fmt.Fprintf(dst, "Component %q not found\n", id)
+	}
+	return c
+}
+
+func (g *Game) cmdHide(dst io.Writer, argv []string) {
+	c := g.cmdutilComponentArg1(dst, argv)
+	if c == nil {
+		return
+	}
+	h, ok := c.(Hider)
+	if !ok {
+		fmt.Fprintf(dst, "Component not hidable (type %T)\n", c)
+		return
+	}
+	h.Hide()
+}
+
+func (g *Game) cmdShow(dst io.Writer, argv []string) {
+	c := g.cmdutilComponentArg1(dst, argv)
+	if c == nil {
+		return
+	}
+	h, ok := c.(Hider)
+	if !ok {
+		fmt.Fprintf(dst, "Component not showable (type %T)\n", c)
+		return
+	}
+	h.Show()
 }
