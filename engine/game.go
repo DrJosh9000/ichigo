@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"math"
 	"reflect"
+	"sort"
 	"sync"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -38,10 +40,11 @@ type Game struct {
 	ScreenHeight int
 	Root         DrawUpdater // typically a *Scene or SceneRef though
 
-	dbmu sync.RWMutex
-	byID map[string]Identifier              // Named components by ID
-	byAB map[abKey]map[interface{}]struct{} // Ancestor/behaviour index
-	par  map[interface{}]interface{}        // par[x] is parent of x
+	dbmu     sync.RWMutex
+	byID     map[string]Identifier              // Named components by ID
+	byAB     map[abKey]map[interface{}]struct{} // Ancestor/behaviour index
+	drawList drawers                            // draw list :|
+	par      map[interface{}]interface{}        // par[x] is parent of x
 }
 
 type abKey struct {
@@ -49,12 +52,33 @@ type abKey struct {
 	behaviour reflect.Type
 }
 
+var _ Drawer = tombstone{}
+
+type tombstone struct{}
+
+func (tombstone) Draw(*ebiten.Image, ebiten.DrawImageOptions) {}
+
+func (tombstone) DrawOrder() float64 { return math.Inf(1) }
+
+type drawers []Drawer
+
+func (d drawers) Less(i, j int) bool { return d[i].DrawOrder() < d[j].DrawOrder() }
+func (d drawers) Len() int           { return len(d) }
+func (d drawers) Swap(i, j int)      { d[i], d[j] = d[j], d[i] }
+
 // Draw draws the entire thing, with default draw options.
 func (g *Game) Draw(screen *ebiten.Image) {
 	if g.Hidden {
 		return
 	}
-	g.Root.Draw(screen, ebiten.DrawImageOptions{})
+	//g.Root.Draw(screen, ebiten.DrawImageOptions{})
+	// draw everything
+	for _, d := range g.drawList {
+		if h, ok := d.(Hider); ok && h.IsHidden() {
+			continue
+		}
+		d.Draw(screen, ebiten.DrawImageOptions{})
+	}
 }
 
 // Layout returns the configured screen width/height.
@@ -67,7 +91,20 @@ func (g *Game) Update() error {
 	if g.Disabled {
 		return nil
 	}
-	return g.Root.Update()
+
+	if err := g.Root.Update(); err != nil {
+		return err
+	}
+
+	// sort the draw list (yes, on every frame)
+	sort.Stable(g.drawList)
+	// slice out any tombstones
+	for i := len(g.drawList) - 1; i >= 0; i-- {
+		if g.drawList[i] == (tombstone{}) {
+			g.drawList = g.drawList[:i]
+		}
+	}
+	return nil
 }
 
 // Ident returns "__GAME__".
@@ -181,6 +218,11 @@ func (g *Game) register(component, parent interface{}) error {
 		g.par[component] = parent
 	}
 
+	// register in g.drawList
+	if d, ok := component.(Drawer); ok {
+		g.drawList = append(g.drawList, d)
+	}
+
 	// register in g.byAB
 	ct := reflect.TypeOf(component)
 	for _, b := range Behaviours {
@@ -247,6 +289,13 @@ func (g *Game) unregister(component interface{}) {
 
 	// unregister from g.par
 	delete(g.par, component)
+
+	// unregister from g.drawList
+	for i, d := range g.drawList {
+		if d == component {
+			g.drawList[i] = tombstone{}
+		}
+	}
 
 	// unregister from g.byID if needed
 	i, ok := component.(Identifier)

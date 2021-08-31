@@ -16,7 +16,7 @@ import (
 
 func main() {
 	// Change to true to enable cpu profile
-	if false && runtime.GOOS != "js" {
+	if true && runtime.GOOS != "js" {
 		f, err := os.Create("cpuprofile.pprof")
 		if err != nil {
 			log.Fatal("could not create CPU profile: ", err)
