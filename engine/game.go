@@ -4,6 +4,7 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
+	"image"
 	"io/fs"
 	"math"
 	"reflect"
@@ -36,9 +37,8 @@ func init() {
 type Game struct {
 	Disabled
 	Hidden
-	ScreenWidth  int
-	ScreenHeight int
-	Root         interface{} // typically a *Scene or SceneRef though
+	ScreenSize image.Point
+	Root       interface{} // typically a *Scene or SceneRef though
 
 	dbmu     sync.RWMutex
 	byID     map[string]Identifier              // Named components by ID
@@ -110,7 +110,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 // Layout returns the configured screen width/height.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
-	return g.ScreenWidth, g.ScreenHeight
+	return g.ScreenSize.X, g.ScreenSize.Y
 }
 
 // Update updates everything.

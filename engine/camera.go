@@ -25,12 +25,55 @@ type Camera struct {
 	Child interface{}
 
 	// Camera controls
+	// These directly manipulate the camera. If you want to restrict the camera
+	// view area to the child's bounding rectangle, use PointAt.
 	Centre   image.Point // world coordinates
-	Filter   ebiten.Filter
-	Rotation float64 // radians
-	Zoom     float64 // unitless
+	Rotation float64     // radians
+	Zoom     float64     // unitless
 
 	game *Game
+}
+
+// PointAt points the camera at a particular centre point and zoom, but adjusts
+// for the bounds of the child component (if available).
+func (c *Camera) PointAt(centre image.Point, zoom float64) {
+	// Special sauce: if Child has a BoundingRect, make some adjustments
+	bnd, ok := c.Child.(Bounder)
+	if !ok {
+		c.Centre, c.Zoom = centre, zoom
+		return
+	}
+
+	// The child has boundaries; respect them.
+	br := bnd.BoundingRect()
+
+	// The lower bound on zoom is the larger of
+	// { (ScreenWidth / BoundsWidth), (ScreenHeight / BoundsHeight) }
+	sz := br.Size()
+	if z := float64(c.game.ScreenSize.X) / float64(sz.X); zoom < z {
+		zoom = z
+	}
+	if z := float64(c.game.ScreenSize.Y) / float64(sz.Y); zoom < z {
+		zoom = z
+	}
+
+	// If the configured centre puts the camera out of bounds, move it.
+	// Camera frame currently Rectangle{ centre ± (screen/(2*zoom)) }.
+	sw2, sh2 := float2(c.game.ScreenSize.Div(2))
+	swz, shz := int(sw2/zoom), int(sh2/zoom)
+	if centre.X-swz < br.Min.X {
+		centre.X = br.Min.X + swz
+	}
+	if centre.Y-shz < br.Min.Y {
+		centre.Y = br.Min.Y + shz
+	}
+	if centre.X+swz > br.Max.X {
+		centre.X = br.Max.X - swz
+	}
+	if centre.Y+shz > br.Max.Y {
+		centre.Y = br.Max.Y - shz
+	}
+	c.Centre, c.Zoom = centre, zoom
 }
 
 // Prepare grabs a copy of game (needed for screen dimensions)
@@ -47,6 +90,6 @@ func (c *Camera) Transform() (opts ebiten.DrawImageOptions) {
 	opts.GeoM.Translate(float2(c.Centre.Mul(-1)))
 	opts.GeoM.Scale(c.Zoom, c.Zoom)
 	opts.GeoM.Rotate(c.Rotation)
-	opts.GeoM.Translate(float64(c.game.ScreenWidth/2), float64(c.game.ScreenHeight/2))
+	opts.GeoM.Translate(float2(c.game.ScreenSize.Div(2)))
 	return opts
 }

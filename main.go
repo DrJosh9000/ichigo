@@ -38,8 +38,7 @@ func main() {
 	}
 
 	g := &engine.Game{
-		ScreenHeight: 240,
-		ScreenWidth:  320,
+		ScreenSize: image.Pt(320, 240),
 		Root: &engine.Scene{
 			ID: "root",
 			Components: []interface{}{

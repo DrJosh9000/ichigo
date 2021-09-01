@@ -64,12 +64,12 @@ func (aw *Awakeman) Update() error {
 	}
 
 	// Update the camera
-	aw.camera.Zoom = 1
-	if ebiten.IsKeyPressed(ebiten.KeyShift) {
-		aw.camera.Zoom = 2
-	}
 	// aw.Pos is top-left corner, so add half size to get centre
-	aw.camera.Centre = aw.Sprite.Actor.Pos.Add(aw.Sprite.Actor.Size.Div(2))
+	z := 1.0
+	if ebiten.IsKeyPressed(ebiten.KeyShift) {
+		z = 2.0
+	}
+	aw.camera.PointAt(aw.Sprite.Actor.Pos.Add(aw.Sprite.Actor.Size.Div(2)), z)
 	return nil
 }
 
