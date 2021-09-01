@@ -127,6 +127,7 @@ func (g *Game) Update() error {
 	}
 
 	// Update everything that is not disabled.
+	// TODO: do it in a fixed order? map essentially randomises iteration order
 	for u := range g.Query(g.Ident(), UpdaterType) {
 		// Skip g (note g satisfies Updater, so this would infinitely recurse)
 		if u == g {
