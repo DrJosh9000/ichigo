@@ -14,9 +14,14 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+const (
+	enableCPUProfile = false
+	rewriteLevel1    = false
+)
+
 func main() {
 	// Change to true to enable cpu profile
-	if false && runtime.GOOS != "js" {
+	if enableCPUProfile && runtime.GOOS != "js" {
 		f, err := os.Create("cpuprofile.pprof")
 		if err != nil {
 			log.Fatal("could not create CPU profile: ", err)
@@ -33,7 +38,7 @@ func main() {
 	ebiten.SetWindowTitle("TODO")
 
 	// Change to true to rewrite level1.gobz
-	if false && runtime.GOOS != "js" {
+	if rewriteLevel1 && runtime.GOOS != "js" {
 		writeLevel1()
 	}
 

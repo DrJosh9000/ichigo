@@ -2,29 +2,34 @@ package engine
 
 import (
 	"encoding/gob"
-	"image"
 	"io/fs"
 	"path/filepath"
 )
 
 var (
-	// Ensure Scene satisfies Scener.
-	_ Scener = &Scene{}
+	_ scener = &Scene{}
 
-	// Ensure SceneRef satisfies interfaces.
 	_ interface {
 		Loader
-		Scener
+		Saver
+		scener
 	} = &SceneRef{}
 )
+
+type scener interface {
+	Bounder
+	Disabler
+	Hider
+	Identifier
+	Scanner
+}
 
 func init() {
 	gob.Register(&Scene{})
 	gob.Register(&SceneRef{})
-
 }
 
-// Scene just contains a bunch of components.
+// Scene contains a bunch of components.
 type Scene struct {
 	ID
 	Bounds     // world coordinates
@@ -48,7 +53,18 @@ func (s *Scene) Scan() []interface{} { return s.Components }
 type SceneRef struct {
 	Path string
 
-	scene *Scene // not exported for gob reasons
+	*Scene // not gob encoded
+}
+
+// GobDecode saves the byte slice as Path.
+func (r *SceneRef) GobDecode(b []byte) error {
+	r.Path = string(b)
+	return nil
+}
+
+// GobEncode returns Path as a byte slice.
+func (r *SceneRef) GobEncode() ([]byte, error) {
+	return []byte(r.Path), nil
 }
 
 // Load loads the scene from the file.
@@ -57,39 +73,11 @@ func (r *SceneRef) Load(assets fs.FS) error {
 	if err := LoadGobz(sc, assets, r.Path); err != nil {
 		return err
 	}
-	r.scene = sc
+	r.Scene = sc
 	return nil
 }
 
 // Save saves the scene to a file in the current directory.
-func (r *SceneRef) Save() error { return SaveGobz(r.scene, filepath.Base(r.Path)) }
-
-// The rest of the methods forward to r.scene, as such they will
-// panic if the scene isn't loaded.
-
-// BoundingRect returns the Bounds from the scene.
-func (r SceneRef) BoundingRect() image.Rectangle { return r.scene.BoundingRect() }
-
-// IsDisabled returns the value of IsDisabled from the scene.
-func (r SceneRef) IsDisabled() bool { return r.scene.IsDisabled() }
-
-// Disable calls Disable on the scene.
-func (r SceneRef) Disable() { r.scene.Disable() }
-
-// Enable calls Enable on the scene.
-func (r SceneRef) Enable() { r.scene.Enable() }
-
-// IsHidden returns the value of IsHidden from the scene.
-func (r SceneRef) IsHidden() bool { return r.scene.IsHidden() }
-
-// Hide calls Hide on the scene.
-func (r SceneRef) Hide() { r.scene.Hide() }
-
-// Show calls Show on the scene.
-func (r SceneRef) Show() { r.scene.Show() }
-
-// Ident returns the value of Ident from the scene.
-func (r SceneRef) Ident() string { return r.scene.Ident() }
-
-// Scan returns the components in the scene.
-func (r SceneRef) Scan() []interface{} { return r.scene.Scan() }
+func (r *SceneRef) Save() error {
+	return SaveGobz(r.Scene, filepath.Base(r.Path))
+}

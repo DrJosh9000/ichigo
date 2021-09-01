@@ -17,13 +17,11 @@ var (
 	ColliderType    = reflect.TypeOf((*Collider)(nil)).Elem()
 	DisablerType    = reflect.TypeOf((*Disabler)(nil)).Elem()
 	DrawerType      = reflect.TypeOf((*Drawer)(nil)).Elem()
-	DrawUpdaterType = reflect.TypeOf((*DrawUpdater)(nil)).Elem()
 	HiderType       = reflect.TypeOf((*Hider)(nil)).Elem()
 	IdentifierType  = reflect.TypeOf((*Identifier)(nil)).Elem()
 	LoaderType      = reflect.TypeOf((*Loader)(nil)).Elem()
 	PrepperType     = reflect.TypeOf((*Prepper)(nil)).Elem()
 	ScannerType     = reflect.TypeOf((*Scanner)(nil)).Elem()
-	ScenerType      = reflect.TypeOf((*Scener)(nil)).Elem()
 	SaverType       = reflect.TypeOf((*Saver)(nil)).Elem()
 	TransformerType = reflect.TypeOf((*Transformer)(nil)).Elem()
 	UpdaterType     = reflect.TypeOf((*Updater)(nil)).Elem()
@@ -35,13 +33,11 @@ var (
 		ColliderType,
 		DisablerType,
 		DrawerType,
-		DrawUpdaterType,
 		HiderType,
 		IdentifierType,
 		LoaderType,
 		PrepperType,
 		ScannerType,
-		ScenerType,
 		SaverType,
 		TransformerType,
 		UpdaterType,
@@ -81,13 +77,6 @@ type Drawer interface {
 	DrawOrder() float64
 }
 
-// DrawUpdater components can be both drawn and updated.
-// Same comments as for Drawer and Updater.
-type DrawUpdater interface {
-	Drawer
-	Updater
-}
-
 // Hider components can be hidden.
 type Hider interface {
 	IsHidden() bool
@@ -119,33 +108,6 @@ type Prepper interface {
 // Scan should return a slice containing all immediate subcomponents.
 type Scanner interface {
 	Scan() []interface{}
-}
-
-// Scener components are a scene (Scene or SceneRef).
-type Scener interface {
-	// Q: Why not make Scene able to load itself?
-	// A: Having separate types makes it easier to reason about what is loading
-	//    what. There is less ambiguity about what "save" means (the contents of
-	//    the scene, or the path to the file?) Additionally, the gob decoder
-	//    decodes over existing fields, which could lead to some fun bugs.
-	//
-	// Q: Why not make Scener a small interface, e.g. with just Scene() ?
-	// A: Everything in the engine would then need to type switch for Scener or
-	//    SceneRef, i.e.
-	//        switch x := i.(type) {
-	//        case Drawer:
-	//            i.Draw(screen, opts)
-	//        case Scener:
-	//            i.Scene().Draw(screen, opts)
-	//        }
-	//    It seems cleaner to let the engine assert only for the interface it
-	//    needs at that moment.
-
-	Bounder
-	Disabler
-	Hider
-	Identifier
-	Scanner
 }
 
 // Saver components can be saved to disk.
