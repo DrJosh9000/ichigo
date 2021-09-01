@@ -126,10 +126,10 @@ func (s StaticTile) CellIndex() int { return int(s) }
 
 // AnimatedTile uses an Anim to choose a tile index.
 type AnimatedTile struct {
-	Animer
+	Anim Animer
 }
 
-func (a AnimatedTile) CellIndex() int { return a.CurrentFrame() }
+func (a AnimatedTile) CellIndex() int { return a.Anim.CurrentFrame() }
 
-// Scan returns a.Animer. (It could be a Loader.)
-func (a AnimatedTile) Scan() []interface{} { return []interface{}{a.Animer} }
+// Scan returns a.Anim.
+func (a AnimatedTile) Scan() []interface{} { return []interface{}{a.Anim} }
