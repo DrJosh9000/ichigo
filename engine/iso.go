@@ -14,8 +14,8 @@ type IsoProjection struct {
 
 // Project projects a 3D coordinate into 2D.
 // If ZX = 0, x is unchanged; similarly for ZY and y.
-// Otherwise, x becomes x + z/ZX and y becomes y + z/ZY.
-// Dividing Z is used because there's little reason for an isometric projection
+// Otherwise, x projects to x + z/ZX and y projects to y + z/ZY.
+// Dividing is used because there's little reason for an isometric projection
 // in a game to exaggerate the Z position, and integers are used to preserve
 // "pixel perfect" calculation in case you are making the next Celeste.
 func (π IsoProjection) Project(x, y, z int) (xp, yp int) {
