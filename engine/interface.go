@@ -12,22 +12,21 @@ import (
 var (
 	// TypeOf(pointer to interface).Elem() is "idiomatic" -
 	// see https://pkg.go.dev/reflect#example-TypeOf
-	AnimerType         = reflect.TypeOf((*Animer)(nil)).Elem()
-	BounderType        = reflect.TypeOf((*Bounder)(nil)).Elem()
-	ColliderType       = reflect.TypeOf((*Collider)(nil)).Elem()
-	DisablerType       = reflect.TypeOf((*Disabler)(nil)).Elem()
-	DrawerType         = reflect.TypeOf((*Drawer)(nil)).Elem()
-	DrawUpdaterType    = reflect.TypeOf((*DrawUpdater)(nil)).Elem()
-	HiderType          = reflect.TypeOf((*Hider)(nil)).Elem()
-	IdentifierType     = reflect.TypeOf((*Identifier)(nil)).Elem()
-	LoaderType         = reflect.TypeOf((*Loader)(nil)).Elem()
-	ParallaxScalerType = reflect.TypeOf((*ParallaxScaler)(nil)).Elem()
-	PrepperType        = reflect.TypeOf((*Prepper)(nil)).Elem()
-	ScannerType        = reflect.TypeOf((*Scanner)(nil)).Elem()
-	ScenerType         = reflect.TypeOf((*Scener)(nil)).Elem()
-	SaverType          = reflect.TypeOf((*Saver)(nil)).Elem()
-	TransformerType    = reflect.TypeOf((*Transformer)(nil)).Elem()
-	UpdaterType        = reflect.TypeOf((*Updater)(nil)).Elem()
+	AnimerType      = reflect.TypeOf((*Animer)(nil)).Elem()
+	BounderType     = reflect.TypeOf((*Bounder)(nil)).Elem()
+	ColliderType    = reflect.TypeOf((*Collider)(nil)).Elem()
+	DisablerType    = reflect.TypeOf((*Disabler)(nil)).Elem()
+	DrawerType      = reflect.TypeOf((*Drawer)(nil)).Elem()
+	DrawUpdaterType = reflect.TypeOf((*DrawUpdater)(nil)).Elem()
+	HiderType       = reflect.TypeOf((*Hider)(nil)).Elem()
+	IdentifierType  = reflect.TypeOf((*Identifier)(nil)).Elem()
+	LoaderType      = reflect.TypeOf((*Loader)(nil)).Elem()
+	PrepperType     = reflect.TypeOf((*Prepper)(nil)).Elem()
+	ScannerType     = reflect.TypeOf((*Scanner)(nil)).Elem()
+	ScenerType      = reflect.TypeOf((*Scener)(nil)).Elem()
+	SaverType       = reflect.TypeOf((*Saver)(nil)).Elem()
+	TransformerType = reflect.TypeOf((*Transformer)(nil)).Elem()
+	UpdaterType     = reflect.TypeOf((*Updater)(nil)).Elem()
 
 	// Behaviours lists all the behaviours that can be queried with Game.Query.
 	Behaviours = []reflect.Type{
@@ -40,7 +39,6 @@ var (
 		HiderType,
 		IdentifierType,
 		LoaderType,
-		ParallaxScalerType,
 		PrepperType,
 		ScannerType,
 		ScenerType,
@@ -107,12 +105,6 @@ type Identifier interface {
 // before preparation.
 type Loader interface {
 	Load(fs.FS) error
-}
-
-// ParallaxScaler components have a scaling factor. This is used for
-// parallax layers in a scene, and can be thought of as 1/distance.
-type ParallaxScaler interface {
-	ParallaxFactor() float64
 }
 
 // Prepper components can be prepared. It is called after the component

@@ -16,7 +16,7 @@ import (
 
 func main() {
 	// Change to true to enable cpu profile
-	if true && runtime.GOOS != "js" {
+	if false && runtime.GOOS != "js" {
 		f, err := os.Create("cpuprofile.pprof")
 		if err != nil {
 			log.Fatal("could not create CPU profile: ", err)
@@ -33,7 +33,7 @@ func main() {
 	ebiten.SetWindowTitle("TODO")
 
 	// Change to true to rewrite level1.gobz
-	if false && runtime.GOOS != "js" {
+	if true && runtime.GOOS != "js" {
 		writeLevel1()
 	}
 
@@ -116,12 +116,15 @@ func writeLevel1() {
 				Color:  color.Gray{100},
 				ZOrder: 0,
 			},
-			&engine.Billboard{
-				ID:       "bg_image",
-				Parallax: 0.5,
-				ZOrder:   1,
-				Pos:      image.Pt(-160, -120),
-				Src:      engine.ImageRef{Path: "assets/space.png"},
+			&engine.Parallax{
+				CameraID: "game_camera",
+				Child: &engine.Billboard{
+					ID:     "bg_image",
+					ZOrder: 1,
+					Pos:    image.Pt(-160, -120),
+					Src:    engine.ImageRef{Path: "assets/space.png"},
+				},
+				Factor: 0.5,
 			},
 			&engine.Tilemap{
 				ID:     "terrain",

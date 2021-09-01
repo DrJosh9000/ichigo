@@ -11,7 +11,6 @@ import (
 var _ interface {
 	Identifier
 	Drawer
-	ParallaxScaler
 	Scanner
 	Transformer
 } = &Billboard{}
@@ -24,7 +23,6 @@ func init() {
 type Billboard struct {
 	ID
 	Hidden
-	Parallax
 	Pos image.Point
 	Src ImageRef
 	ZOrder

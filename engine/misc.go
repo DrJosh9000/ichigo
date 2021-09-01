@@ -38,12 +38,6 @@ func (h *Hidden) Hide() { *h = true }
 // Show sets h to false.
 func (h *Hidden) Show() { *h = false }
 
-// Parallax implements ParallaxScaler directly (as a float64 value).
-type Parallax float64
-
-// ParallaxFactor returns s as a float64.
-func (s Parallax) ParallaxFactor() float64 { return float64(s) }
-
 // ZOrder implements DrawOrder (in Drawer) directly (as a float64 value).
 type ZOrder float64
 
