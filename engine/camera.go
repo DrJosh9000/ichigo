@@ -11,6 +11,7 @@ import (
 var _ interface {
 	Identifier
 	Prepper
+	Scanner
 	Transformer
 } = &Camera{}
 
@@ -18,11 +19,10 @@ func init() {
 	gob.Register(&Camera{})
 }
 
-// Camera models a camera that is viewing a scene. (Camera is a child of the
-// scene it is viewing, for various reasons.) Changes to the fields take effect
-// immediately.
+// Camera models a camera that is viewing something.
 type Camera struct {
 	ID
+	Child interface{}
 
 	// Camera controls
 	Centre   image.Point // world coordinates
@@ -38,6 +38,9 @@ func (c *Camera) Prepare(game *Game) error {
 	c.game = game
 	return nil
 }
+
+// Scan returns s.Child.
+func (c *Camera) Scan() []interface{} { return []interface{}{c.Child} }
 
 // Transform returns the camera transform.
 func (c *Camera) Transform() (opts ebiten.DrawImageOptions) {

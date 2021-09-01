@@ -5,8 +5,6 @@ import (
 	"image"
 	"io/fs"
 	"path/filepath"
-
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // Ensure SceneRef satisfies interfaces.
@@ -76,6 +74,3 @@ func (r SceneRef) Ident() string { return r.scene.Ident() }
 
 // Scan returns the components in the scene.
 func (r SceneRef) Scan() []interface{} { return r.scene.Scan() }
-
-// Transform returns the value of Transform from the scene.
-func (r SceneRef) Transform() ebiten.DrawImageOptions { return r.scene.Transform() }

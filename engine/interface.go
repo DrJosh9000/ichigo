@@ -146,7 +146,6 @@ type Scener interface {
 	Hider
 	Identifier
 	Scanner
-	Transformer
 }
 
 // Saver components can be saved to disk.

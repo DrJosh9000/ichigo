@@ -2,8 +2,6 @@ package engine
 
 import (
 	"encoding/gob"
-
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // Ensure Scene satisfies Scener.
@@ -16,8 +14,7 @@ func init() {
 // Scene manages drawing and updating a bunch of components.
 type Scene struct {
 	ID
-	Bounds             // world coordinates
-	Camera     *Camera // optional; applies a bunch of transforms to draw calls
+	Bounds     // world coordinates
 	Components []interface{}
 	Disabled
 	Hidden
@@ -105,18 +102,5 @@ func (s *Scene) Draw(screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 }
 */
 
-// Transform returns the camera transform
-func (s *Scene) Transform() ebiten.DrawImageOptions {
-	if s.Camera == nil {
-		return ebiten.DrawImageOptions{}
-	}
-	return s.Camera.Transform()
-}
-
 // Scan returns all immediate subcomponents (including the camera, if not nil).
-func (s *Scene) Scan() []interface{} {
-	if s.Camera != nil {
-		return append(s.Components, s.Camera)
-	}
-	return s.Components
-}
+func (s *Scene) Scan() []interface{} { return s.Components }

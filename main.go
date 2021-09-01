@@ -33,7 +33,7 @@ func main() {
 	ebiten.SetWindowTitle("TODO")
 
 	// Change to true to rewrite level1.gobz
-	if true && runtime.GOOS != "js" {
+	if false && runtime.GOOS != "js" {
 		writeLevel1()
 	}
 
@@ -43,7 +43,10 @@ func main() {
 		Root: &engine.Scene{
 			ID: "root",
 			Components: []interface{}{
-				&engine.SceneRef{Path: "assets/level1.gobz"},
+				&engine.Camera{
+					ID:    "game_camera",
+					Child: &engine.SceneRef{Path: "assets/level1.gobz"},
+				},
 				&engine.DebugToast{ID: "toast", Pos: image.Pt(0, 15)},
 				engine.PerfDisplay{},
 			},
@@ -107,9 +110,6 @@ func writeLevel1() {
 	level1 := &engine.Scene{
 		ID:     "level_1",
 		Bounds: engine.Bounds(image.Rect(-32, -32, 320+32, 240+32)),
-		Camera: &engine.Camera{
-			ID: "game_camera",
-		},
 		Components: []interface{}{
 			&engine.Fill{
 				ID:     "bg_fill",
