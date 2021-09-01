@@ -14,6 +14,7 @@ var _ interface {
 	Drawer
 	Hider
 	Scanner
+	Transformer
 } = &Tilemap{}
 
 // Ensure StaticTile and AnimatedTile satisfy Tile.
@@ -67,13 +68,12 @@ func (t *Tilemap) CollidesWith(r image.Rectangle) bool {
 // Draw draws the tilemap.
 func (t *Tilemap) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	og := opts.GeoM
-	var geom ebiten.GeoM
 	for p, tile := range t.Map {
 		if tile == nil {
 			continue
 		}
-		geom.Reset()
-		geom.Translate(float2(mul2(p, t.Sheet.CellSize).Add(t.Offset)))
+		var geom ebiten.GeoM
+		geom.Translate(float2(mul2(p, t.Sheet.CellSize)))
 		geom.Concat(og)
 		opts.GeoM = geom
 
@@ -90,6 +90,11 @@ func (t *Tilemap) Scan() []interface{} {
 		c = append(c, tile)
 	}
 	return c
+}
+
+func (t *Tilemap) Transform() (opts ebiten.DrawImageOptions) {
+	opts.GeoM.Translate(float2(t.Offset))
+	return opts
 }
 
 // TileAt returns the tile present at the given world coordinate.

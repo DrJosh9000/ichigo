@@ -11,13 +11,14 @@ var (
 		Collider
 		Identifier
 		Scanner
+		Prepper
+		Transformer
 	} = &Wall{}
 
 	_ interface {
 		Drawer
 		Disabler
 		Hider
-		Prepper
 		Scanner
 		Transformer
 	} = &WallUnit{}
@@ -34,17 +35,10 @@ type Wall struct {
 	Sheet      Sheet
 	UnitOffset image.Point // drawing offset
 	UnitSize   image.Point // tile size
-
-	units map[image.Point]*WallUnit
+	Units      map[image.Point]*WallUnit
 }
 
-func (w *Wall) regUnit(u *WallUnit) {
-	if w.units == nil {
-		w.units = make(map[image.Point]*WallUnit)
-	}
-	w.units[u.Pos] = u
-}
-
+// CollidesWith implements a tilerange collosion check, similar to Tilemap.
 func (w *Wall) CollidesWith(r image.Rectangle) bool {
 	if w.Ersatz {
 		return false
@@ -57,7 +51,7 @@ func (w *Wall) CollidesWith(r image.Rectangle) bool {
 
 	for j := min.Y; j <= max.Y; j++ {
 		for i := min.X; i <= max.X; i++ {
-			if w.units[image.Pt(i, j)] != nil {
+			if w.Units[image.Pt(i, j)] != nil {
 				return true
 			}
 		}
@@ -65,7 +59,30 @@ func (w *Wall) CollidesWith(r image.Rectangle) bool {
 	return false
 }
 
-func (w *Wall) Scan() []interface{} { return []interface{}{&w.Sheet} }
+// Scan returns the Sheet and all WallUnits.
+func (w *Wall) Scan() []interface{} {
+	c := make([]interface{}, 1, len(w.Units)+1)
+	c[0] = &w.Sheet
+	for _, unit := range w.Units {
+		c = append(c, unit)
+	}
+	return c
+}
+
+// Prepare makes sure all WallUnits know about Wall.
+func (w *Wall) Prepare(*Game) error {
+	// Ensure all child units know about wall, which houses common attributes
+	for _, u := range w.Units {
+		u.wall = w
+	}
+	return nil
+}
+
+// Transform returns a GeoM translation by Offset.
+func (w *Wall) Transform() (opts ebiten.DrawImageOptions) {
+	opts.GeoM.Translate(float2(w.Offset))
+	return opts
+}
 
 // WallUnit is a unit in a wall. Unlike a tile in a tilemap, WallUnit is
 // responsible for drawing itself.
@@ -80,19 +97,15 @@ type WallUnit struct {
 	wall *Wall
 }
 
+// Draw draws this wall unit.
 func (u *WallUnit) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	screen.DrawImage(u.wall.Sheet.SubImage(u.Tile.CellIndex()), opts)
 }
 
-func (u *WallUnit) Prepare(g *Game) error {
-	u.wall = g.Component(u.WallID).(*Wall)
-	u.wall.regUnit(u)
-	return nil
-}
-
+// Scan returns the Tile.
 func (u *WallUnit) Scan() []interface{} { return []interface{}{u.Tile} }
 
 func (u *WallUnit) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(float2(mul2(u.Pos, u.wall.UnitSize).Add(u.wall.UnitOffset).Add(u.wall.Offset)))
+	opts.GeoM.Translate(float2(mul2(u.Pos, u.wall.UnitSize).Add(u.wall.UnitOffset)))
 	return opts
 }
