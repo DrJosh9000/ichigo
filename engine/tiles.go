@@ -52,8 +52,8 @@ func (t *Tilemap) CollidesWith(r image.Rectangle) bool {
 
 	// Probe the map at all tilespace coordinates overlapping the rect.
 	r = r.Sub(t.Offset)
-	min := div2(r.Min, t.Sheet.CellSize)
-	max := div2(r.Max.Sub(image.Pt(1, 1)), t.Sheet.CellSize) // NB: fencepost
+	min := pdiv(r.Min, t.Sheet.CellSize)
+	max := pdiv(r.Max.Sub(image.Pt(1, 1)), t.Sheet.CellSize) // NB: fencepost
 
 	for j := min.Y; j <= max.Y; j++ {
 		for i := min.X; i <= max.X; i++ {
@@ -73,7 +73,7 @@ func (t *Tilemap) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 			continue
 		}
 		var geom ebiten.GeoM
-		geom.Translate(float2(mul2(p, t.Sheet.CellSize)))
+		geom.Translate(pfloat(pmul(p, t.Sheet.CellSize)))
 		geom.Concat(og)
 		opts.GeoM = geom
 
@@ -93,24 +93,24 @@ func (t *Tilemap) Scan() []interface{} {
 }
 
 func (t *Tilemap) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(float2(t.Offset))
+	opts.GeoM.Translate(pfloat(t.Offset))
 	return opts
 }
 
 // TileAt returns the tile present at the given world coordinate.
 func (t *Tilemap) TileAt(wc image.Point) Tile {
-	return t.Map[div2(wc.Sub(t.Offset), t.Sheet.CellSize)]
+	return t.Map[pdiv(wc.Sub(t.Offset), t.Sheet.CellSize)]
 }
 
 // SetTileAt sets the tile at the given world coordinate.
 func (t *Tilemap) SetTileAt(wc image.Point, tile Tile) {
-	t.Map[div2(wc.Sub(t.Offset), t.Sheet.CellSize)] = tile
+	t.Map[pdiv(wc.Sub(t.Offset), t.Sheet.CellSize)] = tile
 }
 
 // TileBounds returns a rectangle describing the tile boundary for the tile
 // at the given world coordinate.
 func (t *Tilemap) TileBounds(wc image.Point) image.Rectangle {
-	p := mul2(div2(wc.Sub(t.Offset), t.Sheet.CellSize), t.Sheet.CellSize).Add(t.Offset)
+	p := pmul(pdiv(wc.Sub(t.Offset), t.Sheet.CellSize), t.Sheet.CellSize).Add(t.Offset)
 	return image.Rectangle{p, p.Add(t.Sheet.CellSize)}
 }
 

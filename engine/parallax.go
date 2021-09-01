@@ -42,7 +42,7 @@ func (p *Parallax) Scan() []interface{} { return []interface{}{p.Child} }
 
 // Transform returns a GeoM translation of Factor * camera.Centre.
 func (p *Parallax) Transform() (opts ebiten.DrawImageOptions) {
-	x, y := float2(p.camera.Centre)
+	x, y := pfloat(p.camera.Centre)
 	opts.GeoM.Translate(x*p.Factor, y*p.Factor)
 	return opts
 }

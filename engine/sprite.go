@@ -49,7 +49,7 @@ func (s *Sprite) SetAnim(a *Anim) {
 }
 
 func (s *Sprite) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(float2(s.Actor.Pos.Add(s.FrameOffset)))
+	opts.GeoM.Translate(pfloat(s.Actor.Pos.Add(s.FrameOffset)))
 	return opts
 }
 

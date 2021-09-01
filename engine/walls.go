@@ -46,8 +46,8 @@ func (w *Wall) CollidesWith(r image.Rectangle) bool {
 
 	// Probe the map at all tilespace coordinates overlapping the rect.
 	r = r.Sub(w.Offset)
-	min := div2(r.Min, w.UnitSize)
-	max := div2(r.Max.Sub(image.Pt(1, 1)), w.UnitSize) // NB: fencepost
+	min := pdiv(r.Min, w.UnitSize)
+	max := pdiv(r.Max.Sub(image.Pt(1, 1)), w.UnitSize) // NB: fencepost
 
 	for j := min.Y; j <= max.Y; j++ {
 		for i := min.X; i <= max.X; i++ {
@@ -80,7 +80,7 @@ func (w *Wall) Prepare(*Game) error {
 
 // Transform returns a GeoM translation by Offset.
 func (w *Wall) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(float2(w.Offset))
+	opts.GeoM.Translate(pfloat(w.Offset))
 	return opts
 }
 
@@ -106,6 +106,6 @@ func (u *WallUnit) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 func (u *WallUnit) Scan() []interface{} { return []interface{}{u.Tile} }
 
 func (u *WallUnit) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(float2(mul2(u.Pos, u.wall.UnitSize).Add(u.wall.UnitOffset)))
+	opts.GeoM.Translate(pfloat(pmul(u.Pos, u.wall.UnitSize).Add(u.wall.UnitOffset)))
 	return opts
 }
