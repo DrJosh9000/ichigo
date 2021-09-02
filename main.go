@@ -107,13 +107,13 @@ func writeLevel1() {
 			&engine.Fill{
 				ID:     "bg_fill",
 				Color:  color.Gray{100},
-				ZOrder: -10,
+				ZOrder: -1000,
 			},
 			&engine.Parallax{
 				CameraID: "game_camera",
 				Child: &engine.Billboard{
 					ID:     "bg_image",
-					ZOrder: -5,
+					ZOrder: -900,
 					Pos:    image.Pt(-160, -120),
 					Src:    engine.ImageRef{Path: "assets/space.png"},
 				},
