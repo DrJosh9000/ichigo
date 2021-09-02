@@ -41,7 +41,7 @@ func (s *Sheet) Scan() []interface{} { return []interface{}{&s.Src} }
 
 // SubImage returns an *ebiten.Image corresponding to the given cell index.
 func (s *Sheet) SubImage(i int) *ebiten.Image {
-	p := pmul(image.Pt(i%s.w, i/s.w), s.CellSize)
+	p := cmul(image.Pt(i%s.w, i/s.w), s.CellSize)
 	r := image.Rectangle{p, p.Add(s.CellSize)}
 	return s.Src.Image().SubImage(r).(*ebiten.Image)
 }

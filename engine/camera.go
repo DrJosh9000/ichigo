@@ -59,7 +59,7 @@ func (c *Camera) PointAt(centre image.Point, zoom float64) {
 
 	// If the configured centre puts the camera out of bounds, move it.
 	// Camera frame currently Rectangle{ centre ± (screen/(2*zoom)) }.
-	sw2, sh2 := pfloat(c.game.ScreenSize.Div(2))
+	sw2, sh2 := cfloat(c.game.ScreenSize.Div(2))
 	swz, shz := int(sw2/zoom), int(sh2/zoom)
 	if centre.X-swz < br.Min.X {
 		centre.X = br.Min.X + swz
@@ -87,9 +87,9 @@ func (c *Camera) Scan() []interface{} { return []interface{}{c.Child} }
 
 // Transform returns the camera transform.
 func (c *Camera) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(pfloat(c.Centre.Mul(-1)))
+	opts.GeoM.Translate(cfloat(c.Centre.Mul(-1)))
 	opts.GeoM.Scale(c.Zoom, c.Zoom)
 	opts.GeoM.Rotate(c.Rotation)
-	opts.GeoM.Translate(pfloat(c.game.ScreenSize.Div(2)))
+	opts.GeoM.Translate(cfloat(c.game.ScreenSize.Div(2)))
 	return opts
 }

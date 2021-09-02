@@ -37,6 +37,6 @@ func (b *Billboard) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 func (b *Billboard) Scan() []interface{} { return []interface{}{&b.Src} }
 
 func (b *Billboard) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(pfloat(b.Pos))
+	opts.GeoM.Translate(cfloat(b.Pos))
 	return opts
 }

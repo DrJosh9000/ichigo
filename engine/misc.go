@@ -44,20 +44,20 @@ type ZOrder float64
 // DrawOrder returns z as a float64.
 func (z ZOrder) DrawOrder() float64 { return float64(z) }
 
-// ---------- Some math helpers for image.Point ----------
+// ---------- Some helpers for image.Point ----------
 
-func pmul(p, q image.Point) image.Point {
-	p.X *= q.X
-	p.Y *= q.Y
-	return p
+// cmul performs componentwise multiplication of two image.Points.
+func cmul(p, q image.Point) image.Point {
+	return image.Point{p.X * q.X, p.Y * q.Y}
 }
 
-func pdiv(p, q image.Point) image.Point {
-	p.X /= q.X
-	p.Y /= q.Y
-	return p
+// cdiv performs componentwise division of two image.Points.
+func cdiv(p, q image.Point) image.Point {
+	return image.Point{p.X / q.X, p.Y / q.Y}
+
 }
 
-func pfloat(p image.Point) (float64, float64) {
+// cfloat returns the components of an image.Point as two floats.
+func cfloat(p image.Point) (x, y float64) {
 	return float64(p.X), float64(p.Y)
 }
