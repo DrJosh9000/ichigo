@@ -39,13 +39,13 @@ type Wall struct {
 }
 
 // CollidesWith implements a tilerange collosion check, similar to Tilemap.
-func (w *Wall) CollidesWith(r image.Rectangle) bool {
+func (w *Wall) CollidesWith(b Box) bool {
 	if w.Ersatz {
 		return false
 	}
 
 	// Probe the map at all tilespace coordinates overlapping the rect.
-	r = r.Sub(w.Offset)
+	r := b.XY().Sub(w.Offset)
 	min := cdiv(r.Min, w.UnitSize)
 	max := cdiv(r.Max.Sub(image.Pt(1, 1)), w.UnitSize) // NB: fencepost
 

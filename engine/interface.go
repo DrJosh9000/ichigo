@@ -49,7 +49,7 @@ type Bounder interface {
 
 // Collider components have tangible form.
 type Collider interface {
-	CollidesWith(image.Rectangle) bool
+	CollidesWith(Box) bool
 }
 
 // Disabler components can be disabled.

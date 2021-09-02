@@ -24,7 +24,7 @@ type Actor struct {
 }
 
 func (a *Actor) CollidesAt(p Point3) bool {
-	bounds := Box{Min: p, Max: p.Add(a.Size)}.XY() // TODO: 3D collision
+	bounds := Box{Min: p, Max: p.Add(a.Size)}
 	for c := range a.game.Query(a.CollisionDomain, ColliderType) {
 		if c.(Collider).CollidesWith(bounds) {
 			return true

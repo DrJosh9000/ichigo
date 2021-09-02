@@ -47,13 +47,13 @@ type Tilemap struct {
 }
 
 // CollidesWith implements Collider.
-func (t *Tilemap) CollidesWith(r image.Rectangle) bool {
+func (t *Tilemap) CollidesWith(b Box) bool {
 	if t.Ersatz {
 		return false
 	}
 
 	// Probe the map at all tilespace coordinates overlapping the rect.
-	r = r.Sub(t.Offset)
+	r := b.XY().Sub(t.Offset) // TODO: pretend tilemap is a plane in 3D?
 	min := cdiv(r.Min, t.Sheet.CellSize)
 	max := cdiv(r.Max.Sub(image.Pt(1, 1)), t.Sheet.CellSize) // NB: fencepost
 

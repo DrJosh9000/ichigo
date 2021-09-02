@@ -2,7 +2,6 @@ package engine
 
 import (
 	"encoding/gob"
-	"image"
 )
 
 var _ Collider = SolidRect{}
@@ -13,9 +12,9 @@ func init() {
 
 type SolidRect struct {
 	ID
-	Bounds
+	Box
 }
 
-func (s SolidRect) CollidesWith(r image.Rectangle) bool {
-	return s.BoundingRect().Overlaps(r)
+func (s SolidRect) CollidesWith(r Box) bool {
+	return s.Box.Overlaps(r)
 }

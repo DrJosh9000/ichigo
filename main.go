@@ -170,16 +170,16 @@ func writeLevel1() {
 				},
 			},
 			&engine.SolidRect{
-				ID:     "ceiling",
-				Bounds: engine.Bounds(image.Rect(0, -1, 320, 0)),
+				ID:  "ceiling",
+				Box: engine.Box{Min: engine.Pt3(0, -1, 0), Max: engine.Pt3(320, 0, 100)},
 			},
 			&engine.SolidRect{
-				ID:     "left_wall",
-				Bounds: engine.Bounds(image.Rect(-1, 0, 0, 240)),
+				ID:  "left_wall",
+				Box: engine.Box{Min: engine.Pt3(-1, 0, 0), Max: engine.Pt3(0, 240, 100)},
 			},
 			&engine.SolidRect{
-				ID:     "right_wall",
-				Bounds: engine.Bounds(image.Rect(320, 0, 321, 240)),
+				ID:  "right_wall",
+				Box: engine.Box{Min: engine.Pt3(320, 0, 0), Max: engine.Pt3(321, 240, 100)},
 			},
 			&game.Awakeman{
 				CameraID: "game_camera",
