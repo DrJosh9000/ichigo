@@ -25,7 +25,6 @@ type Sprite struct {
 	FrameOffset image.Point
 	Hidden
 	Sheet Sheet
-	ZOrder
 
 	anim *Anim
 }
@@ -33,6 +32,11 @@ type Sprite struct {
 // Draw draws the current cell to the screen.
 func (s *Sprite) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	screen.DrawImage(s.Sheet.SubImage(s.anim.Cell()), opts)
+}
+
+// DrawOrder returns the Z position from Actor.Pos, and 0 bias.
+func (s *Sprite) DrawOrder() (int, int) {
+	return s.Actor.Pos.Z, 0
 }
 
 // Scan returns the Actor and the Sheet.
@@ -54,7 +58,7 @@ func (s *Sprite) SetAnim(a *Anim) {
 
 // Transform returns a translation by the FrameOffset.
 func (s *Sprite) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(cfloat(s.Actor.Pos.Add(s.FrameOffset)))
+	opts.GeoM.Translate(cfloat(s.Actor.Pos.XY().Add(s.FrameOffset)))
 	return opts
 }
 

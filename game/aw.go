@@ -4,7 +4,6 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
-	"image"
 	"math"
 
 	"drjosh.dev/gurgle/engine"
@@ -71,7 +70,7 @@ func (aw *Awakeman) Update() error {
 	if ebiten.IsKeyPressed(ebiten.KeyShift) {
 		z = 2.0
 	}
-	aw.camera.PointAt(aw.Sprite.Actor.Pos.Add(aw.Sprite.Actor.Size.Div(2)), z)
+	aw.camera.PointAt(aw.Sprite.Actor.Pos.XY().Add(aw.Sprite.Actor.Size.XY().Div(2)), z)
 	return nil
 }
 
@@ -116,7 +115,7 @@ func (aw *Awakeman) realUpdate() error {
 	ux, uy := aw.vx, aw.vy
 
 	// Has traction?
-	if aw.Sprite.Actor.CollidesAt(aw.Sprite.Actor.Pos.Add(image.Pt(0, 1))) {
+	if aw.Sprite.Actor.CollidesAt(aw.Sprite.Actor.Pos.Add(engine.Pt3(0, 1, 0))) {
 		// Not falling.
 		// Instantly decelerate (AW absorbs all kinetic E in legs, or something)
 		if aw.jumpBuffer > 0 {

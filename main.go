@@ -187,8 +187,8 @@ func writeLevel1() {
 				Sprite: engine.Sprite{
 					Actor: engine.Actor{
 						CollisionDomain: "level_1",
-						Pos:             image.Pt(100, 100),
-						Size:            image.Pt(8, 16),
+						Pos:             engine.Pt3(100, 100, 9),
+						Size:            engine.Pt3(8, 16, 8),
 					},
 					FrameOffset: image.Pt(-1, 0),
 					Sheet: engine.Sheet{
@@ -228,7 +228,6 @@ func writeLevel1() {
 						CellSize: image.Pt(10, 16),
 						Src:      engine.ImageRef{Path: "assets/aw.png"},
 					},
-					ZOrder: 9,
 				},
 			},
 		},

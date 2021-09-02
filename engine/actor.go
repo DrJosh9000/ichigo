@@ -2,14 +2,10 @@ package engine
 
 import (
 	"encoding/gob"
-	"image"
 )
 
 // Ensure Actor satisfies interfaces.
-var _ interface {
-	Bounder
-	Prepper
-} = &Actor{}
+var _ Prepper = &Actor{}
 
 func init() {
 	gob.Register(&Actor{})
@@ -20,18 +16,15 @@ func init() {
 
 // Actor handles basic movement.
 type Actor struct {
-	CollisionDomain string // id of component to look for colliders inside of
-	Pos             image.Point
-	Size            image.Point
+	CollisionDomain  string // id of component to look for colliders inside of
+	Pos, Size        Point3
+	xRem, yRem, zRem float64
 
-	xRem, yRem float64
-	game       *Game
+	game *Game
 }
 
-func (a *Actor) BoundingRect() image.Rectangle { return image.Rectangle{a.Pos, a.Pos.Add(a.Size)} }
-
-func (a *Actor) CollidesAt(p image.Point) bool {
-	bounds := image.Rectangle{Min: p, Max: p.Add(a.Size)}
+func (a *Actor) CollidesAt(p Point3) bool {
+	bounds := Box{Min: p, Max: p.Add(a.Size)}.XY() // TODO: 3D collision
 	for c := range a.game.Query(a.CollisionDomain, ColliderType) {
 		if c.(Collider).CollidesWith(bounds) {
 			return true
@@ -49,7 +42,7 @@ func (a *Actor) MoveX(dx float64, onCollide func()) {
 	a.xRem -= float64(move)
 	sign := sign(move)
 	for move != 0 {
-		if a.CollidesAt(a.Pos.Add(image.Pt(sign, 0))) {
+		if a.CollidesAt(a.Pos.Add(Pt3(sign, 0, 0))) {
 			if onCollide != nil {
 				onCollide()
 			}
@@ -69,13 +62,33 @@ func (a *Actor) MoveY(dy float64, onCollide func()) {
 	a.yRem -= float64(move)
 	sign := sign(move)
 	for move != 0 {
-		if a.CollidesAt(a.Pos.Add(image.Pt(0, sign))) {
+		if a.CollidesAt(a.Pos.Add(Pt3(0, sign, 0))) {
 			if onCollide != nil {
 				onCollide()
 			}
 			return
 		}
 		a.Pos.Y += sign
+		move -= sign
+	}
+}
+
+func (a *Actor) MoveZ(dz float64, onCollide func()) {
+	a.yRem += dz
+	move := int(a.zRem + 0.5)
+	if move == 0 {
+		return
+	}
+	a.zRem -= float64(move)
+	sign := sign(move)
+	for move != 0 {
+		if a.CollidesAt(a.Pos.Add(Pt3(0, 0, 0))) {
+			if onCollide != nil {
+				onCollide()
+			}
+			return
+		}
+		a.Pos.Z += sign
 		move -= sign
 	}
 }

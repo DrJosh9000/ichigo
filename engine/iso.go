@@ -150,6 +150,34 @@ func (b Box) Size() Point3 {
 	return b.Max.Sub(b.Min)
 }
 
+// Back returns an image.Rectangle representing the back of the box, using
+// the given projection π.
+func (b Box) Back(π image.Point) image.Rectangle {
+	b.Max.Z = b.Min.Z
+	return image.Rectangle{
+		Min: b.Min.IsoProject(π),
+		Max: b.Max.IsoProject(π),
+	}
+}
+
+// Front returns an image.Rectangle representing the front of the box, using
+// the given projection π.
+func (b Box) Front(π image.Point) image.Rectangle {
+	b.Min.Z = b.Max.Z
+	return image.Rectangle{
+		Min: b.Min.IsoProject(π),
+		Max: b.Max.IsoProject(π),
+	}
+}
+
+// XY returns the image.Rectangle representing the box if we forgot about Z.
+func (b Box) XY() image.Rectangle {
+	return image.Rectangle{
+		Min: b.Min.XY(),
+		Max: b.Max.XY(),
+	}
+}
+
 // IsoVoxmap implements a voxel map, painted using flat images in 2D.
 type IsoVoxmap struct {
 	ID
