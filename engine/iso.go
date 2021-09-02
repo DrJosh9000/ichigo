@@ -1,6 +1,9 @@
 package engine
 
-import "strconv"
+import (
+	"image"
+	"strconv"
+)
 
 // Point3 is a en element of int^3.
 type Point3 struct {
@@ -57,6 +60,30 @@ func (p Point3) Coord() (x, y, z int) {
 	return p.X, p.Y, p.Z
 }
 
+// IsoProject performs isometric projection of a 3D coordinate into 2D.
+//
+// If π.X = 0, the x returned is p.X; similarly for π.Y and y.
+// Otherwise, x projects to x + z/π.X and y projects to y + z/π.Y.
+func (p Point3) IsoProject(π image.Point) image.Point {
+	/*
+		I'm using the π character because I'm a maths wanker.
+
+		Dividing is used because there's little reason for an isometric
+		projection in a game to exaggerate the Z position.
+
+		Integers are used to preserve that "pixel perfect" calculation in case
+		you are making the next Celeste.
+	*/
+	q := image.Point{p.X, p.Y}
+	if π.X != 0 {
+		q.X += p.Z / π.X
+	}
+	if π.Y != 0 {
+		q.Y += p.Z / π.Y
+	}
+	return q
+}
+
 // Box describes an axis-aligned rectangular prism.
 type Box struct {
 	Min, Max Point3
@@ -89,28 +116,4 @@ func (b Box) Overlaps(c Box) bool {
 // Size returns b's width, height, and depth.
 func (b Box) Size() Point3 {
 	return b.Max.Sub(b.Min)
-}
-
-// IsoProjection translates an integer 3D coordinate into an integer 2D
-// coordinate.
-type IsoProjection struct {
-	ZX, ZY int
-}
-
-// Project projects a 3D coordinate into 2D.
-// If ZX = 0, x is unchanged; similarly for ZY and y.
-// Otherwise, x projects to x + z/ZX and y projects to y + z/ZY.
-// Dividing is used because there's little reason for an isometric projection
-// in a game to exaggerate the Z position, and integers are used to preserve
-// "pixel perfect" calculation in case you are making the next Celeste.
-func (π IsoProjection) Project(x, y, z int) (xp, yp int) {
-	// I'm using the π character because I'm a maths wanker
-	xp, yp = x, y
-	if π.ZX != 0 {
-		xp += z / π.ZX
-	}
-	if π.ZY != 0 {
-		yp += z / π.ZY
-	}
-	return xp, yp
 }
