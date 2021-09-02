@@ -16,7 +16,7 @@ var (
 )
 
 func init() {
-	gob.Register(ImageRef{})
+	gob.Register(&ImageRef{})
 }
 
 // ImageRef loads images from the AssetFS into *ebiten.Image form. It is your

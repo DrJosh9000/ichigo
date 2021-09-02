@@ -86,20 +86,20 @@ func (g *Game) cmdTree(dst io.Writer, argv []string) {
 			return
 		}
 	}
-	PreorderWalk(c, func(c, p interface{}) error {
+	PreorderWalk(c, func(w, _ interface{}) error {
 		indent := ""
 		l := 0
-		for ; p != nil; p = g.par[p] {
+		for p := w; p != c; p = g.par[p] {
 			l++
 		}
 		if l > 0 {
 			indent = strings.Repeat("  ", l-1) + "↳ "
 		}
-		i, ok := c.(Identifier)
+		i, ok := w.(Identifier)
 		if ok {
-			fmt.Fprintf(dst, "%s%T %q\n", indent, c, i.Ident())
+			fmt.Fprintf(dst, "%s%T %q\n", indent, w, i.Ident())
 		} else {
-			fmt.Fprintf(dst, "%s%T\n", indent, c)
+			fmt.Fprintf(dst, "%s%T\n", indent, w)
 		}
 		return nil
 	})
