@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-// Point3 is a en element of int^3.
+// Point3 is a an element of int^3.
 type Point3 struct {
 	X, Y, Z int
 }
