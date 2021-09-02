@@ -30,10 +30,12 @@ type Sprite struct {
 	anim *Anim
 }
 
+// Draw draws the current cell to the screen.
 func (s *Sprite) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
-	screen.DrawImage(s.Sheet.SubImage(s.anim.CurrentFrame()), opts)
+	screen.DrawImage(s.Sheet.SubImage(s.anim.Cell()), opts)
 }
 
+// Scan returns the Actor and the Sheet.
 func (s *Sprite) Scan() []interface{} {
 	return []interface{}{
 		&s.Actor,
@@ -41,6 +43,8 @@ func (s *Sprite) Scan() []interface{} {
 	}
 }
 
+// SetAnim sets the Anim to use for the sprite. If it is not the same as the
+// one currently set, it resets the new anim.
 func (s *Sprite) SetAnim(a *Anim) {
 	if s.anim != a {
 		a.Reset()
@@ -48,11 +52,12 @@ func (s *Sprite) SetAnim(a *Anim) {
 	s.anim = a
 }
 
+// Transform returns a translation by the FrameOffset.
 func (s *Sprite) Transform() (opts ebiten.DrawImageOptions) {
 	opts.GeoM.Translate(pfloat(s.Actor.Pos.Add(s.FrameOffset)))
 	return opts
 }
 
-// anim can change a bit so we don't tell Game about it, but that means it must
-// be updated here.
+// Update updates the Sprite's anim. anim can change a bit so we don't tell Game
+// about it, but that means it must be updated manually.
 func (s *Sprite) Update() error { return s.anim.Update() }

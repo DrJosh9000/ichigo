@@ -99,7 +99,7 @@ type WallUnit struct {
 
 // Draw draws this wall unit.
 func (u *WallUnit) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
-	screen.DrawImage(u.wall.Sheet.SubImage(u.Tile.CellIndex()), opts)
+	screen.DrawImage(u.wall.Sheet.SubImage(u.Tile.Cell()), opts)
 }
 
 // Scan returns the Tile.

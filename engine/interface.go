@@ -12,7 +12,6 @@ import (
 var (
 	// TypeOf(pointer to interface).Elem() is "idiomatic" -
 	// see https://pkg.go.dev/reflect#example-TypeOf
-	AnimerType      = reflect.TypeOf((*Animer)(nil)).Elem()
 	BounderType     = reflect.TypeOf((*Bounder)(nil)).Elem()
 	ColliderType    = reflect.TypeOf((*Collider)(nil)).Elem()
 	DisablerType    = reflect.TypeOf((*Disabler)(nil)).Elem()
@@ -28,7 +27,6 @@ var (
 
 	// Behaviours lists all the behaviours that can be queried with Game.Query.
 	Behaviours = []reflect.Type{
-		AnimerType,
 		BounderType,
 		ColliderType,
 		DisablerType,
@@ -43,14 +41,6 @@ var (
 		UpdaterType,
 	}
 )
-
-// Animer components have a current frame index.
-type Animer interface {
-	Updater
-
-	CurrentFrame() int
-	Reset()
-}
 
 // Bounder components have a bounding rectangle.
 type Bounder interface {

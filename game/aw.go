@@ -2,6 +2,8 @@ package game
 
 import (
 	"encoding/gob"
+	"errors"
+	"fmt"
 	"image"
 	"math"
 
@@ -182,39 +184,41 @@ func (aw *Awakeman) realUpdate() error {
 }
 
 func (aw *Awakeman) Prepare(game *engine.Game) error {
-	aw.camera = game.Component(aw.CameraID).(*engine.Camera)
-	aw.toast, _ = game.Component(aw.ToastID).(*engine.DebugToast)
+	cam, ok := game.Component(aw.CameraID).(*engine.Camera)
+	if !ok {
+		return fmt.Errorf("component %q not *engine.Camera", aw.CameraID)
+	}
+	aw.camera = cam
+	tst, ok := game.Component(aw.ToastID).(*engine.DebugToast)
+	if !ok {
+		return fmt.Errorf("component %q not *engine.DebugToast", aw.ToastID)
+	}
+	aw.toast = tst
 
-	aw.animIdleLeft = &engine.Anim{Frames: []engine.AnimFrame{
-		{Frame: 1, Duration: 60},
-	}}
-	aw.animIdleRight = &engine.Anim{Frames: []engine.AnimFrame{
-		{Frame: 0, Duration: 60},
-	}}
-	aw.animRunLeft = &engine.Anim{Frames: []engine.AnimFrame{
-		{Frame: 14, Duration: 3},
-		{Frame: 15, Duration: 5},
-		{Frame: 16, Duration: 3},
-		{Frame: 17, Duration: 3},
-	}}
-	aw.animRunRight = &engine.Anim{Frames: []engine.AnimFrame{
-		{Frame: 10, Duration: 3},
-		{Frame: 11, Duration: 5},
-		{Frame: 12, Duration: 3},
-		{Frame: 13, Duration: 3},
-	}}
-	aw.animWalkRight = &engine.Anim{Frames: []engine.AnimFrame{
-		{Frame: 2, Duration: 6},
-		{Frame: 3, Duration: 6},
-		{Frame: 4, Duration: 6},
-		{Frame: 5, Duration: 6},
-	}}
-	aw.animWalkLeft = &engine.Anim{Frames: []engine.AnimFrame{
-		{Frame: 6, Duration: 6},
-		{Frame: 7, Duration: 6},
-		{Frame: 8, Duration: 6},
-		{Frame: 9, Duration: 6},
-	}}
+	aw.animIdleLeft = aw.Sprite.Sheet.NewAnim("idle_left")
+	if aw.animIdleLeft == nil {
+		return errors.New("missing anim idle_left")
+	}
+	aw.animIdleRight = aw.Sprite.Sheet.NewAnim("idle_right")
+	if aw.animIdleRight == nil {
+		return errors.New("missing anim idle_right")
+	}
+	aw.animRunLeft = aw.Sprite.Sheet.NewAnim("run_left")
+	if aw.animRunLeft == nil {
+		return errors.New("missing anim run_left")
+	}
+	aw.animRunRight = aw.Sprite.Sheet.NewAnim("run_right")
+	if aw.animRunRight == nil {
+		return errors.New("missing anim run_right")
+	}
+	aw.animWalkRight = aw.Sprite.Sheet.NewAnim("walk_left")
+	if aw.animWalkRight == nil {
+		return errors.New("missing anim walk_left")
+	}
+	aw.animWalkLeft = aw.Sprite.Sheet.NewAnim("walk_right")
+	if aw.animWalkLeft == nil {
+		return errors.New("missing anim walk_right")
+	}
 	return nil
 }
 

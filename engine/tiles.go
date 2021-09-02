@@ -2,7 +2,9 @@ package engine
 
 import (
 	"encoding/gob"
+	"fmt"
 	"image"
+	"io/fs"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -23,7 +25,7 @@ var (
 	_ interface {
 		Tile
 		Scanner
-	} = AnimatedTile{}
+	} = &AnimatedTile{}
 )
 
 func init() {
@@ -77,9 +79,25 @@ func (t *Tilemap) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 		geom.Concat(og)
 		opts.GeoM = geom
 
-		src := t.Sheet.SubImage(tile.CellIndex())
+		src := t.Sheet.SubImage(tile.Cell())
 		screen.DrawImage(src, opts)
 	}
+}
+
+// Load instantiates animations for all AnimatedTiles.
+func (t *Tilemap) Load(fs.FS) error {
+	for _, tile := range t.Map {
+		at, ok := tile.(*AnimatedTile)
+		if !ok {
+			continue
+		}
+		ad, found := t.Sheet.AnimDefs[at.AnimKey]
+		if !found {
+			return fmt.Errorf("anim key %q not in sheet AnimDefs", at.AnimKey)
+		}
+		at.anim = ad.NewAnim()
+	}
+	return nil
 }
 
 // Scan returns a slice containing Src and all non-nil tiles.
@@ -116,20 +134,22 @@ func (t *Tilemap) TileBounds(wc image.Point) image.Rectangle {
 
 // Tile is the interface needed by Tilemap.
 type Tile interface {
-	CellIndex() int
+	Cell() int
 }
 
 // StaticTile returns a fixed tile index.
 type StaticTile int
 
-func (s StaticTile) CellIndex() int { return int(s) }
+func (s StaticTile) Cell() int { return int(s) }
 
 // AnimatedTile uses an Anim to choose a tile index.
 type AnimatedTile struct {
-	Anim Animer
+	AnimKey string
+
+	anim *Anim
 }
 
-func (a AnimatedTile) CellIndex() int { return a.Anim.CurrentFrame() }
+func (a *AnimatedTile) Cell() int { return a.anim.Cell() }
 
-// Scan returns a.Anim.
-func (a AnimatedTile) Scan() []interface{} { return []interface{}{a.Anim} }
+// Scan returns a.anim.
+func (a *AnimatedTile) Scan() []interface{} { return []interface{}{a.anim} }

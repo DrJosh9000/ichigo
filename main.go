@@ -73,32 +73,21 @@ func main() {
 
 // writeLevel1 dumps a test level into level1.gobz
 func writeLevel1() {
-	redTileAnim := &engine.Anim{Frames: []engine.AnimFrame{
-		{Frame: 3, Duration: 12},
-		{Frame: 4, Duration: 12},
-		{Frame: 5, Duration: 12},
-		{Frame: 6, Duration: 12},
-	}}
-	greenTileAnim := &engine.Anim{Frames: []engine.AnimFrame{
-		{Frame: 0, Duration: 16},
-		{Frame: 1, Duration: 16},
-		{Frame: 2, Duration: 16},
-	}}
 	denseTiles := [][]engine.Tile{
 		{engine.StaticTile(9), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.StaticTile(9)},
-		{nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.AnimatedTile{Anim: redTileAnim.Copy()}, nil, nil, nil, nil, nil, nil, nil, nil, nil},
-		{nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.AnimatedTile{Anim: redTileAnim.Copy()}, nil, nil, nil},
+		{nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, &engine.AnimatedTile{AnimKey: "red_tile"}, nil, nil, nil, nil, nil, nil, nil, nil, nil},
+		{nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, &engine.AnimatedTile{AnimKey: "red_tile"}, nil, nil, nil},
 		{nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil},
-		{nil, nil, engine.AnimatedTile{Anim: greenTileAnim.Copy()}, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil},
-		{nil, nil, nil, nil, nil, engine.AnimatedTile{Anim: redTileAnim.Copy()}, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil},
-		{nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.AnimatedTile{Anim: greenTileAnim.Copy()}, nil, nil, nil, nil, nil, nil},
-		{nil, nil, nil, nil, engine.AnimatedTile{Anim: greenTileAnim.Copy()}, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil},
-		{nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.AnimatedTile{Anim: greenTileAnim.Copy()}, nil, nil, nil, nil, nil, nil, nil, nil, nil},
-		{nil, engine.AnimatedTile{Anim: redTileAnim.Copy()}, nil, nil, nil, nil, nil, nil, engine.StaticTile(9), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil},
+		{nil, nil, &engine.AnimatedTile{AnimKey: "green_tile"}, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil},
+		{nil, nil, nil, nil, nil, &engine.AnimatedTile{AnimKey: "red_tile"}, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil},
+		{nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, &engine.AnimatedTile{AnimKey: "green_tile"}, nil, nil, nil, nil, nil, nil},
+		{nil, nil, nil, nil, &engine.AnimatedTile{AnimKey: "green_tile"}, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil},
+		{nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, &engine.AnimatedTile{AnimKey: "green_tile"}, nil, nil, nil, nil, nil, nil, nil, nil, nil},
+		{nil, &engine.AnimatedTile{AnimKey: "red_tile"}, nil, nil, nil, nil, nil, nil, engine.StaticTile(9), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil},
 		{nil, nil, nil, nil, nil, engine.StaticTile(9), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.StaticTile(9), nil, nil, nil},
 		{nil, nil, nil, nil, engine.StaticTile(9), engine.StaticTile(9), engine.StaticTile(9), nil, nil, nil, engine.StaticTile(9), nil, nil, nil, nil, nil, nil, nil, nil, nil},
-		{engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.AnimatedTile{Anim: redTileAnim.Copy()}, engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8)},
-		{engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.AnimatedTile{Anim: redTileAnim.Copy()}, engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.AnimatedTile{Anim: greenTileAnim.Copy()}, engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7)},
+		{engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), &engine.AnimatedTile{AnimKey: "red_tile"}, engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8)},
+		{engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), &engine.AnimatedTile{AnimKey: "red_tile"}, engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), &engine.AnimatedTile{AnimKey: "green_tile"}, engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7)},
 		{engine.StaticTile(9), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(9)},
 	}
 	tiles := make(map[image.Point]engine.Tile)
@@ -135,6 +124,22 @@ func writeLevel1() {
 				ZOrder: 2,
 				Map:    tiles,
 				Sheet: engine.Sheet{
+					AnimDefs: map[string]*engine.AnimDef{
+						"red_tile": {
+							Steps: []engine.AnimStep{
+								{Cell: 3, Duration: 12},
+								{Cell: 4, Duration: 12},
+								{Cell: 5, Duration: 12},
+								{Cell: 6, Duration: 12},
+							}},
+						"green_tile": {
+							Steps: []engine.AnimStep{
+								{Cell: 0, Duration: 16},
+								{Cell: 1, Duration: 16},
+								{Cell: 2, Duration: 16},
+							},
+						},
+					},
 					CellSize: image.Pt(16, 16),
 					Src:      engine.ImageRef{Path: "assets/boxes.png"},
 				},
@@ -160,12 +165,45 @@ func writeLevel1() {
 						Pos:             image.Pt(100, 100),
 						Size:            image.Pt(8, 16),
 					},
-					ZOrder:      3,
 					FrameOffset: image.Pt(-1, 0),
 					Sheet: engine.Sheet{
+						AnimDefs: map[string]*engine.AnimDef{
+
+							"idle_left": {Steps: []engine.AnimStep{
+								{Cell: 1, Duration: 60},
+							}},
+							"idle_right": {Steps: []engine.AnimStep{
+								{Cell: 0, Duration: 60},
+							}},
+							"run_left": {Steps: []engine.AnimStep{
+								{Cell: 14, Duration: 3},
+								{Cell: 15, Duration: 5},
+								{Cell: 16, Duration: 3},
+								{Cell: 17, Duration: 3},
+							}},
+							"run_right": {Steps: []engine.AnimStep{
+								{Cell: 10, Duration: 3},
+								{Cell: 11, Duration: 5},
+								{Cell: 12, Duration: 3},
+								{Cell: 13, Duration: 3},
+							}},
+							"walk_left": {Steps: []engine.AnimStep{
+								{Cell: 2, Duration: 6},
+								{Cell: 3, Duration: 6},
+								{Cell: 4, Duration: 6},
+								{Cell: 5, Duration: 6},
+							}},
+							"walk_right": {Steps: []engine.AnimStep{
+								{Cell: 6, Duration: 6},
+								{Cell: 7, Duration: 6},
+								{Cell: 8, Duration: 6},
+								{Cell: 9, Duration: 6},
+							}},
+						},
 						CellSize: image.Pt(10, 16),
 						Src:      engine.ImageRef{Path: "assets/aw.png"},
 					},
+					ZOrder: 3,
 				},
 			},
 		},
