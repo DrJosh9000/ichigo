@@ -32,7 +32,7 @@ type Awakeman struct {
 
 	camera      *engine.Camera
 	toast       *engine.DebugToast
-	vx, vy      float64
+	vx, vy, vz  float64
 	facingLeft  bool
 	coyoteTimer int
 	jumpBuffer  int
@@ -114,7 +114,7 @@ func (aw *Awakeman) realUpdate() error {
 	// and
 	//   s = (v_0 + v) / 2.
 	// Capture current v_0 to use later.
-	ux, uy := aw.vx, aw.vy
+	ux, uy, uz := aw.vx, aw.vy, aw.vz
 
 	// Has traction?
 	if aw.Sprite.Actor.CollidesAt(aw.Sprite.Actor.Pos.Add(engine.Pt3(0, 1, 0))) {
@@ -170,6 +170,15 @@ func (aw *Awakeman) realUpdate() error {
 			aw.Sprite.SetAnim(aw.animIdleLeft)
 		}
 	}
+	// Up and down (away and closer)
+	switch {
+	case ebiten.IsKeyPressed(ebiten.KeyUp) || ebiten.IsKeyPressed(ebiten.KeyW):
+		aw.vz = -runVelocity
+	case ebiten.IsKeyPressed(ebiten.KeyDown) || ebiten.IsKeyPressed(ebiten.KeyS):
+		aw.vz = runVelocity
+	default:
+		aw.vz = 0
+	}
 
 	// s = (v_0 + v) / 2.
 	aw.Sprite.Actor.MoveX((ux+aw.vx)/2, nil)
@@ -181,6 +190,7 @@ func (aw *Awakeman) realUpdate() error {
 			aw.vy = 0
 		}
 	})
+	aw.Sprite.Actor.MoveZ((uz+aw.vz)/2, nil)
 	return nil
 }
 

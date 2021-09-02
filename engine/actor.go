@@ -74,7 +74,7 @@ func (a *Actor) MoveY(dy float64, onCollide func()) {
 }
 
 func (a *Actor) MoveZ(dz float64, onCollide func()) {
-	a.yRem += dz
+	a.zRem += dz
 	move := int(a.zRem + 0.5)
 	if move == 0 {
 		return
@@ -82,7 +82,7 @@ func (a *Actor) MoveZ(dz float64, onCollide func()) {
 	a.zRem -= float64(move)
 	sign := sign(move)
 	for move != 0 {
-		if a.CollidesAt(a.Pos.Add(Pt3(0, 0, 0))) {
+		if a.CollidesAt(a.Pos.Add(Pt3(0, 0, sign))) {
 			if onCollide != nil {
 				onCollide()
 			}
