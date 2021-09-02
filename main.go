@@ -16,7 +16,8 @@ import (
 
 const (
 	enableCPUProfile = false
-	rewriteLevel1    = true
+	hardcodedLevel1  = true
+	rewriteLevel1    = false
 )
 
 func main() {
@@ -38,8 +39,14 @@ func main() {
 	ebiten.SetWindowTitle("TODO")
 
 	// Change to true to rewrite level1.gobz
-	if rewriteLevel1 && runtime.GOOS != "js" {
-		writeLevel1()
+	lev1 := interface{}(&engine.SceneRef{Path: "assets/level1.gobz"})
+	if hardcodedLevel1 {
+		lev1 = level1()
+		if rewriteLevel1 && runtime.GOOS != "js" {
+			if err := engine.SaveGobz(lev1, "game/assets/level1.gobz"); err != nil {
+				log.Fatalf("Couldn't save level1.gobz: %v", err)
+			}
+		}
 	}
 
 	g := &engine.Game{
@@ -49,7 +56,7 @@ func main() {
 			Components: []interface{}{
 				&engine.Camera{
 					ID:    "game_camera",
-					Child: &engine.SceneRef{Path: "assets/level1.gobz"},
+					Child: lev1,
 				},
 				&engine.DebugToast{ID: "toast", Pos: image.Pt(0, 15)},
 				engine.PerfDisplay{},
@@ -71,8 +78,7 @@ func main() {
 	}
 }
 
-// writeLevel1 dumps a test level into level1.gobz
-func writeLevel1() {
+func level1() *engine.Scene {
 	denseTiles := [][]engine.Tile{
 		{engine.StaticTile(9), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.StaticTile(9)},
 		{nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, &engine.AnimatedTile{AnimKey: "red_tile"}, nil, nil, nil, nil, nil, nil, nil, nil, nil},
@@ -100,7 +106,7 @@ func writeLevel1() {
 		}
 	}
 
-	level1 := &engine.Scene{
+	return &engine.Scene{
 		ID:     "level_1",
 		Bounds: engine.Bounds(image.Rect(-32, -32, 320+32, 240+32)),
 		Components: []interface{}{
@@ -233,9 +239,5 @@ func writeLevel1() {
 				},
 			},
 		},
-	}
-
-	if err := engine.SaveGobz(level1, "game/assets/level1.gobz"); err != nil {
-		log.Fatalf("Couldn't save level1.gobz: %v", err)
 	}
 }
