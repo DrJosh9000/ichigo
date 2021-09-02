@@ -6,10 +6,12 @@ import (
 	"fmt"
 	"image"
 	"io/fs"
+	"log"
 	"math"
 	"reflect"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -243,6 +245,7 @@ func walk(component, parent interface{}, visit func(component, parent interface{
 // LoadAndPrepare must be called before any calls to Component or Query.
 func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	// Load all the Loaders.
+	startLoad := time.Now()
 	if err := Walk(g, func(c, _ interface{}) error {
 		l, ok := c.(Loader)
 		if !ok {
@@ -252,8 +255,10 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	}); err != nil {
 		return err
 	}
+	log.Printf("finished loading in %v", time.Since(startLoad))
 
 	// Build the component databases
+	startBuild := time.Now()
 	g.dbmu.Lock()
 	g.byID = make(map[string]Identifier)
 	g.byAB = make(map[abKey]map[interface{}]struct{})
@@ -262,13 +267,16 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 		return err
 	}
 	g.dbmu.Unlock()
+	log.Printf("finished building db in %v", time.Since(startBuild))
 
 	// Prepare all the Preppers
+	startPrep := time.Now()
 	for p := range g.Query(g.Ident(), PrepperType) {
 		if err := p.(Prepper).Prepare(g); err != nil {
 			return err
 		}
 	}
+	log.Printf("finished preparing in %v", time.Since(startPrep))
 	return nil
 }
 
