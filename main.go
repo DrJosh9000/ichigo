@@ -107,13 +107,13 @@ func writeLevel1() {
 			&engine.Fill{
 				ID:     "bg_fill",
 				Color:  color.Gray{100},
-				ZOrder: 0,
+				ZOrder: -10,
 			},
 			&engine.Parallax{
 				CameraID: "game_camera",
 				Child: &engine.Billboard{
 					ID:     "bg_image",
-					ZOrder: 1,
+					ZOrder: -5,
 					Pos:    image.Pt(-160, -120),
 					Src:    engine.ImageRef{Path: "assets/space.png"},
 				},
@@ -138,11 +138,15 @@ func writeLevel1() {
 					engine.Pt3(5, 0, 0): {CellBack: 0, CellFront: 1},
 					engine.Pt3(5, 1, 0): {CellBack: 0, CellFront: 1},
 					engine.Pt3(5, 2, 0): {CellBack: 0, CellFront: 1},
+
+					engine.Pt3(8, 2, 0): {CellBack: 0, CellFront: 1},
+					engine.Pt3(8, 2, 1): {CellBack: 0, CellFront: 1},
+					engine.Pt3(8, 2, 2): {CellBack: 0, CellFront: 1},
 				},
 			},
 			&engine.Tilemap{
 				ID:     "terrain",
-				ZOrder: 8,
+				ZOrder: -1,
 				Map:    tiles,
 				Sheet: engine.Sheet{
 					AnimDefs: map[string]*engine.AnimDef{
