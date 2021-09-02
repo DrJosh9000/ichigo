@@ -193,7 +193,6 @@ func writeLevel1() {
 					FrameOffset: image.Pt(-1, 0),
 					Sheet: engine.Sheet{
 						AnimDefs: map[string]*engine.AnimDef{
-
 							"idle_left": {Steps: []engine.AnimStep{
 								{Cell: 1, Duration: 60},
 							}},
