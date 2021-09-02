@@ -91,11 +91,10 @@ func (t *Tilemap) Load(fs.FS) error {
 		if !ok {
 			continue
 		}
-		ad, found := t.Sheet.AnimDefs[at.AnimKey]
-		if !found {
-			return fmt.Errorf("anim key %q not in sheet AnimDefs", at.AnimKey)
+		at.anim = t.Sheet.NewAnim(at.AnimKey)
+		if at.anim == nil {
+			return fmt.Errorf("missing anim %q", at.AnimKey)
 		}
-		at.anim = ad.NewAnim()
 	}
 	return nil
 }
