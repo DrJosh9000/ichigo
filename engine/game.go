@@ -217,14 +217,15 @@ func (g *Game) Query(ancestorID string, behaviour reflect.Type) map[interface{}]
 // Scan implements Scanner.
 func (g *Game) Scan() []interface{} { return []interface{}{g.Root} }
 
-// Walk calls visit with every component and its parent, reachable from the
-// given component via Scan, for as long as visit returns nil. The parent of
-// the first component (as passed to visit) will be nil.
-func Walk(component interface{}, visit func(component, parent interface{}) error) error {
-	return walk(component, nil, visit)
+// PreorderWalk calls visit with every component and its parent, reachable from
+// the  given component via Scan, for as long as visit returns nil. The parent
+// value passed to visit when visiting component will be nil. The parent will be
+// visited before the children.
+func PreorderWalk(component interface{}, visit func(component, parent interface{}) error) error {
+	return preorderWalk(component, nil, visit)
 }
 
-func walk(component, parent interface{}, visit func(component, parent interface{}) error) error {
+func preorderWalk(component, parent interface{}, visit func(component, parent interface{}) error) error {
 	if err := visit(component, parent); err != nil {
 		return err
 	}
@@ -233,11 +234,30 @@ func walk(component, parent interface{}, visit func(component, parent interface{
 		return nil
 	}
 	for _, c := range sc.Scan() {
-		if err := walk(c, component, visit); err != nil {
+		if err := preorderWalk(c, component, visit); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+// PostorderWalk calls visit with every component and its parent, reachable from
+// the  given component via Scan, for as long as visit returns nil. The parent
+// value passed to visit when visiting component will be nil. The children will
+// be visited before the parent.
+func PostorderWalk(component interface{}, visit func(component, parent interface{}) error) error {
+	return preorderWalk(component, nil, visit)
+}
+
+func postorderWalk(component, parent interface{}, visit func(component, parent interface{}) error) error {
+	if sc, ok := component.(Scanner); ok {
+		for _, c := range sc.Scan() {
+			if err := postorderWalk(c, component, visit); err != nil {
+				return err
+			}
+		}
+	}
+	return visit(component, parent)
 }
 
 // LoadAndPrepare first calls Load on all Loaders. Once loading is complete, it
@@ -246,7 +266,7 @@ func walk(component, parent interface{}, visit func(component, parent interface{
 func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	// Load all the Loaders.
 	startLoad := time.Now()
-	if err := Walk(g, func(c, _ interface{}) error {
+	if err := PreorderWalk(g, func(c, _ interface{}) error {
 		l, ok := c.(Loader)
 		if !ok {
 			return nil
@@ -263,7 +283,7 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	g.byID = make(map[string]Identifier)
 	g.byAB = make(map[abKey]map[interface{}]struct{})
 	g.par = make(map[interface{}]interface{})
-	if err := Walk(g, g.register); err != nil {
+	if err := PreorderWalk(g, g.register); err != nil {
 		return err
 	}
 	g.dbmu.Unlock()
@@ -283,6 +303,8 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 // Register registers a component into the component database (as the
 // child of a given parent). Passing a nil component or parent is an error.
 // Registering multiple components with the same ID is also an error.
+// Registering a component will recursively register all children found via
+// Scan.
 func (g *Game) Register(component, parent interface{}) error {
 	if component == nil {
 		return errNilComponent
@@ -292,7 +314,8 @@ func (g *Game) Register(component, parent interface{}) error {
 	}
 	g.dbmu.Lock()
 	defer g.dbmu.Unlock()
-	return g.register(component, parent)
+	// walk goes in the right order for registering.
+	return preorderWalk(component, parent, g.register)
 }
 
 func (g *Game) register(component, parent interface{}) error {
@@ -340,13 +363,17 @@ func (g *Game) register(component, parent interface{}) error {
 }
 
 // Unregister removes the component from the component database.
-// Passing a nil component has no effect.
+// Passing a nil component has no effect. Unregistering a component will
+// recursively unregister child components found via Scan.
 func (g *Game) Unregister(component interface{}) {
 	if component == nil {
 		return
 	}
 	g.dbmu.Lock()
-	g.unregister(component)
+	postorderWalk(component, nil, func(c, _ interface{}) error {
+		g.unregister(c)
+		return nil
+	})
 	g.dbmu.Unlock()
 }
 

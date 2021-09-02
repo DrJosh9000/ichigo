@@ -86,7 +86,7 @@ func (g *Game) cmdTree(dst io.Writer, argv []string) {
 			return
 		}
 	}
-	Walk(c, func(c, p interface{}) error {
+	PreorderWalk(c, func(c, p interface{}) error {
 		indent := ""
 		l := 0
 		for ; p != nil; p = g.par[p] {
