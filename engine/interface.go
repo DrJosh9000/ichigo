@@ -107,7 +107,7 @@ type Saver interface {
 
 // Transformer components can transform their child components.
 type Transformer interface {
-	Transform() ebiten.DrawImageOptions
+	Transform() Transform
 }
 
 // Updater components can update themselves. Update is called repeatedly. Each

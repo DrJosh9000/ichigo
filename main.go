@@ -57,6 +57,8 @@ func main() {
 				&engine.Camera{
 					ID:    "game_camera",
 					Child: lev1,
+					// Each step in Z becomes -½ step in X plus ½ step in Y:
+					IsoProjection: image.Pt(-2, 2),
 				},
 				&engine.DebugToast{ID: "toast", Pos: image.Pt(0, 15)},
 				engine.PerfDisplay{},
@@ -129,7 +131,6 @@ func level1() *engine.Scene {
 				ID:            "voxmap",
 				DrawOrderBias: image.Pt(1, -1), // left before right, bottom before top
 				DrawOffset:    image.Pt(-8, 0),
-				Projection:    image.Pt(-2, 2), // each step in Z becomes -1/2 step in X plus 1/2 step in Y.
 				VoxSize:       engine.Pt3(16, 16, 16),
 				Sheet: engine.Sheet{
 					CellSize: image.Pt(24, 24),

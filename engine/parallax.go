@@ -3,8 +3,6 @@ package engine
 import (
 	"encoding/gob"
 	"fmt"
-
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 var _ interface {
@@ -41,8 +39,8 @@ func (p *Parallax) Prepare(game *Game) error {
 func (p *Parallax) Scan() []interface{} { return []interface{}{p.Child} }
 
 // Transform returns a GeoM translation of Factor * camera.Centre.
-func (p *Parallax) Transform() (opts ebiten.DrawImageOptions) {
+func (p *Parallax) Transform() (tf Transform) {
 	x, y := cfloat(p.camera.Centre)
-	opts.GeoM.Translate(x*p.Factor, y*p.Factor)
-	return opts
+	tf.Opts.GeoM.Translate(x*p.Factor, y*p.Factor)
+	return tf
 }

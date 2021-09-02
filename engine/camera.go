@@ -3,8 +3,6 @@ package engine
 import (
 	"encoding/gob"
 	"image"
-
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // Ensure Camera satisfies interfaces.
@@ -27,9 +25,10 @@ type Camera struct {
 	// Camera controls
 	// These directly manipulate the camera. If you want to restrict the camera
 	// view area to the child's bounding rectangle, use PointAt.
-	Centre   image.Point // world coordinates
-	Rotation float64     // radians
-	Zoom     float64     // unitless
+	Centre        image.Point // world coordinates
+	Rotation      float64     // radians
+	Zoom          float64     // unitless
+	IsoProjection image.Point
 
 	game *Game
 }
@@ -86,10 +85,11 @@ func (c *Camera) Prepare(game *Game) error {
 func (c *Camera) Scan() []interface{} { return []interface{}{c.Child} }
 
 // Transform returns the camera transform.
-func (c *Camera) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(cfloat(c.Centre.Mul(-1)))
-	opts.GeoM.Scale(c.Zoom, c.Zoom)
-	opts.GeoM.Rotate(c.Rotation)
-	opts.GeoM.Translate(cfloat(c.game.ScreenSize.Div(2)))
-	return opts
+func (c *Camera) Transform() (tf Transform) {
+	tf.IsoProjection = c.IsoProjection
+	tf.Opts.GeoM.Translate(cfloat(c.Centre.Mul(-1)))
+	tf.Opts.GeoM.Scale(c.Zoom, c.Zoom)
+	tf.Opts.GeoM.Rotate(c.Rotation)
+	tf.Opts.GeoM.Translate(cfloat(c.game.ScreenSize.Div(2)))
+	return tf
 }

@@ -60,8 +60,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// parents as well.
 	// accum memoises the results for each component.
 	type state struct {
-		hidden bool
-		opts   ebiten.DrawImageOptions
+		hidden    bool
+		transform Transform
 	}
 	accum := map[interface{}]state{
 		g: {hidden: false},
@@ -97,7 +97,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 			// p is not hidden, so compute its cumulative transform.
 			if t, ok := p.(Transformer); ok {
-				st.opts = concatOpts(t.Transform(), st.opts)
+				st.transform = t.Transform().Concat(st.transform)
 			}
 			accum[p] = st
 		}
@@ -106,7 +106,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if st.hidden {
 			continue
 		}
-		d.Draw(screen, &st.opts)
+		d.Draw(screen, &st.transform.Opts)
 	}
 }
 
@@ -439,15 +439,3 @@ func (d drawList) Less(i, j int) bool {
 
 func (d drawList) Len() int      { return len(d) }
 func (d drawList) Swap(i, j int) { d[i], d[j] = d[j], d[i] }
-
-func concatOpts(a, b ebiten.DrawImageOptions) ebiten.DrawImageOptions {
-	a.ColorM.Concat(b.ColorM)
-	a.GeoM.Concat(b.GeoM)
-	if b.CompositeMode != 0 {
-		a.CompositeMode = b.CompositeMode
-	}
-	if b.Filter != 0 {
-		a.Filter = b.Filter
-	}
-	return a
-}

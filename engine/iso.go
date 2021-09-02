@@ -11,12 +11,12 @@ var (
 	_ interface {
 		Prepper
 		Scanner
+		Transformer
 	} = &IsoVoxmap{}
 
 	_ interface {
 		Prepper
 		Scanner
-		Transformer
 	} = &IsoVoxel{}
 
 	_ Drawer = &IsoVoxelSide{}
@@ -36,7 +36,6 @@ type IsoVoxmap struct {
 	Map           map[Point3]*IsoVoxel
 	DrawOrderBias image.Point // so boxes overdraw correctly
 	DrawOffset    image.Point
-	Projection    image.Point // IsoProjection parameter
 	Sheet         Sheet
 	VoxSize       Point3 // size of each voxel
 }
@@ -59,6 +58,12 @@ func (m *IsoVoxmap) Scan() []interface{} {
 		c = append(c, voxel)
 	}
 	return c
+}
+
+// Transform returns a translation by DrawOffset.
+func (m *IsoVoxmap) Transform() (tf Transform) {
+	tf.Opts.GeoM.Translate(cfloat(m.DrawOffset))
+	return tf
 }
 
 // IsoVoxel is a voxel in an IsoVoxmap.
@@ -85,16 +90,6 @@ func (v *IsoVoxel) Scan() []interface{} {
 	return []interface{}{&v.back, &v.front}
 }
 
-// Transform returns a translation of first by DrawOffset, then by
-// pos.CMul(VoxSize) iso-projected (the top-left of the back of the voxel).
-func (v *IsoVoxel) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(cfloat(v.ivm.DrawOffset))
-	p3 := v.pos.CMul(v.ivm.VoxSize)
-	p2 := p3.IsoProject(v.ivm.Projection)
-	opts.GeoM.Translate(cfloat(p2))
-	return opts
-}
-
 // IsoVoxelSide is a side of a voxel.
 type IsoVoxelSide struct {
 	front bool
@@ -103,6 +98,12 @@ type IsoVoxelSide struct {
 
 // Draw draws this side.
 func (v *IsoVoxelSide) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
+
+	// TODO: apply IsoProjection to opts.GeoM
+	//	p3 := v.pos.CMul(v.ivm.VoxSize)
+	//	p2 := p3.IsoProject(v.ivm.Projection)
+	//	tf.Opts.GeoM.Translate(cfloat(p2))
+
 	cell := v.vox.CellBack
 	if v.front {
 		cell = v.vox.CellFront

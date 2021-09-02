@@ -57,9 +57,9 @@ func (s *Sprite) SetAnim(a *Anim) {
 }
 
 // Transform returns a translation by the FrameOffset.
-func (s *Sprite) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(cfloat(s.Actor.Pos.XY().Add(s.FrameOffset)))
-	return opts
+func (s *Sprite) Transform() (tf Transform) {
+	tf.Opts.GeoM.Translate(cfloat(s.Actor.Pos.XY().Add(s.FrameOffset)))
+	return tf
 }
 
 // Update updates the Sprite's anim. anim can change a bit so we don't tell Game
