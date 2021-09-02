@@ -119,9 +119,30 @@ func writeLevel1() {
 				},
 				Factor: 0.5,
 			},
+			&engine.IsoVoxmap{
+				ID:            "voxmap",
+				DrawOrderBias: image.Pt(1, -1), // draw left before right, bottom before top
+				OffsetBack:    image.Pt(-8, 0),
+				OffsetFront:   image.Pt(-8, 0),
+				Projection:    image.Pt(-2, 2), // each step in Z becomes -1/2 step in X plus 1/2 step in Y.
+				VoxSize:       engine.Pt3(16, 16, 16),
+				Sheet: engine.Sheet{
+					CellSize: image.Pt(24, 24),
+					Src:      engine.ImageRef{Path: "assets/box16.png"},
+				},
+				Map: map[engine.Point3]*engine.IsoVoxel{
+					engine.Pt3(0, 2, 0): {CellBack: 0, CellFront: 1},
+					engine.Pt3(1, 2, 0): {CellBack: 0, CellFront: 1},
+					engine.Pt3(2, 2, 0): {CellBack: 0, CellFront: 1},
+
+					engine.Pt3(5, 0, 0): {CellBack: 0, CellFront: 1},
+					engine.Pt3(5, 1, 0): {CellBack: 0, CellFront: 1},
+					engine.Pt3(5, 2, 0): {CellBack: 0, CellFront: 1},
+				},
+			},
 			&engine.Tilemap{
 				ID:     "terrain",
-				ZOrder: 2,
+				ZOrder: 8,
 				Map:    tiles,
 				Sheet: engine.Sheet{
 					AnimDefs: map[string]*engine.AnimDef{
@@ -203,7 +224,7 @@ func writeLevel1() {
 						CellSize: image.Pt(10, 16),
 						Src:      engine.ImageRef{Path: "assets/aw.png"},
 					},
-					ZOrder: 3,
+					ZOrder: 9,
 				},
 			},
 		},

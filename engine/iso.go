@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"encoding/gob"
 	"image"
 	"strconv"
 
@@ -24,6 +25,12 @@ var (
 		Transformer
 	} = &IsoVoxelSide{}
 )
+
+func init() {
+	gob.Register(&IsoVoxmap{})
+	gob.Register(&IsoVoxel{})
+	gob.Register(&IsoVoxelSide{})
+}
 
 // Point3 is a an element of int^3.
 type Point3 struct {
@@ -152,7 +159,7 @@ type IsoVoxmap struct {
 	DrawOrderBias image.Point // so boxes overdraw correctly
 	OffsetBack    image.Point // offsets the image drawn for the back
 	OffsetFront   image.Point // offsets the image drawn for the front
-	Proj          image.Point // IsoProjection parameter
+	Projection    image.Point // IsoProjection parameter
 	Sheet         Sheet
 	VoxSize       Point3 // size of each voxel
 }
@@ -201,10 +208,11 @@ func (v *IsoVoxel) Scan() []interface{} {
 	return []interface{}{&v.back, &v.front}
 }
 
-// Transform returns the transform for drawing this voxel.
+// Transform returns a translation of pos.CMul(VoxSize) iso-projected
+// (the top-left of the back of the voxel).
 func (v *IsoVoxel) Transform() (opts ebiten.DrawImageOptions) {
 	p3 := v.pos.CMul(v.ivm.VoxSize)
-	p2 := p3.IsoProject(v.ivm.Proj)
+	p2 := p3.IsoProject(v.ivm.Projection)
 	opts.GeoM.Translate(cfloat(p2))
 	return opts
 }
