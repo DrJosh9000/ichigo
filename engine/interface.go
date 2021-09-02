@@ -64,7 +64,7 @@ type Disabler interface {
 // passed to Game.Register or returned from Scan).
 type Drawer interface {
 	Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions)
-	DrawOrder() float64
+	DrawOrder() (z, bias int)
 }
 
 // Hider components can be hidden.

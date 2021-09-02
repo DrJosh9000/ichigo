@@ -424,13 +424,21 @@ type tombstone struct{}
 
 func (tombstone) Draw(*ebiten.Image, *ebiten.DrawImageOptions) {}
 
-func (tombstone) DrawOrder() float64 { return math.Inf(1) }
+func (tombstone) DrawOrder() (int, int) { return math.MaxInt, math.MaxInt }
 
 type drawList []Drawer
 
-func (d drawList) Less(i, j int) bool { return d[i].DrawOrder() < d[j].DrawOrder() }
-func (d drawList) Len() int           { return len(d) }
-func (d drawList) Swap(i, j int)      { d[i], d[j] = d[j], d[i] }
+func (d drawList) Less(i, j int) bool {
+	a0, a1 := d[i].DrawOrder()
+	b0, b1 := d[i].DrawOrder()
+	if a0 == b0 {
+		return a1 < b1
+	}
+	return a0 < b0
+}
+
+func (d drawList) Len() int      { return len(d) }
+func (d drawList) Swap(i, j int) { d[i], d[j] = d[j], d[i] }
 
 func concatOpts(a, b ebiten.DrawImageOptions) ebiten.DrawImageOptions {
 	a.ColorM.Concat(b.ColorM)

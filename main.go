@@ -16,7 +16,7 @@ import (
 
 const (
 	enableCPUProfile = false
-	rewriteLevel1    = false
+	rewriteLevel1    = true
 )
 
 func main() {

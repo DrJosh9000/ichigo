@@ -38,11 +38,11 @@ func (h *Hidden) Hide() { *h = true }
 // Show sets h to false.
 func (h *Hidden) Show() { *h = false }
 
-// ZOrder implements DrawOrder (in Drawer) directly (as a float64 value).
-type ZOrder float64
+// ZOrder implements DrawOrder (in Drawer) directly (as an int value).
+type ZOrder int
 
-// DrawOrder returns z as a float64.
-func (z ZOrder) DrawOrder() float64 { return float64(z) }
+// DrawOrder returns z as a int with 0 bias.
+func (z ZOrder) DrawOrder() (int, int) { return int(z), 0 }
 
 // ---------- Some helpers for image.Point ----------
 
@@ -54,10 +54,14 @@ func cmul(p, q image.Point) image.Point {
 // cdiv performs componentwise division of two image.Points.
 func cdiv(p, q image.Point) image.Point {
 	return image.Point{p.X / q.X, p.Y / q.Y}
-
 }
 
 // cfloat returns the components of an image.Point as two floats.
 func cfloat(p image.Point) (x, y float64) {
 	return float64(p.X), float64(p.Y)
+}
+
+// dot returns the dot product of two image.Points.
+func dot(p, q image.Point) int {
+	return p.X*q.X + p.Y*q.Y
 }

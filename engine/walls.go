@@ -69,11 +69,12 @@ func (w *Wall) Scan() []interface{} {
 	return c
 }
 
-// Prepare makes sure all WallUnits know about Wall.
+// Prepare makes sure all WallUnits know about Wall and where they are, for
+// drawing.
 func (w *Wall) Prepare(*Game) error {
 	// Ensure all child units know about wall, which houses common attributes
-	for _, u := range w.Units {
-		u.wall = w
+	for p, u := range w.Units {
+		u.pos, u.wall = p, w
 	}
 	return nil
 }
@@ -89,11 +90,10 @@ func (w *Wall) Transform() (opts ebiten.DrawImageOptions) {
 type WallUnit struct {
 	Disabled
 	Hidden
-	Pos    image.Point // tilespace coordinates
-	Tile   Tile        // chooses which cell in wall.Sheet to draw
-	WallID string
+	Tile Tile // chooses which cell in wall.Sheet to draw
 	ZOrder
 
+	pos  image.Point // tilespace coordinates
 	wall *Wall
 }
 
@@ -106,6 +106,6 @@ func (u *WallUnit) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 func (u *WallUnit) Scan() []interface{} { return []interface{}{u.Tile} }
 
 func (u *WallUnit) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(cfloat(cmul(u.Pos, u.wall.UnitSize).Add(u.wall.UnitOffset)))
+	opts.GeoM.Translate(cfloat(cmul(u.pos, u.wall.UnitSize).Add(u.wall.UnitOffset)))
 	return opts
 }
