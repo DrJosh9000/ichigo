@@ -430,7 +430,7 @@ type drawList []Drawer
 
 func (d drawList) Less(i, j int) bool {
 	a0, a1 := d[i].DrawOrder()
-	b0, b1 := d[i].DrawOrder()
+	b0, b1 := d[j].DrawOrder()
 	if a0 == b0 {
 		return a1 < b1
 	}
