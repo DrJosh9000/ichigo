@@ -19,10 +19,7 @@ var (
 		Transformer
 	} = &IsoVoxel{}
 
-	_ interface {
-		Drawer
-		Transformer
-	} = &IsoVoxelSide{}
+	_ Drawer = &IsoVoxelSide{}
 )
 
 func init() {
@@ -38,8 +35,7 @@ type IsoVoxmap struct {
 	Hidden
 	Map           map[Point3]*IsoVoxel
 	DrawOrderBias image.Point // so boxes overdraw correctly
-	OffsetBack    image.Point // offsets the image drawn for the back
-	OffsetFront   image.Point // offsets the image drawn for the front
+	DrawOffset    image.Point
 	Projection    image.Point // IsoProjection parameter
 	Sheet         Sheet
 	VoxSize       Point3 // size of each voxel
@@ -89,9 +85,10 @@ func (v *IsoVoxel) Scan() []interface{} {
 	return []interface{}{&v.back, &v.front}
 }
 
-// Transform returns a translation of pos.CMul(VoxSize) iso-projected
-// (the top-left of the back of the voxel).
+// Transform returns a translation of first by DrawOffset, then by
+// pos.CMul(VoxSize) iso-projected (the top-left of the back of the voxel).
 func (v *IsoVoxel) Transform() (opts ebiten.DrawImageOptions) {
+	opts.GeoM.Translate(cfloat(v.ivm.DrawOffset))
 	p3 := v.pos.CMul(v.ivm.VoxSize)
 	p2 := p3.IsoProject(v.ivm.Projection)
 	opts.GeoM.Translate(cfloat(p2))
@@ -122,14 +119,4 @@ func (v *IsoVoxelSide) DrawOrder() (int, int) {
 	}
 	bias := dot(v.vox.pos.XY(), v.vox.ivm.DrawOrderBias)
 	return z, bias
-}
-
-// Transform offsets the image by either OffsetBack or OffsetFront.
-func (v *IsoVoxelSide) Transform() (opts ebiten.DrawImageOptions) {
-	if v.front {
-		opts.GeoM.Translate(cfloat(v.vox.ivm.OffsetFront))
-	} else {
-		opts.GeoM.Translate(cfloat(v.vox.ivm.OffsetBack))
-	}
-	return opts
 }
