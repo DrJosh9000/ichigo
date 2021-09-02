@@ -319,6 +319,15 @@ func (g *Game) Register(component, parent interface{}) error {
 }
 
 func (g *Game) register(component, parent interface{}) error {
+	// register in g.byID if needed. nothing else errors so do this first
+	if i, ok := component.(Identifier); ok {
+		id := i.Ident()
+		if _, exists := g.byID[id]; exists {
+			return fmt.Errorf("duplicate id %q", id)
+		}
+		g.byID[id] = i
+	}
+
 	// register in g.par
 	if parent != nil {
 		g.par[component] = parent
@@ -348,17 +357,6 @@ func (g *Game) register(component, parent interface{}) error {
 			g.byAB[k][component] = struct{}{}
 		}
 	}
-
-	// register in g.byID if needed
-	i, ok := component.(Identifier)
-	if !ok {
-		return nil
-	}
-	id := i.Ident()
-	if _, exists := g.byID[id]; exists {
-		return fmt.Errorf("duplicate id %q", id)
-	}
-	g.byID[id] = i
 	return nil
 }
 
@@ -408,11 +406,9 @@ func (g *Game) unregister(component interface{}) {
 	}
 
 	// unregister from g.byID if needed
-	i, ok := component.(Identifier)
-	if !ok {
-		return
+	if i, ok := component.(Identifier); ok {
+		delete(g.byID, i.Ident())
 	}
-	delete(g.byID, i.Ident())
 }
 
 // --------- Helper stuff ---------
