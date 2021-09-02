@@ -415,7 +415,7 @@ func (g *Game) unregister(component interface{}) {
 	delete(g.byID, i.Ident())
 }
 
-// --------- Helper types ---------
+// --------- Helper stuff ---------
 
 type abKey struct {
 	ancestor  string
