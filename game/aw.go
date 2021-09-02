@@ -70,7 +70,9 @@ func (aw *Awakeman) Update() error {
 	if ebiten.IsKeyPressed(ebiten.KeyShift) {
 		z = 2.0
 	}
-	aw.camera.PointAt(aw.Sprite.Actor.Pos.XY().Add(aw.Sprite.Actor.Size.XY().Div(2)), z)
+	pos := aw.Sprite.Actor.Pos.XY()
+	size := aw.Sprite.Actor.Size.XY()
+	aw.camera.PointAt(pos.Add(size.Div(2)), z)
 	return nil
 }
 
