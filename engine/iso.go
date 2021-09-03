@@ -107,12 +107,6 @@ type IsoVoxelSide struct {
 
 // Draw draws this side.
 func (v *IsoVoxelSide) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
-
-	// TODO: apply IsoProjection to opts.GeoM
-	//	p3 := v.pos.CMul(v.ivm.VoxSize)
-	//	p2 := p3.IsoProject(v.ivm.Projection)
-	//	tf.Opts.GeoM.Translate(cfloat(p2))
-
 	cell := v.vox.CellBack
 	if v.front {
 		cell = v.vox.CellFront
