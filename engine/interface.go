@@ -105,9 +105,17 @@ type Saver interface {
 	Save() error
 }
 
-// Transformer components can transform their child components.
+// Transformer components can provide a transform to apply to themselves and any
+// child components, based on the cumulative parent transform. An
+// example implementation:
+//
+// 	func (f Foo) Transform(pt Transform) Transform {
+// 		var tf Transform
+// 		tf.Opts.GeoM.Translate(-2, 3) // or your own transform
+// 		return tf.Concat(pt)
+// 	}
 type Transformer interface {
-	Transform() Transform
+	Transform(Transform) Transform
 }
 
 // Updater components can update themselves. Update is called repeatedly. Each

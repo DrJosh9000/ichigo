@@ -17,6 +17,7 @@ var (
 	_ interface {
 		Prepper
 		Scanner
+		Transformer
 	} = &IsoVoxel{}
 
 	_ Drawer = &IsoVoxelSide{}
@@ -61,9 +62,9 @@ func (m *IsoVoxmap) Scan() []interface{} {
 }
 
 // Transform returns a translation by DrawOffset.
-func (m *IsoVoxmap) Transform() (tf Transform) {
+func (m *IsoVoxmap) Transform(pt Transform) (tf Transform) {
 	tf.Opts.GeoM.Translate(cfloat(m.DrawOffset))
-	return tf
+	return tf.Concat(pt)
 }
 
 // IsoVoxel is a voxel in an IsoVoxmap.
@@ -88,6 +89,14 @@ func (v *IsoVoxel) Prepare(*Game) error {
 // Scan returns the back and front of the voxel.
 func (v *IsoVoxel) Scan() []interface{} {
 	return []interface{}{&v.back, &v.front}
+}
+
+// Transform returns a translation the isoprojected coordinate of this voxel.
+func (v *IsoVoxel) Transform(pt Transform) (tf Transform) {
+	tf.Opts.GeoM.Translate(cfloat(
+		v.pos.CMul(v.ivm.VoxSize).IsoProject(pt.IsoProjection),
+	))
+	return tf.Concat(pt)
 }
 
 // IsoVoxelSide is a side of a voxel.

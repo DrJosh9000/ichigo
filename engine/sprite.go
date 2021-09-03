@@ -57,9 +57,9 @@ func (s *Sprite) SetAnim(a *Anim) {
 }
 
 // Transform returns a translation by the FrameOffset.
-func (s *Sprite) Transform() (tf Transform) {
+func (s *Sprite) Transform(pt Transform) (tf Transform) {
 	tf.Opts.GeoM.Translate(cfloat(s.Actor.Pos.XY().Add(s.FrameOffset)))
-	return tf
+	return tf.Concat(pt)
 }
 
 // Update updates the Sprite's anim. anim can change a bit so we don't tell Game

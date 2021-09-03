@@ -96,8 +96,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				continue
 			}
 			// p is not hidden, so compute its cumulative transform.
-			if t, ok := p.(Transformer); ok {
-				st.transform = t.Transform().Concat(st.transform)
+			if tf, ok := p.(Transformer); ok {
+				st.transform = tf.Transform(st.transform)
 			}
 			accum[p] = st
 		}

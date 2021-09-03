@@ -39,8 +39,8 @@ func (p *Parallax) Prepare(game *Game) error {
 func (p *Parallax) Scan() []interface{} { return []interface{}{p.Child} }
 
 // Transform returns a GeoM translation of Factor * camera.Centre.
-func (p *Parallax) Transform() (tf Transform) {
+func (p *Parallax) Transform(pt Transform) (tf Transform) {
 	x, y := cfloat(p.camera.Centre)
 	tf.Opts.GeoM.Translate(x*p.Factor, y*p.Factor)
-	return tf
+	return tf.Concat(pt)
 }

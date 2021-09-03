@@ -80,9 +80,9 @@ func (w *Wall) Prepare(*Game) error {
 }
 
 // Transform returns a GeoM translation by Offset.
-func (w *Wall) Transform() (tf Transform) {
+func (w *Wall) Transform(pt Transform) (tf Transform) {
 	tf.Opts.GeoM.Translate(cfloat(w.Offset))
-	return tf
+	return tf.Concat(pt)
 }
 
 // WallUnit is a unit in a wall. Unlike a tile in a tilemap, WallUnit is
@@ -105,7 +105,9 @@ func (u *WallUnit) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 // Scan returns the Tile.
 func (u *WallUnit) Scan() []interface{} { return []interface{}{u.Tile} }
 
-func (u *WallUnit) Transform() (tf Transform) {
-	tf.Opts.GeoM.Translate(cfloat(cmul(u.pos, u.wall.UnitSize).Add(u.wall.UnitOffset)))
-	return tf
+func (u *WallUnit) Transform(pt Transform) (tf Transform) {
+	tf.Opts.GeoM.Translate(cfloat(
+		cmul(u.pos, u.wall.UnitSize).Add(u.wall.UnitOffset),
+	))
+	return tf.Concat(pt)
 }

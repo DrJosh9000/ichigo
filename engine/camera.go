@@ -85,11 +85,11 @@ func (c *Camera) Prepare(game *Game) error {
 func (c *Camera) Scan() []interface{} { return []interface{}{c.Child} }
 
 // Transform returns the camera transform.
-func (c *Camera) Transform() (tf Transform) {
+func (c *Camera) Transform(pt Transform) (tf Transform) {
 	tf.IsoProjection = c.IsoProjection
 	tf.Opts.GeoM.Translate(cfloat(c.Centre.Mul(-1)))
 	tf.Opts.GeoM.Scale(c.Zoom, c.Zoom)
 	tf.Opts.GeoM.Rotate(c.Rotation)
 	tf.Opts.GeoM.Translate(cfloat(c.game.ScreenSize.Div(2)))
-	return tf
+	return tf.Concat(pt)
 }
