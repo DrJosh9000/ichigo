@@ -35,11 +35,12 @@ type Camera struct {
 
 // PointAt points the camera at a particular centre point and zoom, but adjusts
 // for the bounds of the child component (if available).
-func (c *Camera) PointAt(centre image.Point, zoom float64) {
+func (c *Camera) PointAt(centre Point3, zoom float64) {
 	// Special sauce: if Child has a BoundingRect, make some adjustments
 	bnd, ok := c.Child.(Bounder)
 	if !ok {
-		c.Centre, c.Zoom = centre, zoom
+		c.Centre = centre.IsoProject(c.IsoProjection)
+		c.Zoom = zoom
 		return
 	}
 
@@ -60,19 +61,20 @@ func (c *Camera) PointAt(centre image.Point, zoom float64) {
 	// Camera frame currently Rectangle{ centre ± (screen/(2*zoom)) }.
 	sw2, sh2 := cfloat(c.game.ScreenSize.Div(2))
 	swz, shz := int(sw2/zoom), int(sh2/zoom)
-	if centre.X-swz < br.Min.X {
-		centre.X = br.Min.X + swz
+	cent := centre.IsoProject(c.IsoProjection)
+	if cent.X-swz < br.Min.X {
+		cent.X = br.Min.X + swz
 	}
-	if centre.Y-shz < br.Min.Y {
-		centre.Y = br.Min.Y + shz
+	if cent.Y-shz < br.Min.Y {
+		cent.Y = br.Min.Y + shz
 	}
-	if centre.X+swz > br.Max.X {
-		centre.X = br.Max.X - swz
+	if cent.X+swz > br.Max.X {
+		cent.X = br.Max.X - swz
 	}
-	if centre.Y+shz > br.Max.Y {
-		centre.Y = br.Max.Y - shz
+	if cent.Y+shz > br.Max.Y {
+		cent.Y = br.Max.Y - shz
 	}
-	c.Centre, c.Zoom = centre, zoom
+	c.Centre, c.Zoom = cent, zoom
 }
 
 // Prepare grabs a copy of game (needed for screen dimensions)
