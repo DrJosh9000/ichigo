@@ -21,8 +21,8 @@ func init() {
 
 // Sprite combines an Actor with the ability to Draw from a single spritesheet.
 type Sprite struct {
-	Actor       Actor
-	FrameOffset image.Point
+	Actor      Actor
+	DrawOffset image.Point
 	Hidden
 	Sheet Sheet
 
@@ -56,9 +56,11 @@ func (s *Sprite) SetAnim(a *Anim) {
 	s.anim = a
 }
 
-// Transform returns a translation by the FrameOffset.
+// Transform returns a translation by the DrawOffset and the iso-projected Pos.
 func (s *Sprite) Transform(pt Transform) (tf Transform) {
-	tf.Opts.GeoM.Translate(cfloat(s.Actor.Pos.XY().Add(s.FrameOffset)))
+	tf.Opts.GeoM.Translate(cfloat(
+		s.Actor.Pos.IsoProject(pt.IsoProjection).Add(s.DrawOffset),
+	))
 	return tf.Concat(pt)
 }
 

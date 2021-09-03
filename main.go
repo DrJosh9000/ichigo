@@ -197,10 +197,10 @@ func level1() *engine.Scene {
 				Sprite: engine.Sprite{
 					Actor: engine.Actor{
 						CollisionDomain: "level_1",
-						Pos:             engine.Pt3(100, 100, 9),
+						Pos:             engine.Pt3(100, 100, 0),
 						Size:            engine.Pt3(8, 16, 8),
 					},
-					FrameOffset: image.Pt(-1, 0),
+					DrawOffset: image.Pt(-1, 0),
 					Sheet: engine.Sheet{
 						AnimDefs: map[string]*engine.AnimDef{
 							"idle_left": {Steps: []engine.AnimStep{
