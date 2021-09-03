@@ -59,6 +59,10 @@ func main() {
 					Child: lev1,
 					// Each step in Z becomes -½ step in X plus ½ step in Y:
 					IsoProjection: image.Pt(-2, 2),
+					// Each step in Z becomes ½ step in Y:
+					//IsoProjection: image.Pt(0, 2),
+					// Each step in Z becomes a step in Y:
+					//IsoProjection: image.Pt(0, 1),
 				},
 				&engine.DebugToast{ID: "toast", Pos: image.Pt(0, 15)},
 				engine.PerfDisplay{},
