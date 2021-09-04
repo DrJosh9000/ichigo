@@ -46,6 +46,7 @@ func (a *Actor) MoveX(x float64, onCollide func()) {
 			if onCollide != nil {
 				onCollide()
 			}
+			a.xRem = 0
 			return
 		}
 		a.Pos.X += sign
@@ -66,6 +67,7 @@ func (a *Actor) MoveY(y float64, onCollide func()) {
 			if onCollide != nil {
 				onCollide()
 			}
+			a.yRem = 0
 			return
 		}
 		a.Pos.Y += sign
@@ -86,6 +88,7 @@ func (a *Actor) MoveZ(z float64, onCollide func()) {
 			if onCollide != nil {
 				onCollide()
 			}
+			a.zRem = 0
 			return
 		}
 		a.Pos.Z += sign
