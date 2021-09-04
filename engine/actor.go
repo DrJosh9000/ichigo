@@ -42,15 +42,17 @@ func (a *Actor) MoveX(x float64, onCollide func()) {
 	a.xRem -= float64(move)
 	sign := sign(move)
 	for move != 0 {
-		if a.CollidesAt(a.Pos.Add(Pt3(sign, 0, 0))) {
-			if onCollide != nil {
-				onCollide()
-			}
-			a.xRem = 0
-			return
-		}
 		a.Pos.X += sign
 		move -= sign
+		if !a.CollidesAt(a.Pos) {
+			continue
+		}
+		if onCollide != nil {
+			onCollide()
+		}
+		a.Pos.X -= sign
+		a.xRem = 0
+		return
 	}
 }
 
@@ -63,15 +65,17 @@ func (a *Actor) MoveY(y float64, onCollide func()) {
 	a.yRem -= float64(move)
 	sign := sign(move)
 	for move != 0 {
-		if a.CollidesAt(a.Pos.Add(Pt3(0, sign, 0))) {
-			if onCollide != nil {
-				onCollide()
-			}
-			a.yRem = 0
-			return
-		}
 		a.Pos.Y += sign
 		move -= sign
+		if !a.CollidesAt(a.Pos) {
+			continue
+		}
+		if onCollide != nil {
+			onCollide()
+		}
+		a.Pos.Y -= sign
+		a.yRem = 0
+		return
 	}
 }
 
@@ -84,15 +88,17 @@ func (a *Actor) MoveZ(z float64, onCollide func()) {
 	a.zRem -= float64(move)
 	sign := sign(move)
 	for move != 0 {
-		if a.CollidesAt(a.Pos.Add(Pt3(0, 0, sign))) {
-			if onCollide != nil {
-				onCollide()
-			}
-			a.zRem = 0
-			return
-		}
 		a.Pos.Z += sign
 		move -= sign
+		if !a.CollidesAt(a.Pos) {
+			continue
+		}
+		if onCollide != nil {
+			onCollide()
+		}
+		a.Pos.Z -= sign
+		a.zRem = 0
+		return
 	}
 }
 
