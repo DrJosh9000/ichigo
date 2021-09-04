@@ -65,6 +65,21 @@ func (p Point3) Coord() (x, y, z int) {
 	return p.X, p.Y, p.Z
 }
 
+// Sign returns a sign vector.
+func (p Point3) Sign() Point3 {
+	return Point3{sign(p.X), sign(p.Y), sign(p.Z)}
+}
+
+func sign(m int) int {
+	if m == 0 {
+		return 0
+	}
+	if m < 0 {
+		return -1
+	}
+	return 1
+}
+
 // IsoProject performs isometric projection of a 3D coordinate into 2D.
 //
 // If π.X = 0, the x returned is p.X; similarly for π.Y and y.

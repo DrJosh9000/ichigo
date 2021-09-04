@@ -33,8 +33,8 @@ func (a *Actor) CollidesAt(p Point3) bool {
 	return false
 }
 
-func (a *Actor) MoveX(dx float64, onCollide func()) {
-	a.xRem += dx
+func (a *Actor) MoveX(x float64, onCollide func()) {
+	a.xRem += x
 	move := int(a.xRem + 0.5) // Note: math.Round can lead to vibration
 	if move == 0 {
 		return
@@ -53,8 +53,8 @@ func (a *Actor) MoveX(dx float64, onCollide func()) {
 	}
 }
 
-func (a *Actor) MoveY(dy float64, onCollide func()) {
-	a.yRem += dy
+func (a *Actor) MoveY(y float64, onCollide func()) {
+	a.yRem += y
 	move := int(a.yRem + 0.5)
 	if move == 0 {
 		return
@@ -73,8 +73,8 @@ func (a *Actor) MoveY(dy float64, onCollide func()) {
 	}
 }
 
-func (a *Actor) MoveZ(dz float64, onCollide func()) {
-	a.zRem += dz
+func (a *Actor) MoveZ(z float64, onCollide func()) {
+	a.zRem += z
 	move := int(a.zRem + 0.5)
 	if move == 0 {
 		return
@@ -96,11 +96,4 @@ func (a *Actor) MoveZ(dz float64, onCollide func()) {
 func (a *Actor) Prepare(g *Game) error {
 	a.game = g
 	return nil
-}
-
-func sign(m int) int {
-	if m < 0 {
-		return -1
-	}
-	return 1
 }
