@@ -28,8 +28,8 @@ type PrismMap struct {
 	Map           map[Point3]*Prism
 	DrawOrderBias image.Point // dot with (X,Y) = bias
 	DrawOffset    image.Point // offset to apply to whole map
-	DrawZStride   image.Point // (X,Y) draw translation for each unit in Z
-	PrismSize     Point3
+	DrawZStride   image.Point // draw offset for each unit in Z
+	PrismSize     Point3      // cmul map key = world pos
 	Sheet         Sheet
 }
 
@@ -63,9 +63,9 @@ func (p *Prism) DrawOrder() (int, int) {
 }
 
 func (p *Prism) Transform(pt Transform) (tf Transform) {
-	v := p.pos.CMul(p.pm.PrismSize)
 	tf.Opts.GeoM.Translate(cfloat(
-		v.XY().Add(p.pm.DrawZStride.Mul(v.Z)),
+		cmul(p.pos.XY(), p.pm.PrismSize.XY()).
+			Add(p.pm.DrawZStride.Mul(p.pos.Z)),
 	))
 	return tf.Concat(pt)
 }
