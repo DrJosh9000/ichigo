@@ -1,6 +1,6 @@
 package engine
 
-const (
+var (
 	// Oblique projections
 	CabinetProjection  = ParallelProjection{0.5, 0.5}
 	CavalierProjection = ParallelProjection{1, 1}
