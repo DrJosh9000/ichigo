@@ -1,10 +1,28 @@
 package engine
 
 import (
+	"encoding/gob"
 	"image"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
+
+var (
+	_ interface {
+		Prepper
+		Transformer
+	} = &PrismMap{}
+
+	_ interface {
+		Drawer
+		Transformer
+	} = &Prism{}
+)
+
+func init() {
+	gob.Register(&PrismMap{})
+	gob.Register(&Prism{})
+}
 
 type PrismMap struct {
 	Map           map[Point3]*Prism
@@ -35,8 +53,8 @@ type Prism struct {
 	pm  *PrismMap
 }
 
-func (p *Prism) Draw(screen *ebiten.Image, tf *Transform) {
-	screen.DrawImage(p.pm.Sheet.SubImage(p.Cell), &tf.Opts)
+func (p *Prism) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
+	screen.DrawImage(p.pm.Sheet.SubImage(p.Cell), opts)
 }
 
 func (p *Prism) DrawOrder() (int, int) {
