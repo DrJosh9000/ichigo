@@ -9,6 +9,10 @@ import (
 
 var (
 	_ interface {
+		Identifier
+		Collider
+		Disabler
+		Hider
 		Prepper
 		Transformer
 	} = &PrismMap{}
@@ -25,12 +29,21 @@ func init() {
 }
 
 type PrismMap struct {
-	Map           map[Point3]*Prism
-	DrawOrderBias image.Point // dot with (X,Y) = bias
-	DrawOffset    image.Point // offset to apply to whole map
-	DrawZStride   image.Point // draw offset for each unit in Z
-	PrismSize     Point3      // cmul map key = world pos
+	ID
+	Disabled
+	Hidden
+	
+	Map           map[Point3]*Prism  // pos -> prism
+	DrawOrderBias image.Point // dot with pos.XY() = bias value
+	DrawOffset    image.Point // offset applies to whole map
+	DrawZStride   image.Point // draw offset for each pos unit in Z
+	PrismSize     Point3      // (prismsize cmul pos) = world position
 	Sheet         Sheet
+}
+
+func (m *PrismMap) CollidesWith(b Box) bool {
+	// TODO
+	return false
 }
 
 func (m *PrismMap) Prepare(*Game) error {
