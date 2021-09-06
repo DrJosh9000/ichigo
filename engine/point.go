@@ -70,6 +70,11 @@ func (p Point3) Sign() Point3 {
 	return Point3{sign(p.X), sign(p.Y), sign(p.Z)}
 }
 
+// Dot returns the dot product of the two vectors.
+func (p Point3) Dot(q Point3) int {
+	return p.X*q.X + p.Y*q.Y + p.Z*q.Z
+}
+
 func sign(m int) int {
 	if m == 0 {
 		return 0

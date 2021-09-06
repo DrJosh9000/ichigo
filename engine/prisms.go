@@ -32,17 +32,20 @@ type PrismMap struct {
 	ID
 	Disabled
 	Hidden
-	
-	Map           map[Point3]*Prism  // pos -> prism
-	DrawOrderBias image.Point // dot with pos.XY() = bias value
-	DrawOffset    image.Point // offset applies to whole map
-	DrawZStride   image.Point // draw offset for each pos unit in Z
-	PrismSize     Point3      // (prismsize cmul pos) = world position
+
+	Map           map[Point3]*Prism // pos -> prism
+	DrawOrderBias image.Point       // dot with pos.XY() = bias value
+	DrawOffset    image.Point       // offset applies to whole map
+	PosToDraw     IntMatrix2x3      // p.pos -> drawspace (before offset and camera and ...)
+	PosToWorld    IntMatrix3x4      // p.pos -> worldspace
+	PrismSize     Point3            // in worldspace
 	Sheet         Sheet
 }
 
 func (m *PrismMap) CollidesWith(b Box) bool {
-	// TODO
+	// Back corner of a prism p is:
+	// m.PrismPos.Apply(p.pos)
+
 	return false
 }
 
@@ -71,14 +74,13 @@ func (p *Prism) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 }
 
 func (p *Prism) DrawOrder() (int, int) {
-	return p.pos.Z * p.pm.PrismSize.Z,
+	return p.pm.PosToWorld.Apply(p.pos).Z,
 		dot(p.pos.XY(), p.pm.DrawOrderBias)
 }
 
 func (p *Prism) Transform(pt Transform) (tf Transform) {
 	tf.Opts.GeoM.Translate(cfloat(
-		cmul(p.pos.XY(), p.pm.PrismSize.XY()).
-			Add(p.pm.DrawZStride.Mul(p.pos.Z)),
+		p.pm.PosToDraw.Apply(p.pos),
 	))
 	return tf.Concat(pt)
 }
