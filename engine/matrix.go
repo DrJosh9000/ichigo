@@ -49,12 +49,12 @@ func (a IntMatrix3x4) Apply(v Int3) Int3 {
 }
 
 // IntMatrix2x3 implements a 2 row, 3 column matrix (as two row vectors).
-type IntMatrix2x3 [2]Int3
+type IntMatrix2x3 struct{ X, Y Int3 }
 
 // Apply applies the matrix to a vector to obtain a transformed vector.
 func (a IntMatrix2x3) Apply(v Int3) image.Point {
 	return image.Point{
-		X: v.Dot(a[0]),
-		Y: v.Dot(a[1]),
+		X: v.Dot(a.X),
+		Y: v.Dot(a.Y),
 	}
 }

@@ -53,7 +53,7 @@ func main() {
 	g := &engine.Game{
 		ScreenSize: image.Pt(320, 240), // Window interior is this many pixels.
 		Projection: engine.IntProjection{
-			// Each 1 voxel step in Z is projected as 1 in Y.
+			// Each 1 voxel step in Z is projected into 1 pixel in Y.
 			X: 0,
 			Y: 1,
 		},
@@ -136,6 +136,33 @@ func level1() *engine.Scene {
 					Src:    engine.ImageRef{Path: "assets/space.png"},
 				},
 				Factor: 0.5,
+			},
+			&engine.PrismMap{
+				ID:            "hexagons",
+				DrawOrderBias: image.Pt(0, -1), // draw higher Y after lower Y
+				DrawOffset:    image.Pt(-8, 0),
+				PosToWorld: engine.IntMatrix3x4{
+					0: [4]int{24, 0, 0, 0},
+					1: [4]int{0, 16, 0, 0},
+					2: [4]int{8, 0, 16, 0},
+				},
+				Sheet: engine.Sheet{
+					CellSize: image.Pt(32, 32),
+					Src:      engine.ImageRef{Path: "assets/hexprism32.png"},
+				},
+				Map: map[engine.Int3]*engine.Prism{
+					engine.Pt3(0, 0, 0): {},
+					engine.Pt3(1, 0, 0): {},
+					engine.Pt3(2, 0, 0): {},
+
+					engine.Pt3(4, -2, 0): {},
+					engine.Pt3(4, -1, 0): {},
+					engine.Pt3(4, 0, 0):  {},
+
+					engine.Pt3(6, 0, -4): {},
+					engine.Pt3(6, 0, -3): {},
+					engine.Pt3(6, 0, -2): {},
+				},
 			},
 			&engine.Tilemap{
 				ID:     "terrain",

@@ -28,6 +28,7 @@ func init() {
 	gob.Register(&Prism{})
 }
 
+// PrismMap
 type PrismMap struct {
 	ID
 	Disabled
@@ -36,10 +37,11 @@ type PrismMap struct {
 	Map           map[Int3]*Prism // pos -> prism
 	DrawOrderBias image.Point     // dot with pos.XY() = bias value
 	DrawOffset    image.Point     // offset applies to whole map
-	PosToDraw     IntMatrix2x3    // p.pos -> drawspace (before offset and camera and ...)
-	PosToWorld    IntMatrix3x4    // p.pos -> worldspace
-	PrismSize     Int3            // in worldspace
+	PosToWorld    IntMatrix3x4    // p.pos -> voxelspace
+	PrismSize     Int3            // in voxelspace
 	Sheet         Sheet
+
+	game *Game
 }
 
 func (m *PrismMap) CollidesWith(b Box) bool {
@@ -49,12 +51,22 @@ func (m *PrismMap) CollidesWith(b Box) bool {
 	return false
 }
 
-func (m *PrismMap) Prepare(*Game) error {
+func (m *PrismMap) Prepare(g *Game) error {
+	m.game = g
 	for v, p := range m.Map {
 		p.pos = v
-		p.pm = m
+		p.m = m
 	}
 	return nil
+}
+
+func (m *PrismMap) Scan() []interface{} {
+	c := make([]interface{}, 1, len(m.Map)+1)
+	c[0] = &m.Sheet
+	for _, prism := range m.Map {
+		c = append(c, prism)
+	}
+	return c
 }
 
 func (m *PrismMap) Transform() (opts ebiten.DrawImageOptions) {
@@ -66,21 +78,21 @@ type Prism struct {
 	Cell int
 
 	pos Int3
-	pm  *PrismMap
+	m   *PrismMap
 }
 
 func (p *Prism) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
-	screen.DrawImage(p.pm.Sheet.SubImage(p.Cell), opts)
+	screen.DrawImage(p.m.Sheet.SubImage(p.Cell), opts)
 }
 
 func (p *Prism) DrawOrder() (int, int) {
-	return p.pm.PosToWorld.Apply(p.pos).Z,
-		dot(p.pos.XY(), p.pm.DrawOrderBias)
+	return p.m.PosToWorld.Apply(p.pos).Z,
+		dot(p.pos.XY(), p.m.DrawOrderBias)
 }
 
 func (p *Prism) Transform() (opts ebiten.DrawImageOptions) {
 	opts.GeoM.Translate(cfloat(
-		p.pm.PosToDraw.Apply(p.pos),
+		p.m.game.Projection.Project(p.m.PosToWorld.Apply(p.pos)),
 	))
 	return opts
 }
