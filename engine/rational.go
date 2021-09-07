@@ -1,10 +1,20 @@
 package engine
 
+import "strconv"
+
 // Rat is a (small) rational number implementation. Overflow can happen.
 type Rat struct{ N, D int }
 
 // IntRat returns the rational representation of n.
 func IntRat(n int) Rat { return Rat{N: n, D: 1} }
+
+// String returns a nice string representation like "-3/5".
+func (r Rat) String() string {
+	if r.D == 1 {
+		return strconv.Itoa(r.N)
+	}
+	return strconv.Itoa(r.N) + "/" + strconv.Itoa(r.D)
+}
 
 // Int returns r.N / r.D.
 func (r Rat) Int() int { return r.N / r.D }
