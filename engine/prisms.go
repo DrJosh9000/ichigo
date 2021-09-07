@@ -4,7 +4,6 @@ import (
 	"encoding/gob"
 	"fmt"
 	"image"
-	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -55,20 +54,30 @@ func (m *PrismMap) CollidesWith(b Box) bool {
 
 	// Step 1: subtract whatever the translation component of PosToWorld is,
 	// reducing the rest of the problem to the 3x3 submatrix.
-	b = b.Sub(m.PosToWorld.Translation())
+	rb := b.Sub(m.PosToWorld.Translation())
 	// Step 2: invert the rest of the fucking matrix.
 	// (Spoilers: I did this already in Prepare)
-	b.Min = m.pwinverse.IntApply(b.Min)
-	b.Max = m.pwinverse.IntApply(b.Max.Sub(Int3{1, 1, 1}))
-	b = b.Canon() // inverse might flip the corners around...
+	rb.Min = m.pwinverse.IntApply(rb.Min)
+	rb.Max = m.pwinverse.IntApply(rb.Max) //.Sub(Int3{1, 1, 1}))
 
-	log.Printf("b.Max = %v", b.Max)
+	rb = rb.Canon() // inverse might flip the corners around...
 
-	for k := b.Min.Z; k <= b.Max.Z; k++ {
-		for j := b.Min.Y; j <= b.Max.Y; j++ {
-			for i := b.Min.X; i <= b.Max.X; i++ {
+	// Check neighboring prisms too because there's a fencepost somewhere here
+	rb.Min = rb.Min.Sub(Int3{1, 1, 1})
+	rb.Max = rb.Max.Add(Int3{1, 1, 1})
+
+	var pp Int3
+	for pp.Z = rb.Min.Z; pp.Z <= rb.Max.Z; pp.Z++ {
+		for pp.Y = rb.Min.Y; pp.Y <= rb.Max.Y; pp.Y++ {
+			for pp.X = rb.Min.X; pp.X <= rb.Max.X; pp.X++ {
 				// TODO: take into account the prism shape...
-				if _, found := m.Map[Int3{i, j, k}]; found {
+				if _, found := m.Map[pp]; !found {
+					continue
+				}
+				// Map it back to worldspace to get a bounding box for the prism
+				wp := m.PosToWorld.Apply(pp)
+				cb := Box{Min: wp, Max: wp.Add(m.PrismSize)}
+				if b.Overlaps(cb) {
 					return true
 				}
 			}

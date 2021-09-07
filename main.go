@@ -141,10 +141,13 @@ func level1() *engine.Scene {
 				ID:            "hexagons",
 				DrawOrderBias: image.Pt(0, -1), // draw higher Y after lower Y
 				PosToWorld: engine.IntMatrix3x4{
+					// For each tile in the X direction, go right by 24 and
+					// forward by 8, etc
 					0: [4]int{24, 0, 0, 0},
 					1: [4]int{0, 16, 0, 0},
 					2: [4]int{8, 0, 16, 0},
 				},
+				PrismSize: engine.Int3{X: 32, Y: 16, Z: 16},
 				Sheet: engine.Sheet{
 					CellSize: image.Pt(32, 32),
 					Src:      engine.ImageRef{Path: "assets/hexprism32.png"},
@@ -275,6 +278,7 @@ func level1() *engine.Scene {
 					engine.Pt3(4, 0, 5):  {},
 					engine.Pt3(5, 0, 5):  {},
 					engine.Pt3(6, 0, 5):  {},
+					engine.Pt3(6, -1, 5): {},
 					engine.Pt3(7, 0, 5):  {},
 					engine.Pt3(8, 0, 5):  {},
 					engine.Pt3(9, 0, 5):  {},
@@ -396,8 +400,8 @@ func level1() *engine.Scene {
 				Sprite: engine.Sprite{
 					Actor: engine.Actor{
 						CollisionDomain: "level_1",
-						Pos:             engine.Pt3(100, 0, 100),
-						Size:            engine.Pt3(8, 16, 1),
+						Pos:             engine.Pt3(100, -32, 100),
+						Size:            engine.Pt3(8, 16, 2),
 					},
 					DrawOffset: image.Pt(-1, 0),
 					Sheet: engine.Sheet{
