@@ -131,33 +131,6 @@ func level1() *engine.Scene {
 				},
 				Factor: 0.5,
 			},
-			&engine.IsoVoxmap{
-				ID:            "voxmap",
-				DrawOrderBias: image.Pt(1, -1), // left before right, bottom before top
-				DrawOffset:    image.Pt(-8, 0),
-				VoxSize:       engine.Pt3(16, 16, 16),
-				Sheet: engine.Sheet{
-					CellSize: image.Pt(24, 24),
-					Src:      engine.ImageRef{Path: "assets/box16.png"},
-				},
-				Map: map[engine.Point3]*engine.IsoVoxel{
-					engine.Pt3(0, 2, 0): {CellBack: 0, CellFront: 1},
-					engine.Pt3(1, 2, 0): {CellBack: 0, CellFront: 1},
-					engine.Pt3(2, 2, 0): {CellBack: 0, CellFront: 1},
-
-					engine.Pt3(5, 0, 0): {CellBack: 0, CellFront: 1},
-					engine.Pt3(5, 1, 0): {CellBack: 0, CellFront: 1},
-					engine.Pt3(5, 2, 0): {CellBack: 0, CellFront: 1},
-
-					engine.Pt3(8, 2, 0): {CellBack: 0, CellFront: 1},
-					engine.Pt3(8, 2, 1): {CellBack: 0, CellFront: 1},
-					engine.Pt3(8, 2, 2): {CellBack: 0, CellFront: 1},
-
-					engine.Pt3(11, 2, 0):  {CellBack: 0, CellFront: 1},
-					engine.Pt3(11, 2, -1): {CellBack: 0, CellFront: 1},
-					engine.Pt3(11, 2, -2): {CellBack: 0, CellFront: 1},
-				},
-			},
 			&engine.Tilemap{
 				ID:     "terrain",
 				ZOrder: -1,
