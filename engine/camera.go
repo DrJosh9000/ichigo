@@ -35,7 +35,7 @@ type Camera struct {
 
 // PointAt points the camera at a particular centre point and zoom, but adjusts
 // for the bounds of the child component (if available).
-func (c *Camera) PointAt(centre Point3, zoom float64) {
+func (c *Camera) PointAt(centre Int3, zoom float64) {
 	// Special sauce: if Child has a BoundingRect, make some adjustments
 	bnd, ok := c.Child.(Bounder)
 	if !ok {

@@ -8,7 +8,7 @@ type IntProjection image.Point
 //
 // If π.X = 0, the x returned is p.X; similarly for π.Y and y.
 // Otherwise, x projects to x + z/π.X and y projects to y + z/π.Y.
-func (π IntProjection) Project(p Point3) image.Point {
+func (π IntProjection) Project(p Int3) image.Point {
 	/*
 		I'm using the π character because I'm a maths wanker.
 

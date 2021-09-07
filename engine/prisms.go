@@ -33,12 +33,12 @@ type PrismMap struct {
 	Disabled
 	Hidden
 
-	Map           map[Point3]*Prism // pos -> prism
-	DrawOrderBias image.Point       // dot with pos.XY() = bias value
-	DrawOffset    image.Point       // offset applies to whole map
-	PosToDraw     IntMatrix2x3      // p.pos -> drawspace (before offset and camera and ...)
-	PosToWorld    IntMatrix3x4      // p.pos -> worldspace
-	PrismSize     Point3            // in worldspace
+	Map           map[Int3]*Prism // pos -> prism
+	DrawOrderBias image.Point     // dot with pos.XY() = bias value
+	DrawOffset    image.Point     // offset applies to whole map
+	PosToDraw     IntMatrix2x3    // p.pos -> drawspace (before offset and camera and ...)
+	PosToWorld    IntMatrix3x4    // p.pos -> worldspace
+	PrismSize     Int3            // in worldspace
 	Sheet         Sheet
 }
 
@@ -65,7 +65,7 @@ func (m *PrismMap) Transform(pt Transform) (tf Transform) {
 type Prism struct {
 	Cell int
 
-	pos Point3
+	pos Int3
 	pm  *PrismMap
 }
 

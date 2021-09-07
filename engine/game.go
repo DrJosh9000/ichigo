@@ -41,6 +41,7 @@ type Game struct {
 	Hidden
 	ScreenSize image.Point
 	Root       interface{} // typically a *Scene or SceneRef though
+	VoxelScale Float3
 
 	dbmu     sync.RWMutex
 	byID     map[string]Identifier              // Named components by ID

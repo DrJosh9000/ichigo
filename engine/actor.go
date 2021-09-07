@@ -17,13 +17,13 @@ func init() {
 // Actor handles basic movement.
 type Actor struct {
 	CollisionDomain  string // id of component to look for colliders inside of
-	Pos, Size        Point3
+	Pos, Size        Int3
 	xRem, yRem, zRem float64
 
 	game *Game
 }
 
-func (a *Actor) CollidesAt(p Point3) bool {
+func (a *Actor) CollidesAt(p Int3) bool {
 	bounds := Box{Min: p, Max: p.Add(a.Size)}
 	for c := range a.game.Query(a.CollisionDomain, ColliderType) {
 		if c.(Collider).CollidesWith(bounds) {

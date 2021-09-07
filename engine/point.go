@@ -1,77 +1,78 @@
 package engine
 
 import (
+	"fmt"
 	"image"
 	"strconv"
 )
 
-// Point3 is a an element of int^3.
-type Point3 struct {
+// Int3 is a an element of int^3.
+type Int3 struct {
 	X, Y, Z int
 }
 
-// Pt3(x, y, z) is shorthand for Point3{x, y, z}.
-func Pt3(x, y, z int) Point3 {
-	return Point3{x, y, z}
+// Pt3(x, y, z) is shorthand for Int3{x, y, z}.
+func Pt3(x, y, z int) Int3 {
+	return Int3{x, y, z}
 }
 
 // String returns a string representation of p like "(3,4,5)".
-func (p Point3) String() string {
+func (p Int3) String() string {
 	return "(" + strconv.Itoa(p.X) + "," + strconv.Itoa(p.Y) + "," + strconv.Itoa(p.Z) + ")"
 }
 
 // XY applies the Z-forgetting projection. (It returns just X and Y.)
-func (p Point3) XY() image.Point {
+func (p Int3) XY() image.Point {
 	return image.Point{p.X, p.Y}
 }
 
 // Add performs vector addition.
-func (p Point3) Add(q Point3) Point3 {
-	return Point3{p.X + q.X, p.Y + q.Y, p.Z + q.Z}
+func (p Int3) Add(q Int3) Int3 {
+	return Int3{p.X + q.X, p.Y + q.Y, p.Z + q.Z}
 }
 
 // Sub performs vector subtraction.
-func (p Point3) Sub(q Point3) Point3 {
+func (p Int3) Sub(q Int3) Int3 {
 	return p.Add(q.Neg())
 }
 
 // CMul performs componentwise multiplication.
-func (p Point3) CMul(q Point3) Point3 {
-	return Point3{p.X * q.X, p.Y * q.Y, p.Z * q.Z}
+func (p Int3) CMul(q Int3) Int3 {
+	return Int3{p.X * q.X, p.Y * q.Y, p.Z * q.Z}
 }
 
 // Mul performs scalar multiplication.
-func (p Point3) Mul(k int) Point3 {
-	return Point3{p.X * k, p.Y * k, p.Z * k}
+func (p Int3) Mul(k int) Int3 {
+	return Int3{p.X * k, p.Y * k, p.Z * k}
 }
 
 // CDiv performs componentwise division.
-func (p Point3) CDiv(q Point3) Point3 {
-	return Point3{p.X / q.X, p.Y / q.Y, p.Z / q.Z}
+func (p Int3) CDiv(q Int3) Int3 {
+	return Int3{p.X / q.X, p.Y / q.Y, p.Z / q.Z}
 }
 
 // Div performs scalar division by k.
-func (p Point3) Div(k int) Point3 {
-	return Point3{p.X / k, p.Y / k, p.Z / k}
+func (p Int3) Div(k int) Int3 {
+	return Int3{p.X / k, p.Y / k, p.Z / k}
 }
 
 // Neg returns the vector pointing in the opposite direction.
-func (p Point3) Neg() Point3 {
-	return Point3{-p.X, -p.Y, -p.Z}
+func (p Int3) Neg() Int3 {
+	return Int3{-p.X, -p.Y, -p.Z}
 }
 
 // Coord returns the components of the vector.
-func (p Point3) Coord() (x, y, z int) {
+func (p Int3) Coord() (x, y, z int) {
 	return p.X, p.Y, p.Z
 }
 
 // Sign returns a sign vector.
-func (p Point3) Sign() Point3 {
-	return Point3{sign(p.X), sign(p.Y), sign(p.Z)}
+func (p Int3) Sign() Int3 {
+	return Int3{sign(p.X), sign(p.Y), sign(p.Z)}
 }
 
 // Dot returns the dot product of the two vectors.
-func (p Point3) Dot(q Point3) int {
+func (p Int3) Dot(q Int3) int {
 	return p.X*q.X + p.Y*q.Y + p.Z*q.Z
 }
 
@@ -83,4 +84,74 @@ func sign(m int) int {
 		return -1
 	}
 	return 1
+}
+
+func signf(m float64) float64 {
+	if m == 0 {
+		return 0
+	}
+	if m < 0 {
+		return -1
+	}
+	return 1
+}
+
+// Float3 is an element of float64^3.
+type Float3 struct {
+	X, Y, Z float64
+}
+
+// String returns a string representation of p like "(3.0,4.0,5.0)".
+func (p Float3) String() string {
+	return fmt.Sprintf("(%f,%f,%f)", p.X, p.Y, p.Z)
+}
+
+// Add performs vector addition.
+func (p Float3) Add(q Float3) Float3 {
+	return Float3{p.X + q.X, p.Y + q.Y, p.Z + q.Z}
+}
+
+// Sub performs vector subtraction.
+func (p Float3) Sub(q Float3) Float3 {
+	return p.Add(q.Neg())
+}
+
+// CMul performs componentwise multiplication.
+func (p Float3) CMul(q Float3) Float3 {
+	return Float3{p.X * q.X, p.Y * q.Y, p.Z * q.Z}
+}
+
+// Mul performs scalar multiplication.
+func (p Float3) Mul(k float64) Float3 {
+	return Float3{p.X * k, p.Y * k, p.Z * k}
+}
+
+// CDiv performs componentwise division.
+func (p Float3) CDiv(q Float3) Float3 {
+	return Float3{p.X / q.X, p.Y / q.Y, p.Z / q.Z}
+}
+
+// Div performs scalar division by k.
+func (p Float3) Div(k float64) Float3 {
+	return Float3{p.X / k, p.Y / k, p.Z / k}
+}
+
+// Neg returns the vector pointing in the opposite direction.
+func (p Float3) Neg() Float3 {
+	return Float3{-p.X, -p.Y, -p.Z}
+}
+
+// Coord returns the components of the vector.
+func (p Float3) Coord() (x, y, z float64) {
+	return p.X, p.Y, p.Z
+}
+
+// Sign returns a sign vector.
+func (p Float3) Sign() Float3 {
+	return Float3{signf(p.X), signf(p.Y), signf(p.Z)}
+}
+
+// Dot returns the dot product of the two vectors.
+func (p Float3) Dot(q Float3) float64 {
+	return p.X*q.X + p.Y*q.Y + p.Z*q.Z
 }

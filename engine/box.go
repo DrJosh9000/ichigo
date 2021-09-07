@@ -4,7 +4,7 @@ import "image"
 
 // Box describes an axis-aligned rectangular prism.
 type Box struct {
-	Min, Max Point3
+	Min, Max Int3
 }
 
 // String returns a string representation of b like "(3,4,5)-(6,5,8)".
@@ -32,7 +32,7 @@ func (b Box) Overlaps(c Box) bool {
 }
 
 // Size returns b's width, height, and depth.
-func (b Box) Size() Point3 {
+func (b Box) Size() Int3 {
 	return b.Max.Sub(b.Min)
 }
 
