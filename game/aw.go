@@ -48,6 +48,7 @@ func (aw *Awakeman) Update() error {
 	// TODO: better cheat for noclip
 	if inpututil.IsKeyJustPressed(ebiten.KeyN) {
 		aw.noclip = !aw.noclip
+		aw.vx, aw.vy, aw.vz = 0, 0, 0
 		if aw.toast != nil {
 			if aw.noclip {
 				aw.toast.Toast("noclip enabled")

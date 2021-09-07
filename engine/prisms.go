@@ -60,9 +60,13 @@ func (m *PrismMap) CollidesWith(b Box) bool {
 	// (Spoilers: I did this already in Prepare)
 	b.Min = m.pwinverse.IntApply(b.Min)
 	b.Max = m.pwinverse.IntApply(b.Max.Sub(Int3{1, 1, 1}))
-	for k := b.Min.Z; k < b.Max.Z; k++ {
-		for j := b.Min.Y; j < b.Max.Y; j++ {
-			for i := b.Min.X; i < b.Max.X; i++ {
+	b = b.Canon() // inverse might flip the corners around...
+
+	log.Printf("b.Max = %v", b.Max)
+
+	for k := b.Min.Z; k <= b.Max.Z; k++ {
+		for j := b.Min.Y; j <= b.Max.Y; j++ {
+			for i := b.Min.X; i <= b.Max.X; i++ {
 				// TODO: take into account the prism shape...
 				if _, found := m.Map[Int3{i, j, k}]; found {
 					return true
@@ -80,7 +84,7 @@ func (m *PrismMap) Prepare(g *Game) error {
 		return fmt.Errorf("inverting PosToWorld: %w", err)
 	}
 	m.pwinverse = pwi
-	log.Printf("inverted PosToWorld: %v", pwi)
+	// log.Printf("inverted PosToWorld: %v", pwi)
 	for v, p := range m.Map {
 		p.pos = v
 		p.m = m

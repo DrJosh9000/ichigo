@@ -52,6 +52,20 @@ func (b Box) Sub(p Int3) Box {
 	}
 }
 
+// Canon returns a copy of b that is well-formed.
+func (b Box) Canon() Box {
+	if b.Max.X < b.Min.X {
+		b.Min.X, b.Max.X = b.Max.X, b.Min.X
+	}
+	if b.Max.Y < b.Min.Y {
+		b.Min.Y, b.Max.Y = b.Max.Y, b.Min.Y
+	}
+	if b.Max.Z < b.Min.Z {
+		b.Min.Z, b.Max.Z = b.Max.Z, b.Min.Z
+	}
+	return b
+}
+
 // Back returns an image.Rectangle representing the back of the box, using
 // the given projection π.
 func (b Box) Back(π IntProjection) image.Rectangle {
