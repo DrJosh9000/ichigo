@@ -2,7 +2,9 @@ package engine
 
 import (
 	"encoding/gob"
+	"fmt"
 	"image"
+	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -28,31 +30,57 @@ func init() {
 	gob.Register(&Prism{})
 }
 
-// PrismMap
+// PrismMap is a generalised tilemap/wallmap/etc.
 type PrismMap struct {
 	ID
 	Disabled
 	Hidden
-
+	Ersatz        bool
 	Map           map[Int3]*Prism // pos -> prism
 	DrawOrderBias image.Point     // dot with pos.XY() = bias value
 	DrawOffset    image.Point     // offset applies to whole map
-	PosToWorld    IntMatrix3x4    // p.pos -> voxelspace
-	PrismSize     Int3            // in voxelspace
+	PosToWorld    IntMatrix3x4    // p.pos -> world voxelspace
+	PrismSize     Int3            // in world voxelspace units
 	Sheet         Sheet
 
-	game *Game
+	game      *Game
+	pwinverse RatMatrix3
 }
 
 func (m *PrismMap) CollidesWith(b Box) bool {
-	// Back corner of a prism p is:
-	// m.PrismPos.Apply(p.pos)
+	if m.Ersatz {
+		return false
+	}
+	// To find the prisms need to test, we need to invert PosToWorld.
 
+	// Step 1: subtract whatever the translation component of PosToWorld is,
+	// reducing the rest of the problem to the 3x3 submatrix.
+	b = b.Sub(m.PosToWorld.Translation())
+	// Step 2: invert the rest of the fucking matrix.
+	// (Spoilers: I did this already in Prepare)
+	b.Min = m.pwinverse.IntApply(b.Min)
+	b.Max = m.pwinverse.IntApply(b.Max.Sub(Int3{1, 1, 1}))
+	for k := b.Min.Z; k < b.Max.Z; k++ {
+		for j := b.Min.Y; j < b.Max.Y; j++ {
+			for i := b.Min.X; i < b.Max.X; i++ {
+				// TODO: take into account the prism shape...
+				if _, found := m.Map[Int3{i, j, k}]; found {
+					return true
+				}
+			}
+		}
+	}
 	return false
 }
 
 func (m *PrismMap) Prepare(g *Game) error {
 	m.game = g
+	pwi, err := m.PosToWorld.ToRatMatrix3().Inverse()
+	if err != nil {
+		return fmt.Errorf("inverting PosToWorld: %w", err)
+	}
+	m.pwinverse = pwi
+	log.Printf("inverted PosToWorld: %v", pwi)
 	for v, p := range m.Map {
 		p.pos = v
 		p.m = m

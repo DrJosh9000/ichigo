@@ -36,6 +36,22 @@ func (b Box) Size() Int3 {
 	return b.Max.Sub(b.Min)
 }
 
+// Add offsets the box by vector p.
+func (b Box) Add(p Int3) Box {
+	return Box{
+		Min: b.Min.Add(p),
+		Max: b.Max.Add(p),
+	}
+}
+
+// Sub offsets the box by (-p).
+func (b Box) Sub(p Int3) Box {
+	return Box{
+		Min: b.Min.Sub(p),
+		Max: b.Max.Sub(p),
+	}
+}
+
 // Back returns an image.Rectangle representing the back of the box, using
 // the given projection π.
 func (b Box) Back(π IntProjection) image.Rectangle {

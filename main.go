@@ -140,7 +140,6 @@ func level1() *engine.Scene {
 			&engine.PrismMap{
 				ID:            "hexagons",
 				DrawOrderBias: image.Pt(0, -1), // draw higher Y after lower Y
-				DrawOffset:    image.Pt(-8, 0),
 				PosToWorld: engine.IntMatrix3x4{
 					0: [4]int{24, 0, 0, 0},
 					1: [4]int{0, 16, 0, 0},
@@ -159,9 +158,9 @@ func level1() *engine.Scene {
 					engine.Pt3(4, -1, 0): {},
 					engine.Pt3(4, 0, 0):  {},
 
-					engine.Pt3(6, 0, -4): {},
-					engine.Pt3(6, 0, -3): {},
 					engine.Pt3(6, 0, -2): {},
+					engine.Pt3(6, 0, -1): {},
+					engine.Pt3(6, 0, 0):  {},
 				},
 			},
 			&engine.Tilemap{
