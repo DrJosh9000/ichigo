@@ -2,10 +2,12 @@ package engine
 
 import "image"
 
+// IntProjection holds an integer projection definition.
+// It is designed for projecting Z onto X and Y with integer fractions as would
+// be used in e.g. a diametric projection (IntProjection{X:0, Y:-2}).
 type IntProjection image.Point
 
 // Project performs an integer parallel projection of a 3D coordinate into 2D.
-//
 // If π.X = 0, the x returned is p.X; similarly for π.Y and y.
 // Otherwise, x projects to x + z/π.X and y projects to y + z/π.Y.
 func (π IntProjection) Project(p Int3) image.Point {

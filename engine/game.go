@@ -41,6 +41,7 @@ type Game struct {
 	Hidden
 	ScreenSize image.Point
 	Root       interface{} // typically a *Scene or SceneRef though
+	Projection IntProjection
 	VoxelScale Float3
 
 	dbmu     sync.RWMutex
@@ -61,8 +62,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// parents as well.
 	// accum memoises the results for each component.
 	type state struct {
-		hidden    bool
-		transform Transform
+		hidden bool
+		opts   ebiten.DrawImageOptions
 	}
 	accum := map[interface{}]state{
 		g: {hidden: false},
@@ -96,9 +97,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				accum[p] = state{hidden: true}
 				continue
 			}
-			// p is not hidden, so compute its cumulative transform.
+			// p is not hidden, so compute its cumulative opts.
 			if tf, ok := p.(Transformer); ok {
-				st.transform = tf.Transform(st.transform)
+				st.opts = ConcatOpts(tf.Transform(), st.opts)
 			}
 			accum[p] = st
 		}
@@ -107,7 +108,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if st.hidden {
 			continue
 		}
-		d.Draw(screen, &st.transform.Opts)
+		d.Draw(screen, &st.opts)
 	}
 }
 
@@ -265,6 +266,10 @@ func postorderWalk(component, parent interface{}, visit func(component, parent i
 // builds the component databases and then calls Prepare on every Preparer.
 // LoadAndPrepare must be called before any calls to Component or Query.
 func (g *Game) LoadAndPrepare(assets fs.FS) error {
+	if g.VoxelScale == (Float3{}) {
+		g.VoxelScale = Float3{1, 1, 1}
+	}
+
 	// Load all the Loaders.
 	startLoad := time.Now()
 	if err := PreorderWalk(g, func(c, _ interface{}) error {
@@ -440,3 +445,17 @@ func (d drawList) Less(i, j int) bool {
 
 func (d drawList) Len() int      { return len(d) }
 func (d drawList) Swap(i, j int) { d[i], d[j] = d[j], d[i] }
+
+// ConcatOpts returns the combined options (as though a was applied and then
+// b).
+func ConcatOpts(a, b ebiten.DrawImageOptions) ebiten.DrawImageOptions {
+	a.ColorM.Concat(b.ColorM)
+	a.GeoM.Concat(b.GeoM)
+	if b.CompositeMode != 0 {
+		a.CompositeMode = b.CompositeMode
+	}
+	if b.Filter != 0 {
+		a.Filter = b.Filter
+	}
+	return a
+}

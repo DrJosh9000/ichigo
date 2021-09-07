@@ -57,9 +57,9 @@ func (m *PrismMap) Prepare(*Game) error {
 	return nil
 }
 
-func (m *PrismMap) Transform(pt Transform) (tf Transform) {
-	tf.Opts.GeoM.Translate(cfloat(m.DrawOffset))
-	return tf.Concat(pt)
+func (m *PrismMap) Transform() (opts ebiten.DrawImageOptions) {
+	opts.GeoM.Translate(cfloat(m.DrawOffset))
+	return opts
 }
 
 type Prism struct {
@@ -78,9 +78,9 @@ func (p *Prism) DrawOrder() (int, int) {
 		dot(p.pos.XY(), p.pm.DrawOrderBias)
 }
 
-func (p *Prism) Transform(pt Transform) (tf Transform) {
-	tf.Opts.GeoM.Translate(cfloat(
+func (p *Prism) Transform() (opts ebiten.DrawImageOptions) {
+	opts.GeoM.Translate(cfloat(
 		p.pm.PosToDraw.Apply(p.pos),
 	))
-	return tf.Concat(pt)
+	return opts
 }

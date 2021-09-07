@@ -105,17 +105,11 @@ type Saver interface {
 	Save() error
 }
 
-// Transformer components can provide a transform to apply to themselves and any
-// child components, based on the cumulative parent transform. An
-// example implementation:
-//
-// 	func (f Foo) Transform(pt Transform) Transform {
-// 		var tf Transform
-// 		tf.Opts.GeoM.Translate(-2, 3) // or your own transform
-// 		return tf.Concat(pt)
-// 	}
+// Transformer components can provide draw options to apply to themselves and
+// any child components. The opts passed to Draw of a component c will be the
+// cumulative opts of all parents of c plus the value returned from c.Transform.
 type Transformer interface {
-	Transform(Transform) Transform
+	Transform() ebiten.DrawImageOptions
 }
 
 // Updater components can update themselves. Update is called repeatedly. Each

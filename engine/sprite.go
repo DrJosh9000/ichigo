@@ -56,12 +56,15 @@ func (s *Sprite) SetAnim(a *Anim) {
 	s.anim = a
 }
 
-// Transform returns a translation by the DrawOffset and the iso-projected Pos.
-func (s *Sprite) Transform(pt Transform) (tf Transform) {
-	tf.Opts.GeoM.Translate(cfloat(
-		pt.Projection.Project(s.Actor.Pos).Add(s.DrawOffset),
+// Transform returns a translation by the DrawOffset and Actor.Pos projected
+func (s *Sprite) Transform() (opts ebiten.DrawImageOptions) {
+	opts.GeoM.Translate(cfloat(
+		// Reaching into Actor for a reference to Game so I don't have to
+		// implement Prepare in this file, but writing this long comment
+		// providing exposition...
+		s.Actor.game.Projection.Project(s.Actor.Pos).Add(s.DrawOffset),
 	))
-	return tf.Concat(pt)
+	return opts
 }
 
 // Update updates the Sprite's anim. anim can change a bit so we don't tell Game

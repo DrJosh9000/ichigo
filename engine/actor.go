@@ -16,13 +16,15 @@ func init() {
 
 // Actor handles basic movement.
 type Actor struct {
-	CollisionDomain  string // id of component to look for colliders inside of
-	Pos, Size        Int3
-	xRem, yRem, zRem float64
+	CollisionDomain string // id of component to look for colliders inside of
+	Pos, Size       Int3   // in voxels; multiply by game.VoxelScale for regular Euclidean space
 
+	rem  Float3
 	game *Game
 }
 
+// CollidesAt runs a collision test of the actor, supposing the actor is at a
+// given position (not necessarily a.Pos).
 func (a *Actor) CollidesAt(p Int3) bool {
 	bounds := Box{Min: p, Max: p.Add(a.Size)}
 	for c := range a.game.Query(a.CollisionDomain, ColliderType) {
@@ -33,13 +35,17 @@ func (a *Actor) CollidesAt(p Int3) bool {
 	return false
 }
 
+// MoveX moves the actor x units in world space. It takes Game.VoxelScale into
+// account (so MoveX(x) moves the actor x/VoxelScale.X voxel units). onCollide
+// is called if a collision occurs, and the actor wil be in the colliding
+// position during the call.
 func (a *Actor) MoveX(x float64, onCollide func()) {
-	a.xRem += x
-	move := int(a.xRem + 0.5) // Note: math.Round can lead to vibration
+	a.rem.X += x / a.game.VoxelScale.X
+	move := int(a.rem.X + 0.5) // Note: math.Round can lead to vibration
 	if move == 0 {
 		return
 	}
-	a.xRem -= float64(move)
+	a.rem.X -= float64(move)
 	sign := sign(move)
 	for move != 0 {
 		a.Pos.X += sign
@@ -51,18 +57,19 @@ func (a *Actor) MoveX(x float64, onCollide func()) {
 			onCollide()
 		}
 		a.Pos.X -= sign
-		a.xRem = 0
+		a.rem.X = 0
 		return
 	}
 }
 
+// MoveY is like MoveX but in the Y dimension. See MoveX for more information.
 func (a *Actor) MoveY(y float64, onCollide func()) {
-	a.yRem += y
-	move := int(a.yRem + 0.5)
+	a.rem.Y += y / a.game.VoxelScale.Y
+	move := int(a.rem.Y + 0.5)
 	if move == 0 {
 		return
 	}
-	a.yRem -= float64(move)
+	a.rem.Y -= float64(move)
 	sign := sign(move)
 	for move != 0 {
 		a.Pos.Y += sign
@@ -74,18 +81,19 @@ func (a *Actor) MoveY(y float64, onCollide func()) {
 			onCollide()
 		}
 		a.Pos.Y -= sign
-		a.yRem = 0
+		a.rem.Y = 0
 		return
 	}
 }
 
+// MoveZ is like MoveX but in the Y dimension. See MoveX for more information.
 func (a *Actor) MoveZ(z float64, onCollide func()) {
-	a.zRem += z
-	move := int(a.zRem + 0.5)
+	a.rem.Z += z / a.game.VoxelScale.Z
+	move := int(a.rem.Z + 0.5)
 	if move == 0 {
 		return
 	}
-	a.zRem -= float64(move)
+	a.rem.Z -= float64(move)
 	sign := sign(move)
 	for move != 0 {
 		a.Pos.Z += sign
@@ -97,11 +105,12 @@ func (a *Actor) MoveZ(z float64, onCollide func()) {
 			onCollide()
 		}
 		a.Pos.Z -= sign
-		a.zRem = 0
+		a.rem.Z = 0
 		return
 	}
 }
 
+// Prepare stores a reference to the game.
 func (a *Actor) Prepare(g *Game) error {
 	a.game = g
 	return nil

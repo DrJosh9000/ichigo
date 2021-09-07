@@ -110,9 +110,9 @@ func (t *Tilemap) Scan() []interface{} {
 }
 
 // Transform returns a translation by t.Offset.
-func (t *Tilemap) Transform(pt Transform) (tf Transform) {
-	tf.Opts.GeoM.Translate(cfloat(t.Offset))
-	return tf.Concat(pt)
+func (t *Tilemap) Transform() (opts ebiten.DrawImageOptions) {
+	opts.GeoM.Translate(cfloat(t.Offset))
+	return opts
 }
 
 // TileAt returns the tile present at the given world coordinate.

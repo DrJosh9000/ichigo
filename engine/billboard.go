@@ -36,7 +36,7 @@ func (b *Billboard) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 // Scan returns a slice containing Src.
 func (b *Billboard) Scan() []interface{} { return []interface{}{&b.Src} }
 
-func (b *Billboard) Transform(pt Transform) (tf Transform) {
-	tf.Opts.GeoM.Translate(cfloat(b.Pos))
-	return tf.Concat(pt)
+func (b *Billboard) Transform() (opts ebiten.DrawImageOptions) {
+	opts.GeoM.Translate(cfloat(b.Pos))
+	return opts
 }
