@@ -84,27 +84,3 @@ func sign(m int) int {
 	}
 	return 1
 }
-
-// IsoProject performs isometric projection of a 3D coordinate into 2D.
-//
-// If π.X = 0, the x returned is p.X; similarly for π.Y and y.
-// Otherwise, x projects to x + z/π.X and y projects to y + z/π.Y.
-func (p Point3) IsoProject(π image.Point) image.Point {
-	/*
-		I'm using the π character because I'm a maths wanker.
-
-		Dividing is used because there's little reason for an isometric
-		projection in a game to exaggerate the Z position.
-
-		Integers are used to preserve that "pixel perfect" calculation in case
-		you are making the next Celeste.
-	*/
-	q := image.Point{p.X, p.Y}
-	if π.X != 0 {
-		q.X += p.Z / π.X
-	}
-	if π.Y != 0 {
-		q.Y += p.Z / π.Y
-	}
-	return q
-}
