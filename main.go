@@ -51,10 +51,14 @@ func main() {
 	}
 
 	g := &engine.Game{
-		ScreenSize: image.Pt(320, 240),
-		Projection: engine.IntProjection{X: 0, Y: 1},
+		ScreenSize: image.Pt(320, 240), // Window interior is this many pixels.
+		Projection: engine.IntProjection{
+			// Each 1 voxel step in Z is projected as 1 in Y.
+			X: 0,
+			Y: 1,
+		},
 		VoxelScale: engine.Float3{
-			// Each voxel counts for this much Eucliden space:
+			// Each voxel counts for this much Eucliden space.
 			X: 1,
 			Y: 1,
 			Z: math.Sqrt(3),
