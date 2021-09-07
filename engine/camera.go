@@ -27,10 +27,9 @@ type Camera struct {
 	// Camera controls
 	// These directly manipulate the camera. If you want to restrict the camera
 	// view area to the child's bounding rectangle, use PointAt.
-	Centre     image.Point // world coordinates
-	Rotation   float64     // radians
-	Zoom       float64     // unitless
-	Projection IntProjection
+	Centre   image.Point // voxel coordinates
+	Rotation float64     // radians
+	Zoom     float64     // unitless
 
 	game *Game
 }
@@ -41,7 +40,7 @@ func (c *Camera) PointAt(centre Int3, zoom float64) {
 	// Special sauce: if Child has a BoundingRect, make some adjustments
 	bnd, ok := c.Child.(Bounder)
 	if !ok {
-		c.Centre = c.Projection.Project(centre)
+		c.Centre = c.game.Projection.Project(centre)
 		c.Zoom = zoom
 		return
 	}
@@ -63,7 +62,7 @@ func (c *Camera) PointAt(centre Int3, zoom float64) {
 	// Camera frame currently Rectangle{ centre ± (screen/(2*zoom)) }.
 	sw2, sh2 := cfloat(c.game.ScreenSize.Div(2))
 	swz, shz := int(sw2/zoom), int(sh2/zoom)
-	cent := c.Projection.Project(centre)
+	cent := c.game.Projection.Project(centre)
 	if cent.X-swz < br.Min.X {
 		cent.X = br.Min.X + swz
 	}

@@ -69,8 +69,6 @@ func main() {
 				&engine.Camera{
 					ID:    "game_camera",
 					Child: lev1,
-					// Each step in Z becomes a step in Y:
-					Projection: engine.IntProjection{X: 0, Y: 1},
 				},
 				&engine.DebugToast{ID: "toast", Pos: image.Pt(0, 15)},
 				engine.PerfDisplay{},
