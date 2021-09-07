@@ -59,7 +59,7 @@ func (s *Sprite) SetAnim(a *Anim) {
 // Transform returns a translation by the DrawOffset and the iso-projected Pos.
 func (s *Sprite) Transform(pt Transform) (tf Transform) {
 	tf.Opts.GeoM.Translate(cfloat(
-		s.Actor.Pos.IsoProject(pt.IsoProjection).Add(s.DrawOffset),
+		pt.Projection.Project(s.Actor.Pos).Add(s.DrawOffset),
 	))
 	return tf.Concat(pt)
 }

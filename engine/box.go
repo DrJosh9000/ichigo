@@ -38,21 +38,21 @@ func (b Box) Size() Point3 {
 
 // Back returns an image.Rectangle representing the back of the box, using
 // the given projection π.
-func (b Box) Back(π image.Point) image.Rectangle {
+func (b Box) Back(π IntProjection) image.Rectangle {
 	b.Max.Z = b.Min.Z
 	return image.Rectangle{
-		Min: b.Min.IsoProject(π),
-		Max: b.Max.IsoProject(π),
+		Min: π.Project(b.Min),
+		Max: π.Project(b.Max),
 	}
 }
 
 // Front returns an image.Rectangle representing the front of the box, using
 // the given projection π.
-func (b Box) Front(π image.Point) image.Rectangle {
+func (b Box) Front(π IntProjection) image.Rectangle {
 	b.Min.Z = b.Max.Z
 	return image.Rectangle{
-		Min: b.Min.IsoProject(π),
-		Max: b.Max.IsoProject(π),
+		Min: π.Project(b.Min),
+		Max: π.Project(b.Max),
 	}
 }
 

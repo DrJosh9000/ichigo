@@ -25,10 +25,10 @@ type Camera struct {
 	// Camera controls
 	// These directly manipulate the camera. If you want to restrict the camera
 	// view area to the child's bounding rectangle, use PointAt.
-	Centre        image.Point // world coordinates
-	Rotation      float64     // radians
-	Zoom          float64     // unitless
-	IsoProjection image.Point
+	Centre     image.Point // world coordinates
+	Rotation   float64     // radians
+	Zoom       float64     // unitless
+	Projection IntProjection
 
 	game *Game
 }
@@ -39,7 +39,7 @@ func (c *Camera) PointAt(centre Point3, zoom float64) {
 	// Special sauce: if Child has a BoundingRect, make some adjustments
 	bnd, ok := c.Child.(Bounder)
 	if !ok {
-		c.Centre = centre.IsoProject(c.IsoProjection)
+		c.Centre = c.Projection.Project(centre)
 		c.Zoom = zoom
 		return
 	}
@@ -61,7 +61,7 @@ func (c *Camera) PointAt(centre Point3, zoom float64) {
 	// Camera frame currently Rectangle{ centre ± (screen/(2*zoom)) }.
 	sw2, sh2 := cfloat(c.game.ScreenSize.Div(2))
 	swz, shz := int(sw2/zoom), int(sh2/zoom)
-	cent := centre.IsoProject(c.IsoProjection)
+	cent := c.Projection.Project(centre)
 	if cent.X-swz < br.Min.X {
 		cent.X = br.Min.X + swz
 	}
@@ -88,7 +88,7 @@ func (c *Camera) Scan() []interface{} { return []interface{}{c.Child} }
 
 // Transform returns the camera transform.
 func (c *Camera) Transform(pt Transform) (tf Transform) {
-	tf.IsoProjection = c.IsoProjection
+	tf.Projection = c.Projection
 	tf.Opts.GeoM.Translate(cfloat(c.Centre.Mul(-1)))
 	tf.Opts.GeoM.Scale(c.Zoom, c.Zoom)
 	tf.Opts.GeoM.Rotate(c.Rotation)

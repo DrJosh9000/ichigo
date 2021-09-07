@@ -1,17 +1,13 @@
 package engine
 
-import (
-	"image"
-
-	"github.com/hajimehoshi/ebiten/v2"
-)
+import "github.com/hajimehoshi/ebiten/v2"
 
 // Transform is a bucket of things that affect drawing.
 type Transform struct {
-	// IsoProjection is used by isometric 3D components to project their
+	// Projection is used by isometric 3D components to project their
 	// coordinates into 2D. There's usually only one component in the tree that
 	// sets this field, but it would apply to all descendants.
-	IsoProjection image.Point
+	Projection IntProjection
 
 	// Opts contains the 2D geometry matrix, the colour matrix, filter mode, and
 	// composition mode.
@@ -21,8 +17,8 @@ type Transform struct {
 // Concat returns the combined transform (a transform equivalent to applying t
 // and then u).
 func (t Transform) Concat(u Transform) Transform {
-	if u.IsoProjection != (image.Point{}) {
-		t.IsoProjection = u.IsoProjection
+	if u.Projection != (IntProjection{}) {
+		t.Projection = u.Projection
 	}
 	t.Opts.ColorM.Concat(u.Opts.ColorM)
 	t.Opts.GeoM.Concat(u.Opts.GeoM)
