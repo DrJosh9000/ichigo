@@ -113,7 +113,7 @@ func polygonRectOverlap(polygon []image.Point, rect image.Rectangle) bool {
 
 	// Since rect is an axis-aligned rectangle, we only need vertical and
 	// horizontal line intersection tests.
-	// Walk each edge of polygon. Only a point and the ∆x, ∆y are needed.
+	// Walk each edge of polygon.
 	for i, p := range polygon {
 		q := polygon[(i+1)%len(polygon)]
 		d := q.Sub(p)
