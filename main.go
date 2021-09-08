@@ -91,33 +91,6 @@ func main() {
 }
 
 func level1() *engine.Scene {
-	denseTiles := [][]engine.Tile{
-		{engine.StaticTile(9), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.StaticTile(9)},
-		{nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, &engine.AnimatedTile{AnimKey: "red_tile"}, nil, nil, nil, nil, nil, nil, nil, nil, nil},
-		{nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, &engine.AnimatedTile{AnimKey: "red_tile"}, nil, nil, nil},
-		{nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil},
-		{nil, nil, &engine.AnimatedTile{AnimKey: "green_tile"}, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil},
-		{nil, nil, nil, nil, nil, &engine.AnimatedTile{AnimKey: "red_tile"}, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil},
-		{nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, &engine.AnimatedTile{AnimKey: "green_tile"}, nil, nil, nil, nil, nil, nil},
-		{nil, nil, nil, nil, &engine.AnimatedTile{AnimKey: "green_tile"}, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil},
-		{nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, &engine.AnimatedTile{AnimKey: "green_tile"}, nil, nil, nil, nil, nil, nil, nil, nil, nil},
-		{nil, &engine.AnimatedTile{AnimKey: "red_tile"}, nil, nil, nil, nil, nil, nil, engine.StaticTile(9), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil},
-		{nil, nil, nil, nil, nil, engine.StaticTile(9), nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, engine.StaticTile(9), nil, nil, nil},
-		{nil, nil, nil, nil, engine.StaticTile(9), engine.StaticTile(9), engine.StaticTile(9), nil, nil, nil, engine.StaticTile(9), nil, nil, nil, nil, nil, nil, nil, nil, nil},
-		{engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), &engine.AnimatedTile{AnimKey: "red_tile"}, engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8), engine.StaticTile(8)},
-		{engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), &engine.AnimatedTile{AnimKey: "red_tile"}, engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), &engine.AnimatedTile{AnimKey: "green_tile"}, engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7)},
-		{engine.StaticTile(9), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(7), engine.StaticTile(9)},
-	}
-	tiles := make(map[image.Point]engine.Tile)
-	for j, row := range denseTiles {
-		for i, tile := range row {
-			if tile == nil {
-				continue
-			}
-			tiles[image.Pt(i, j)] = tile
-		}
-	}
-
 	return &engine.Scene{
 		ID:     "level_1",
 		Bounds: engine.Bounds(image.Rect(-32, -32, 320+32, 240+32)),
@@ -357,43 +330,6 @@ func level1() *engine.Scene {
 					engine.Pt3(0, 0, 13): {},
 				},
 			},
-			/*&engine.Tilemap{
-				ID:     "terrain",
-				ZOrder: -1,
-				Map:    tiles,
-				Sheet: engine.Sheet{
-					AnimDefs: map[string]*engine.AnimDef{
-						"red_tile": {
-							Steps: []engine.AnimStep{
-								{Cell: 3, Duration: 12},
-								{Cell: 4, Duration: 12},
-								{Cell: 5, Duration: 12},
-								{Cell: 6, Duration: 12},
-							}},
-						"green_tile": {
-							Steps: []engine.AnimStep{
-								{Cell: 0, Duration: 16},
-								{Cell: 1, Duration: 16},
-								{Cell: 2, Duration: 16},
-							},
-						},
-					},
-					CellSize: image.Pt(16, 16),
-					Src:      engine.ImageRef{Path: "assets/boxes.png"},
-				},
-			},*/
-			/*&engine.SolidRect{
-				ID:  "ceiling",
-				Box: engine.Box{Min: engine.Pt3(0, -1, 0), Max: engine.Pt3(320, 0, 100)},
-			},
-			&engine.SolidRect{
-				ID:  "left_wall",
-				Box: engine.Box{Min: engine.Pt3(-1, 0, 0), Max: engine.Pt3(0, 240, 100)},
-			},
-			&engine.SolidRect{
-				ID:  "right_wall",
-				Box: engine.Box{Min: engine.Pt3(320, 0, 0), Max: engine.Pt3(321, 240, 100)},
-			},*/
 			&game.Awakeman{
 				CameraID: "game_camera",
 				ToastID:  "toast",

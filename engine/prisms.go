@@ -70,16 +70,18 @@ func (m *PrismMap) CollidesWith(b Box) bool {
 	for pp.Z = rb.Min.Z; pp.Z <= rb.Max.Z; pp.Z++ {
 		for pp.Y = rb.Min.Y; pp.Y <= rb.Max.Y; pp.Y++ {
 			for pp.X = rb.Min.X; pp.X <= rb.Max.X; pp.X++ {
-				// TODO: take into account the prism shape...
+				// Is there a prism here?
 				if _, found := m.Map[pp]; !found {
 					continue
 				}
 				// Map it back to worldspace to get a bounding box for the prism
 				wp := m.PosToWorld.Apply(pp)
 				cb := Box{Min: wp, Max: wp.Add(m.PrismSize)}
-				if b.Overlaps(cb) {
-					return true
+				if !b.Overlaps(cb) {
+					continue
 				}
+				// TODO: take into account the prism shape
+				return true
 			}
 		}
 	}
