@@ -116,7 +116,7 @@ func polygonRectOverlap(polygon []image.Point, rect image.Rectangle) bool {
 	// Walk each edge of polygon.
 	for i, p := range polygon {
 		q := polygon[(i+1)%len(polygon)]
-		// Exclude edges that don't overlap the rectangle in any way.
+		// Pretend the edge is a rectangle. Exclude those that don't overlap.
 		if !rect.Overlaps(image.Rectangle{p, q}.Canon()) {
 			continue
 		}
@@ -130,17 +130,13 @@ func polygonRectOverlap(polygon []image.Point, rect image.Rectangle) bool {
 			min := (rect.Min.Y - p.Y) * d.X
 			max := (rect.Max.Y - p.Y) * d.X
 			// Test left side of rect
-			//if (rect.Min.X >= p.X || rect.Min.X >= q.X) && (rect.Min.X <= p.X || rect.Min.X <= q.X) {
 			if t := (rect.Min.X - p.X) * d.Y; min <= t && t < max {
 				return true
 			}
-			//}
 			// Test right side of rect
-			//if (rect.Max.X > p.X || rect.Max.X > q.X) && (rect.Max.X <= p.X || rect.Max.X <= q.X) {
 			if t := (rmax.X - p.X) * d.Y; min <= t && t < max {
 				return true
 			}
-			//}
 		}
 		// If the polygon edge is not horizontal, test the top and bottom sides
 		if d.Y != 0 {
@@ -150,18 +146,14 @@ func polygonRectOverlap(polygon []image.Point, rect image.Rectangle) bool {
 			min := (rect.Min.X - p.X) * d.Y
 			max := (rect.Max.X - p.X) * d.Y
 			// Test top side of rect
-			//if (rect.Min.Y >= p.Y || rect.Min.Y >= q.Y) && (rect.Min.Y <= p.Y || rect.Min.Y <= q.Y) {
 			if t := (rect.Min.Y - p.Y) * d.X; min <= t && t < max {
 				return true
 			}
-			//}
 
 			// Test bottom side of rect
-			//if (rect.Max.Y > p.Y || rect.Max.Y > q.Y) && (rect.Max.Y <= p.Y || rect.Max.Y <= q.Y) {
 			if t := (rmax.Y - p.Y) * d.X; min <= t && t < max {
 				return true
 			}
-			//}
 		}
 	}
 	return false
