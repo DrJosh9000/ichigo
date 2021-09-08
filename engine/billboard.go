@@ -4,6 +4,7 @@ import (
 	"encoding/gob"
 	"image"
 
+	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -37,6 +38,6 @@ func (b *Billboard) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 func (b *Billboard) Scan() []interface{} { return []interface{}{&b.Src} }
 
 func (b *Billboard) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(cfloat(b.Pos))
+	opts.GeoM.Translate(geom.CFloat(b.Pos))
 	return opts
 }

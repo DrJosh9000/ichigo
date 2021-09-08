@@ -4,6 +4,7 @@ import (
 	"encoding/gob"
 	"image"
 
+	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -36,7 +37,7 @@ type Camera struct {
 
 // PointAt points the camera at a particular centre point and zoom, but adjusts
 // for the bounds of the child component (if available).
-func (c *Camera) PointAt(centre Int3, zoom float64) {
+func (c *Camera) PointAt(centre geom.Int3, zoom float64) {
 	// Special sauce: if Child has a BoundingRect, make some adjustments
 	bnd, ok := c.Child.(Bounder)
 	if !ok {
@@ -60,7 +61,7 @@ func (c *Camera) PointAt(centre Int3, zoom float64) {
 
 	// If the configured centre puts the camera out of bounds, move it.
 	// Camera frame currently Rectangle{ centre ± (screen/(2*zoom)) }.
-	sw2, sh2 := cfloat(c.game.ScreenSize.Div(2))
+	sw2, sh2 := geom.CFloat(c.game.ScreenSize.Div(2))
 	swz, shz := int(sw2/zoom), int(sh2/zoom)
 	cent := c.game.Projection.Project(centre)
 	if cent.X-swz < br.Min.X {
@@ -89,9 +90,9 @@ func (c *Camera) Scan() []interface{} { return []interface{}{c.Child} }
 
 // Transform returns the camera transform.
 func (c *Camera) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(cfloat(c.Centre.Mul(-1)))
+	opts.GeoM.Translate(geom.CFloat(c.Centre.Mul(-1)))
 	opts.GeoM.Scale(c.Zoom, c.Zoom)
 	opts.GeoM.Rotate(c.Rotation)
-	opts.GeoM.Translate(cfloat(c.game.ScreenSize.Div(2)))
+	opts.GeoM.Translate(geom.CFloat(c.game.ScreenSize.Div(2)))
 	return opts
 }

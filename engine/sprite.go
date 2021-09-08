@@ -4,6 +4,7 @@ import (
 	"encoding/gob"
 	"image"
 
+	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -58,7 +59,7 @@ func (s *Sprite) SetAnim(a *Anim) {
 
 // Transform returns a translation by the DrawOffset and Actor.Pos projected
 func (s *Sprite) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(cfloat(
+	opts.GeoM.Translate(geom.CFloat(
 		// Reaching into Actor for a reference to Game so I don't have to
 		// implement Prepare in this file, but writing this long comment
 		// providing exposition...

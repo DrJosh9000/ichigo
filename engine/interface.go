@@ -5,6 +5,7 @@ import (
 	"io/fs"
 	"reflect"
 
+	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -49,7 +50,7 @@ type Bounder interface {
 
 // Collider components have tangible form.
 type Collider interface {
-	CollidesWith(Box) bool
+	CollidesWith(geom.Box) bool
 }
 
 // Disabler components can be disabled.

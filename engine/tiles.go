@@ -6,6 +6,7 @@ import (
 	"image"
 	"io/fs"
 
+	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -47,15 +48,15 @@ type Tilemap struct {
 }
 
 // CollidesWith implements Collider.
-func (t *Tilemap) CollidesWith(b Box) bool {
+func (t *Tilemap) CollidesWith(b geom.Box) bool {
 	if t.Ersatz {
 		return false
 	}
 
 	// Probe the map at all tilespace coordinates overlapping the rect.
 	r := b.XY().Sub(t.Offset) // TODO: pretend tilemap is a plane in 3D?
-	min := cdiv(r.Min, t.Sheet.CellSize)
-	max := cdiv(r.Max.Sub(image.Pt(1, 1)), t.Sheet.CellSize) // NB: fencepost
+	min := geom.CDiv(r.Min, t.Sheet.CellSize)
+	max := geom.CDiv(r.Max.Sub(image.Pt(1, 1)), t.Sheet.CellSize) // NB: fencepost
 
 	for j := min.Y; j <= max.Y; j++ {
 		for i := min.X; i <= max.X; i++ {
@@ -74,10 +75,10 @@ func (t *Tilemap) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 		if tile == nil {
 			continue
 		}
-		var geom ebiten.GeoM
-		geom.Translate(cfloat(cmul(p, t.Sheet.CellSize)))
-		geom.Concat(og)
-		opts.GeoM = geom
+		var mat ebiten.GeoM
+		mat.Translate(geom.CFloat(geom.CMul(p, t.Sheet.CellSize)))
+		mat.Concat(og)
+		opts.GeoM = mat
 
 		src := t.Sheet.SubImage(tile.Cell())
 		screen.DrawImage(src, opts)
@@ -111,24 +112,24 @@ func (t *Tilemap) Scan() []interface{} {
 
 // Transform returns a translation by t.Offset.
 func (t *Tilemap) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(cfloat(t.Offset))
+	opts.GeoM.Translate(geom.CFloat(t.Offset))
 	return opts
 }
 
 // TileAt returns the tile present at the given world coordinate.
 func (t *Tilemap) TileAt(wc image.Point) Tile {
-	return t.Map[cdiv(wc.Sub(t.Offset), t.Sheet.CellSize)]
+	return t.Map[geom.CDiv(wc.Sub(t.Offset), t.Sheet.CellSize)]
 }
 
 // SetTileAt sets the tile at the given world coordinate.
 func (t *Tilemap) SetTileAt(wc image.Point, tile Tile) {
-	t.Map[cdiv(wc.Sub(t.Offset), t.Sheet.CellSize)] = tile
+	t.Map[geom.CDiv(wc.Sub(t.Offset), t.Sheet.CellSize)] = tile
 }
 
 // TileBounds returns a rectangle describing the tile boundary for the tile
 // at the given world coordinate.
 func (t *Tilemap) TileBounds(wc image.Point) image.Rectangle {
-	p := cmul(cdiv(wc.Sub(t.Offset), t.Sheet.CellSize), t.Sheet.CellSize).Add(t.Offset)
+	p := geom.CMul(geom.CDiv(wc.Sub(t.Offset), t.Sheet.CellSize), t.Sheet.CellSize).Add(t.Offset)
 	return image.Rectangle{p, p.Add(t.Sheet.CellSize)}
 }
 

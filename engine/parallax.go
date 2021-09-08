@@ -4,6 +4,7 @@ import (
 	"encoding/gob"
 	"fmt"
 
+	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -42,7 +43,7 @@ func (p *Parallax) Scan() []interface{} { return []interface{}{p.Child} }
 
 // Transform returns a GeoM translation of Factor * camera.Centre.
 func (p *Parallax) Transform() (opts ebiten.DrawImageOptions) {
-	x, y := cfloat(p.camera.Centre)
+	x, y := geom.CFloat(p.camera.Centre)
 	opts.GeoM.Translate(x*p.Factor, y*p.Factor)
 	return opts
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image"
 
+	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -35,19 +36,19 @@ type PrismMap struct {
 	Disabled
 	Hidden
 	Ersatz        bool
-	Map           map[Int3]*Prism // pos -> prism
-	DrawOrderBias image.Point     // dot with pos.XY() = bias value
-	DrawOffset    image.Point     // offset applies to whole map
-	PosToWorld    IntMatrix3x4    // p.pos -> world voxelspace
-	PrismSize     Int3            // in world voxelspace units
-	PrismTop      []image.Point   // polygon vertices anticlockwise, Y means Z
+	Map           map[geom.Int3]*Prism // pos -> prism
+	DrawOrderBias image.Point          // dot with pos.XY() = bias value
+	DrawOffset    image.Point          // offset applies to whole map
+	PosToWorld    geom.IntMatrix3x4    // p.pos -> world voxelspace
+	PrismSize     geom.Int3            // in world voxelspace units
+	PrismTop      []image.Point        // polygon vertices anticlockwise, Y means Z
 	Sheet         Sheet
 
 	game      *Game
-	pwinverse RatMatrix3
+	pwinverse geom.RatMatrix3
 }
 
-func (m *PrismMap) CollidesWith(b Box) bool {
+func (m *PrismMap) CollidesWith(b geom.Box) bool {
 	if m.Ersatz {
 		return false
 	}
@@ -65,10 +66,10 @@ func (m *PrismMap) CollidesWith(b Box) bool {
 	rb = rb.Canon() // inverse might flip the corners around...
 
 	// Check neighboring prisms too because there's a fencepost somewhere here
-	rb.Min = rb.Min.Sub(Int3{1, 1, 1})
-	rb.Max = rb.Max.Add(Int3{1, 1, 1})
+	rb.Min = rb.Min.Sub(geom.Int3{1, 1, 1})
+	rb.Max = rb.Max.Add(geom.Int3{1, 1, 1})
 
-	var pp Int3
+	var pp geom.Int3
 	for pp.Z = rb.Min.Z; pp.Z <= rb.Max.Z; pp.Z++ {
 		for pp.Y = rb.Min.Y; pp.Y <= rb.Max.Y; pp.Y++ {
 			for pp.X = rb.Min.X; pp.X <= rb.Max.X; pp.X++ {
@@ -78,13 +79,13 @@ func (m *PrismMap) CollidesWith(b Box) bool {
 				}
 				// Map it back to worldspace to get a bounding box for the prism
 				wp := m.PosToWorld.Apply(pp)
-				cb := Box{Min: wp, Max: wp.Add(m.PrismSize)}
+				cb := geom.Box{Min: wp, Max: wp.Add(m.PrismSize)}
 				if !b.Overlaps(cb) {
 					continue
 				}
 				// Take into account the prism shape
 				r := b.XZ().Sub(wp.XZ())
-				if polygonRectOverlap(m.PrismTop, r) {
+				if geom.PolygonRectOverlap(m.PrismTop, r) {
 					return true
 				}
 			}
@@ -102,7 +103,7 @@ func (m *PrismMap) CollidesWith(b Box) bool {
 			}
 			// Take into account the prism shape
 			r := b.XZ().Sub(wp.XZ())
-			if polygonRectOverlap(m.PrismTop, r) {
+			if geom.PolygonRectOverlap(m.PrismTop, r) {
 				return true
 			}
 		}
@@ -134,14 +135,14 @@ func (m *PrismMap) Scan() []interface{} {
 }
 
 func (m *PrismMap) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(cfloat(m.DrawOffset))
+	opts.GeoM.Translate(geom.CFloat(m.DrawOffset))
 	return opts
 }
 
 type Prism struct {
 	Cell int
 
-	pos Int3
+	pos geom.Int3
 	m   *PrismMap
 }
 
@@ -151,11 +152,11 @@ func (p *Prism) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 
 func (p *Prism) DrawOrder() (int, int) {
 	return p.m.PosToWorld.Apply(p.pos).Z,
-		dot(p.pos.XY(), p.m.DrawOrderBias)
+		geom.Dot(p.pos.XY(), p.m.DrawOrderBias)
 }
 
 func (p *Prism) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(cfloat(
+	opts.GeoM.Translate(geom.CFloat(
 		p.m.game.Projection.Project(p.m.PosToWorld.Apply(p.pos)),
 	))
 	return opts

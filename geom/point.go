@@ -1,4 +1,4 @@
-package engine
+package geom
 
 import (
 	"fmt"
@@ -73,7 +73,7 @@ func (p Int3) Coord() (x, y, z int) {
 
 // Sign returns a sign vector.
 func (p Int3) Sign() Int3 {
-	return Int3{sign(p.X), sign(p.Y), sign(p.Z)}
+	return Int3{Sign(p.X), Sign(p.Y), Sign(p.Z)}
 }
 
 // Dot returns the dot product of the two vectors.
@@ -81,7 +81,8 @@ func (p Int3) Dot(q Int3) int {
 	return p.X*q.X + p.Y*q.Y + p.Z*q.Z
 }
 
-func sign(m int) int {
+// Sign returns the sign of the int (-1, 0, or 1).
+func Sign(m int) int {
 	if m == 0 {
 		return 0
 	}
@@ -91,7 +92,8 @@ func sign(m int) int {
 	return 1
 }
 
-func signf(m float64) float64 {
+// FSign returns the sign of the float64 (-1, 0, or 1).
+func FSign(m float64) float64 {
 	if m == 0 {
 		return 0
 	}
@@ -153,7 +155,7 @@ func (p Float3) Coord() (x, y, z float64) {
 
 // Sign returns a sign vector.
 func (p Float3) Sign() Float3 {
-	return Float3{signf(p.X), signf(p.Y), signf(p.Z)}
+	return Float3{FSign(p.X), FSign(p.Y), FSign(p.Z)}
 }
 
 // Dot returns the dot product of the two vectors.

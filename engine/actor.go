@@ -2,6 +2,8 @@ package engine
 
 import (
 	"encoding/gob"
+
+	"drjosh.dev/gurgle/geom"
 )
 
 // Ensure Actor satisfies interfaces.
@@ -16,17 +18,17 @@ func init() {
 
 // Actor handles basic movement.
 type Actor struct {
-	CollisionDomain string // id of component to look for colliders inside of
-	Pos, Size       Int3   // in voxels; multiply by game.VoxelScale for regular Euclidean space
+	CollisionDomain string    // id of component to look for colliders inside of
+	Pos, Size       geom.Int3 // in voxels; multiply by game.VoxelScale for regular Euclidean space
 
-	rem  Float3
+	rem  geom.Float3
 	game *Game
 }
 
 // CollidesAt runs a collision test of the actor, supposing the actor is at a
 // given position (not necessarily a.Pos).
-func (a *Actor) CollidesAt(p Int3) bool {
-	bounds := Box{Min: p, Max: p.Add(a.Size)}
+func (a *Actor) CollidesAt(p geom.Int3) bool {
+	bounds := geom.Box{Min: p, Max: p.Add(a.Size)}
 	for c := range a.game.Query(a.CollisionDomain, ColliderType) {
 		if c.(Collider).CollidesWith(bounds) {
 			return true
@@ -46,7 +48,7 @@ func (a *Actor) MoveX(x float64, onCollide func()) {
 		return
 	}
 	a.rem.X -= float64(move)
-	sign := sign(move)
+	sign := geom.Sign(move)
 	for move != 0 {
 		a.Pos.X += sign
 		move -= sign
@@ -70,7 +72,7 @@ func (a *Actor) MoveY(y float64, onCollide func()) {
 		return
 	}
 	a.rem.Y -= float64(move)
-	sign := sign(move)
+	sign := geom.Sign(move)
 	for move != 0 {
 		a.Pos.Y += sign
 		move -= sign
@@ -94,7 +96,7 @@ func (a *Actor) MoveZ(z float64, onCollide func()) {
 		return
 	}
 	a.rem.Z -= float64(move)
-	sign := sign(move)
+	sign := geom.Sign(move)
 	for move != 0 {
 		a.Pos.Z += sign
 		move -= sign

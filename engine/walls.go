@@ -3,6 +3,7 @@ package engine
 import (
 	"image"
 
+	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -39,15 +40,15 @@ type Wall struct {
 }
 
 // CollidesWith implements a tilerange collosion check, similar to Tilemap.
-func (w *Wall) CollidesWith(b Box) bool {
+func (w *Wall) CollidesWith(b geom.Box) bool {
 	if w.Ersatz {
 		return false
 	}
 
 	// Probe the map at all tilespace coordinates overlapping the rect.
 	r := b.XY().Sub(w.Offset)
-	min := cdiv(r.Min, w.UnitSize)
-	max := cdiv(r.Max.Sub(image.Pt(1, 1)), w.UnitSize) // NB: fencepost
+	min := geom.CDiv(r.Min, w.UnitSize)
+	max := geom.CDiv(r.Max.Sub(image.Pt(1, 1)), w.UnitSize) // NB: fencepost
 
 	for j := min.Y; j <= max.Y; j++ {
 		for i := min.X; i <= max.X; i++ {
@@ -81,7 +82,7 @@ func (w *Wall) Prepare(*Game) error {
 
 // Transform returns a GeoM translation by Offset.
 func (w *Wall) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(cfloat(w.Offset))
+	opts.GeoM.Translate(geom.CFloat(w.Offset))
 	return opts
 }
 
@@ -106,8 +107,8 @@ func (u *WallUnit) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 func (u *WallUnit) Scan() []interface{} { return []interface{}{u.Tile} }
 
 func (u *WallUnit) Transform() (opts ebiten.DrawImageOptions) {
-	opts.GeoM.Translate(cfloat(
-		cmul(u.pos, u.wall.UnitSize).Add(u.wall.UnitOffset),
+	opts.GeoM.Translate(geom.CFloat(
+		geom.CMul(u.pos, u.wall.UnitSize).Add(u.wall.UnitOffset),
 	))
 	return opts
 }

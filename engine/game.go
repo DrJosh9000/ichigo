@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -41,8 +42,8 @@ type Game struct {
 	Hidden
 	ScreenSize image.Point
 	Root       interface{} // typically a *Scene or SceneRef though
-	Projection IntProjection
-	VoxelScale Float3
+	Projection geom.IntProjection
+	VoxelScale geom.Float3
 
 	dbmu     sync.RWMutex
 	byID     map[string]Identifier              // Named components by ID
@@ -266,8 +267,8 @@ func postorderWalk(component, parent interface{}, visit func(component, parent i
 // builds the component databases and then calls Prepare on every Preparer.
 // LoadAndPrepare must be called before any calls to Component or Query.
 func (g *Game) LoadAndPrepare(assets fs.FS) error {
-	if g.VoxelScale == (Float3{}) {
-		g.VoxelScale = Float3{1, 1, 1}
+	if g.VoxelScale == (geom.Float3{}) {
+		g.VoxelScale = geom.Float3{1, 1, 1}
 	}
 
 	// Load all the Loaders.
