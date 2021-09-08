@@ -29,7 +29,7 @@ func init() {
 	gob.Register(&Prism{})
 }
 
-// PrismMap is a generalised tilemap/wallmap/etc.
+// PrismMap is a generalised 3D tilemap/wallmap/etc.
 type PrismMap struct {
 	ID
 	Disabled
@@ -95,7 +95,6 @@ func (m *PrismMap) Prepare(g *Game) error {
 		return fmt.Errorf("inverting PosToWorld: %w", err)
 	}
 	m.pwinverse = pwi
-	// log.Printf("inverted PosToWorld: %v", pwi)
 	for v, p := range m.Map {
 		p.pos = v
 		p.m = m

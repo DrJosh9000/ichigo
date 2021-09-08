@@ -29,6 +29,15 @@ func (s *Sheet) NewAnim(key string) *Anim {
 	return s.AnimDefs[key].NewAnim()
 }
 
+// NewAnims returns a new Anim for every AnimDef in the AnimDefs map.
+func (s *Sheet) NewAnims() map[string]*Anim {
+	m := make(map[string]*Anim, len(s.AnimDefs))
+	for k, d := range s.AnimDefs {
+		m[k] = d.NewAnim()
+	}
+	return m
+}
+
 // Prepare computes the width of the image (in cells).
 func (s *Sheet) Prepare(*Game) error {
 	s.w, _ = s.Src.Image().Size()

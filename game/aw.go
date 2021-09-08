@@ -2,7 +2,6 @@ package game
 
 import (
 	"encoding/gob"
-	"errors"
 	"fmt"
 	"math"
 
@@ -38,7 +37,7 @@ type Awakeman struct {
 	jumpBuffer  int
 	noclip      bool
 
-	animIdleLeft, animIdleRight, animRunLeft, animRunRight, animWalkLeft, animWalkRight *engine.Anim
+	anims map[string]*engine.Anim
 }
 
 // Ident returns "awakeman". There should be only one!
@@ -97,10 +96,11 @@ func (aw *Awakeman) realUpdate() error {
 	const (
 		ε              = 0.2
 		restitution    = -0.3
-		gravity        = 0.2
-		airResistance  = -0.02 // ⇒ terminal velocity = 10
-		jumpVelocity   = -4.2
-		runVelocity    = 1.4
+		gravity        = 0.25
+		airResistance  = -0.005 // ⇒ terminal velocity = 10
+		jumpVelocity   = -3.3
+		sqrt2          = 1.414213562373095
+		runVelocity    = sqrt2
 		coyoteTime     = 5
 		jumpBufferTime = 5
 	)
@@ -118,7 +118,7 @@ func (aw *Awakeman) realUpdate() error {
 	ux, uy, uz := aw.vx, aw.vy, aw.vz
 
 	// Has traction?
-	if aw.Sprite.Actor.CollidesAt(aw.Sprite.Actor.Pos.Add(engine.Pt3(0, 1, 0))) {
+	if aw.vy >= 0 && aw.Sprite.Actor.CollidesAt(aw.Sprite.Actor.Pos.Add(engine.Pt3(0, 1, 0))) {
 		// Not falling.
 		// Instantly decelerate (AW absorbs all kinetic E in legs, or something)
 		if aw.jumpBuffer > 0 {
@@ -154,38 +154,54 @@ func (aw *Awakeman) realUpdate() error {
 			aw.jumpBuffer = jumpBufferTime
 		}
 	}
-	// Left and right
+	// Left, right, away, toward
+	aw.vx, aw.vz = 0, 0
 	switch {
-	case ebiten.IsKeyPressed(ebiten.KeyLeft) || ebiten.IsKeyPressed(ebiten.KeyA):
+	case ebiten.IsKeyPressed(ebiten.KeyLeft):
 		aw.vx = -runVelocity
-		aw.Sprite.SetAnim(aw.animRunLeft)
-		aw.facingLeft = true
-	case ebiten.IsKeyPressed(ebiten.KeyRight) || ebiten.IsKeyPressed(ebiten.KeyD):
+	case ebiten.IsKeyPressed(ebiten.KeyRight):
 		aw.vx = runVelocity
-		aw.Sprite.SetAnim(aw.animRunRight)
-		aw.facingLeft = false
-	default:
-		aw.vx = 0
-		aw.Sprite.SetAnim(aw.animIdleRight)
-		if aw.facingLeft {
-			aw.Sprite.SetAnim(aw.animIdleLeft)
-		}
 	}
-	// Up and down (away and closer)
 	switch {
-	case ebiten.IsKeyPressed(ebiten.KeyUp) || ebiten.IsKeyPressed(ebiten.KeyW):
+	case ebiten.IsKeyPressed(ebiten.KeyUp):
 		aw.vz = -runVelocity
-	case ebiten.IsKeyPressed(ebiten.KeyDown) || ebiten.IsKeyPressed(ebiten.KeyS):
+	case ebiten.IsKeyPressed(ebiten.KeyDown):
 		aw.vz = runVelocity
-	default:
-		aw.vz = 0
+	}
+
+	// Animations and velocity correction
+	switch {
+	case aw.vx != 0 && aw.vz != 0: // Diagonal
+		aw.Sprite.SetAnim(aw.anims["run_vert"])
+		// Pythagorean theorem; |vx| = |vz|, so the hypotenuse is √2 too big
+		// if we want to run at runVelocity always
+		aw.vx /= sqrt2
+		aw.vz /= sqrt2
+	case aw.vx == 0 && aw.vz != 0: // Vertical
+		aw.Sprite.SetAnim(aw.anims["run_vert"])
+
+	// vz == 0 for all remaining cases
+	case aw.vx < 0: // Left
+		aw.Sprite.SetAnim(aw.anims["run_left"])
+		aw.facingLeft = true
+	case aw.vx > 0: // Right
+		aw.Sprite.SetAnim(aw.anims["run_right"])
+		aw.facingLeft = false
+	default: // aw.vx == 0; Idle
+		aw.Sprite.SetAnim(aw.anims["idle_right"])
+		if aw.facingLeft {
+			aw.Sprite.SetAnim(aw.anims["idle_left"])
+		}
 	}
 
 	// s = (v_0 + v) / 2.
 	aw.Sprite.Actor.MoveX((ux+aw.vx)/2, nil)
-	// For Y, on collision, bounce a little bit.
+	// For Y, on collision from going upwards, bounce a little bit.
 	// Does not apply to X because controls override it anyway.
 	aw.Sprite.Actor.MoveY((uy+aw.vy)/2, func() {
+		if aw.vy > 0 {
+			return
+		}
 		aw.vy *= restitution
 		if math.Abs(aw.vy) < ε {
 			aw.vy = 0
@@ -206,31 +222,16 @@ func (aw *Awakeman) Prepare(game *engine.Game) error {
 		return fmt.Errorf("component %q not *engine.DebugToast", aw.ToastID)
 	}
 	aw.toast = tst
+	aw.anims = aw.Sprite.Sheet.NewAnims()
 
-	aw.animIdleLeft = aw.Sprite.Sheet.NewAnim("idle_left")
-	if aw.animIdleLeft == nil {
-		return errors.New("missing anim idle_left")
-	}
-	aw.animIdleRight = aw.Sprite.Sheet.NewAnim("idle_right")
-	if aw.animIdleRight == nil {
-		return errors.New("missing anim idle_right")
-	}
-	aw.animRunLeft = aw.Sprite.Sheet.NewAnim("run_left")
-	if aw.animRunLeft == nil {
-		return errors.New("missing anim run_left")
-	}
-	aw.animRunRight = aw.Sprite.Sheet.NewAnim("run_right")
-	if aw.animRunRight == nil {
-		return errors.New("missing anim run_right")
-	}
-	aw.animWalkRight = aw.Sprite.Sheet.NewAnim("walk_left")
-	if aw.animWalkRight == nil {
-		return errors.New("missing anim walk_left")
-	}
-	aw.animWalkLeft = aw.Sprite.Sheet.NewAnim("walk_right")
-	if aw.animWalkLeft == nil {
-		return errors.New("missing anim walk_right")
-	}
+	/*
+		idle_left
+		idle_right
+		run_left
+		run_right
+		run_vert
+	*/
+
 	return nil
 }
 
