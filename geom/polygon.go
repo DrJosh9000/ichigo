@@ -4,11 +4,11 @@ import "image"
 
 // PolygonContains reports if a polygon contains a point
 func PolygonContains(polygon []image.Point, p image.Point) bool {
-	for i, p1 := range polygon {
-		p2 := polygon[(i+1)%len(polygon)]
-		// ∆(p p1 p2) should have positive signed area
-		p1, p2 = p1.Sub(p), p2.Sub(p)
-		if p2.X*p1.Y-p1.X*p2.Y < 0 {
+	for i, q := range polygon {
+		r := polygon[(i+1)%len(polygon)]
+		// ∆(p q r) should have positive signed area
+		q, r = q.Sub(p), r.Sub(p)
+		if q.X*r.Y > r.X*q.Y {
 			return false
 		}
 	}
