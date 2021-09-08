@@ -6,6 +6,7 @@ import (
 	"math"
 
 	"drjosh.dev/gurgle/engine"
+	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
@@ -118,7 +119,7 @@ func (aw *Awakeman) realUpdate() error {
 	ux, uy, uz := aw.vx, aw.vy, aw.vz
 
 	// Has traction?
-	if aw.vy >= 0 && aw.Sprite.Actor.CollidesAt(aw.Sprite.Actor.Pos.Add(engine.Pt3(0, 1, 0))) {
+	if aw.vy >= 0 && aw.Sprite.Actor.CollidesAt(aw.Sprite.Actor.Pos.Add(geom.Pt3(0, 1, 0))) {
 		// Not falling.
 		// Instantly decelerate (AW absorbs all kinetic E in legs, or something)
 		if aw.jumpBuffer > 0 {
