@@ -23,7 +23,12 @@ func (p Int3) String() string {
 
 // XY applies the Z-forgetting projection. (It returns just X and Y.)
 func (p Int3) XY() image.Point {
-	return image.Point{p.X, p.Y}
+	return image.Point{X: p.X, Y: p.Y}
+}
+
+// XZ applies the Y-forgetting projection. (It returns just X and Z (as Y).)
+func (p Int3) XZ() image.Point {
+	return image.Point{X: p.X, Y: p.Z}
 }
 
 // Add performs vector addition.

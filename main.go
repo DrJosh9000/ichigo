@@ -121,6 +121,14 @@ func level1() *engine.Scene {
 					2: [4]int{8, 0, 16, 0},
 				},
 				PrismSize: engine.Int3{X: 32, Y: 16, Z: 16},
+				PrismTop: []image.Point{
+					{X: 8, Y: 0},
+					{X: 0, Y: 8},
+					{X: 8, Y: 16},
+					{X: 23, Y: 16},
+					{X: 31, Y: 8},
+					{X: 23, Y: 0},
+				},
 				Sheet: engine.Sheet{
 					CellSize: image.Pt(32, 32),
 					Src:      engine.ImageRef{Path: "assets/hexprism32.png"},

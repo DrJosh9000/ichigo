@@ -93,3 +93,11 @@ func (b Box) XY() image.Rectangle {
 		Max: b.Max.XY(),
 	}
 }
+
+// XZ returns the image.Rectangle representing the box if we forgot about Y.
+func (b Box) XZ() image.Rectangle {
+	return image.Rectangle{
+		Min: b.Min.XZ(),
+		Max: b.Max.XZ(),
+	}
+}

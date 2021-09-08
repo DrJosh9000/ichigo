@@ -40,6 +40,7 @@ type PrismMap struct {
 	DrawOffset    image.Point     // offset applies to whole map
 	PosToWorld    IntMatrix3x4    // p.pos -> world voxelspace
 	PrismSize     Int3            // in world voxelspace units
+	PrismTop      []image.Point   // polygon vertices anticlockwise, Y means Z
 	Sheet         Sheet
 
 	game      *Game
@@ -50,6 +51,7 @@ func (m *PrismMap) CollidesWith(b Box) bool {
 	if m.Ersatz {
 		return false
 	}
+
 	// To find the prisms need to test, we need to invert PosToWorld.
 
 	// Step 1: subtract whatever the translation component of PosToWorld is,
@@ -80,11 +82,31 @@ func (m *PrismMap) CollidesWith(b Box) bool {
 				if !b.Overlaps(cb) {
 					continue
 				}
-				// TODO: take into account the prism shape
-				return true
+				// Take into account the prism shape
+				r := b.XZ().Sub(wp.XZ())
+				if polygonRectOverlap(m.PrismTop, r) {
+					return true
+				}
 			}
 		}
 	}
+
+	/*
+		// Here's the test-every-prism approach
+		for pos := range m.Map {
+			// Map it back to worldspace to get a bounding box for the prism
+			wp := m.PosToWorld.Apply(pos)
+			cb := Box{Min: wp, Max: wp.Add(m.PrismSize)}
+			if !b.Overlaps(cb) {
+				continue
+			}
+			// Take into account the prism shape
+			r := b.XZ().Sub(wp.XZ())
+			if polygonRectOverlap(m.PrismTop, r) {
+				return true
+			}
+		}
+	*/
 	return false
 }
 
