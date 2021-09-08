@@ -66,8 +66,8 @@ func (m *PrismMap) CollidesWith(b geom.Box) bool {
 	rb = rb.Canon() // inverse might flip the corners around...
 
 	// Check neighboring prisms too because there's a fencepost somewhere here
-	rb.Min = rb.Min.Sub(geom.Int3{1, 1, 1})
-	rb.Max = rb.Max.Add(geom.Int3{1, 1, 1})
+	rb.Min = rb.Min.Sub(geom.Int3{X: 1, Y: 1, Z: 1})
+	rb.Max = rb.Max.Add(geom.Int3{X: 1, Y: 1, Z: 1})
 
 	var pp geom.Int3
 	for pp.Z = rb.Min.Z; pp.Z <= rb.Max.Z; pp.Z++ {

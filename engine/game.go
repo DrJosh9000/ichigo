@@ -268,7 +268,7 @@ func postorderWalk(component, parent interface{}, visit func(component, parent i
 // LoadAndPrepare must be called before any calls to Component or Query.
 func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	if g.VoxelScale == (geom.Float3{}) {
-		g.VoxelScale = geom.Float3{1, 1, 1}
+		g.VoxelScale = geom.Float3{X: 1, Y: 1, Z: 1}
 	}
 
 	// Load all the Loaders.
