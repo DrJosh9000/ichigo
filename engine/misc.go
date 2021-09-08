@@ -83,33 +83,20 @@ func polygonContains(polygon []image.Point, p image.Point) bool {
 
 // polygonRectOverlap reports if a polygon overlaps a rectangle.
 func polygonRectOverlap(polygon []image.Point, rect image.Rectangle) bool {
-	// There's a good chance a vertex from one thing is inside the other...
-
-	// Check if any vertex of the polygon is inside the rect.
-	for _, p := range polygon {
-		if p.In(rect) {
-			return true
-		}
+	if polygon[0].In(rect) {
+		return true
 	}
-
-	// Reduced Max (to the inclusive bound).
-	rmax := rect.Max.Sub(image.Pt(1, 1))
 
 	// Check if any vertex of the rect is inside the polygon.
 	if polygonContains(polygon, rect.Min) {
 		return true
 	}
-	if polygonContains(polygon, rmax) {
-		return true
-	}
-	if polygonContains(polygon, image.Pt(rect.Min.X, rmax.Y)) {
-		return true
-	}
-	if polygonContains(polygon, image.Pt(rmax.X, rect.Min.Y)) {
-		return true
-	}
 
-	// Only remaining cases involve line intersection between the rect and poly.
+	// Reduced Max (to the inclusive bound).
+	rmax := rect.Max.Sub(image.Pt(1, 1))
+
+	// Only remaining cases involve line intersection between the rect and poly
+	// having eliminated the possibility that one is entirely within another.
 
 	// Since rect is an axis-aligned rectangle, we only need vertical and
 	// horizontal line intersection tests.
