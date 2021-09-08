@@ -136,7 +136,6 @@ func polygonRectOverlap(polygon []image.Point, rect image.Rectangle) bool {
 			if t := (rect.Min.Y - p.Y) * d.X; min <= t && t < max {
 				return true
 			}
-
 			// Test bottom side of rect
 			if t := (rmax.Y - p.Y) * d.X; min <= t && t < max {
 				return true
