@@ -149,9 +149,8 @@ func (p *Prism) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	screen.DrawImage(p.m.Sheet.SubImage(p.Cell), opts)
 }
 
-func (p *Prism) DrawOrder() (int, int) {
-	return p.m.PosToWorld.Apply(p.pos).Z,
-		geom.Dot(p.pos.XY(), image.Point(p.m.game.Projection).Mul(-1))
+func (p *Prism) DrawOrder() float64 {
+	return p.m.game.Projection.DrawOrder(p.m.PosToWorld.Apply(p.pos))
 }
 
 func (p *Prism) Transform() (opts ebiten.DrawImageOptions) {

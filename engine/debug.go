@@ -41,9 +41,9 @@ func (d *DebugToast) Draw(screen *ebiten.Image, _ *ebiten.DrawImageOptions) {
 	ebitenutil.DebugPrintAt(screen, d.Text, d.Pos.X, d.Pos.Y)
 }
 
-func (d *DebugToast) DrawOrder() (int, int) {
+func (d *DebugToast) DrawOrder() float64 {
 	// Always draw on top
-	return math.MaxInt, 0
+	return math.MaxFloat64
 }
 
 func (d *DebugToast) Toast(text string) {
@@ -68,7 +68,7 @@ func (p PerfDisplay) Draw(screen *ebiten.Image, _ *ebiten.DrawImageOptions) {
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f  FPS: %0.2f", ebiten.CurrentTPS(), ebiten.CurrentFPS()))
 }
 
-func (PerfDisplay) DrawOrder() (int, int) {
+func (PerfDisplay) DrawOrder() float64 {
 	// Always draw on top
-	return math.MaxInt, 0
+	return math.MaxFloat64
 }

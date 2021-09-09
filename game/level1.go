@@ -265,11 +265,11 @@ func Level1() *engine.Scene {
 						CollisionDomain: "level_1",
 						Pos:             geom.Pt3(100, -64, 100),
 						Bounds: geom.Box{
-							Min: geom.Pt3(-4, -16, -1),
-							Max: geom.Pt3(4, 0, 1),
+							Min: geom.Pt3(-4, -15, -1),
+							Max: geom.Pt3(4, 1, 1),
 						},
 					},
-					DrawOffset: image.Pt(-5, -16),
+					DrawOffset: image.Pt(-5, -15),
 					Sheet: engine.Sheet{
 						AnimDefs: map[string]*engine.AnimDef{
 							"idle_left": {Steps: []engine.AnimStep{

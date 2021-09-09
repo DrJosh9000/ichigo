@@ -17,8 +17,8 @@ func (π IntProjection) Project(p Int3) image.Point {
 		Dividing is used because there's little reason for an isometric
 		projection in a game to exaggerate the Z position.
 
-		Integers are used to preserve that "pixel perfect" calculation in case
-		you are making the next Celeste.
+		Integers are used to preserve "pixel perfect" calculation in case you
+		are making the next Celeste.
 	*/
 	q := p.XY()
 	if π.X != 0 {
@@ -28,4 +28,18 @@ func (π IntProjection) Project(p Int3) image.Point {
 		q.Y += p.Z / π.Y
 	}
 	return q
+}
+
+// DrawOrder computes a draw-order value for a point under this projection.
+// Each projection has an implied camera angle - Z alone is insufficient to
+// order things properly.
+func (π IntProjection) DrawOrder(p Int3) float64 {
+	z := float64(p.Z)
+	if π.X != 0 {
+		z -= float64(p.X) / float64(π.X)
+	}
+	if π.Y != 0 {
+		z -= float64(p.Y) / float64(π.Y)
+	}
+	return z
 }

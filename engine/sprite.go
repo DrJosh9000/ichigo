@@ -35,9 +35,9 @@ func (s *Sprite) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	screen.DrawImage(s.Sheet.SubImage(s.anim.Cell()), opts)
 }
 
-// DrawOrder returns the Z position from Actor.Pos, and 0 bias.
-func (s *Sprite) DrawOrder() (int, int) {
-	return s.Actor.Pos.Z, 0
+// DrawOrder returns the projected draw order.
+func (s *Sprite) DrawOrder() float64 {
+	return s.Actor.game.Projection.DrawOrder(s.Actor.Pos)
 }
 
 // Scan returns the Actor and the Sheet.

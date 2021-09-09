@@ -40,8 +40,8 @@ func (h *Hidden) Hide() { *h = true }
 // Show sets h to false.
 func (h *Hidden) Show() { *h = false }
 
-// ZOrder implements DrawOrder (in Drawer) directly (as an int value).
-type ZOrder int
+// ZOrder implements DrawOrder (in Drawer) directly (as a numeric value).
+type ZOrder float64
 
-// DrawOrder returns z as a int with 0 bias.
-func (z ZOrder) DrawOrder() (int, int) { return int(z), 0 }
+// DrawOrder returns z.
+func (z ZOrder) DrawOrder() float64 { return float64(z) }

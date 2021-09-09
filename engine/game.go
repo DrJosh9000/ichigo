@@ -431,17 +431,12 @@ type tombstone struct{}
 
 func (tombstone) Draw(*ebiten.Image, *ebiten.DrawImageOptions) {}
 
-func (tombstone) DrawOrder() (int, int) { return math.MaxInt, math.MaxInt }
+func (tombstone) DrawOrder() float64 { return math.Inf(1) }
 
 type drawList []Drawer
 
 func (d drawList) Less(i, j int) bool {
-	a0, a1 := d[i].DrawOrder()
-	b0, b1 := d[j].DrawOrder()
-	if a0 == b0 {
-		return a1 < b1
-	}
-	return a0 < b0
+	return d[i].DrawOrder() < d[j].DrawOrder()
 }
 
 func (d drawList) Len() int      { return len(d) }
