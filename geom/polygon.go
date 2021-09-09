@@ -2,7 +2,9 @@ package geom
 
 import "image"
 
-// PolygonContains reports if a polygon contains a point
+// PolygonContains reports if a polygon contains a point. The polygon must be in
+// clockwise order if +Y is pointing upwards, or anticlockwise if +Y is pointing
+// downwards.
 func PolygonContains(polygon []image.Point, p image.Point) bool {
 	for i, q := range polygon {
 		r := polygon[(i+1)%len(polygon)]
