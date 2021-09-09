@@ -19,16 +19,21 @@ func init() {
 // Actor handles basic movement.
 type Actor struct {
 	CollisionDomain string    // id of component to look for colliders inside of
-	Pos, Size       geom.Int3 // in voxels; multiply by game.VoxelScale for regular Euclidean space
+	Pos             geom.Int3 // in voxels; multiply by game.VoxelScale for regular Euclidean space
+	Bounds          geom.Box  // in voxels; relative to Pos
 
 	rem  geom.Float3
 	game *Game
 }
 
+func (a *Actor) BoundingBox() geom.Box {
+	return a.Bounds.Add(a.Pos)
+}
+
 // CollidesAt runs a collision test of the actor, supposing the actor is at a
 // given position (not necessarily a.Pos).
 func (a *Actor) CollidesAt(p geom.Int3) bool {
-	bounds := geom.Box{Min: p, Max: p.Add(a.Size)}
+	bounds := a.Bounds.Add(p)
 	for c := range a.game.Query(a.CollisionDomain, ColliderType) {
 		if c.(Collider).CollidesWith(bounds) {
 			return true

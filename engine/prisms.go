@@ -35,14 +35,13 @@ type PrismMap struct {
 	ID
 	Disabled
 	Hidden
-	Ersatz        bool
-	Map           map[geom.Int3]*Prism // pos -> prism
-	DrawOrderBias image.Point          // dot with pos.XY() = bias value
-	DrawOffset    image.Point          // offset applies to whole map
-	PosToWorld    geom.IntMatrix3x4    // p.pos -> world voxelspace
-	PrismSize     geom.Int3            // in world voxelspace units
-	PrismTop      []image.Point        // polygon vertices anticlockwise, Y means Z
-	Sheet         Sheet
+	Ersatz     bool
+	Map        map[geom.Int3]*Prism // pos -> prism
+	DrawOffset image.Point          // offset applies to whole map
+	PosToWorld geom.IntMatrix3x4    // p.pos -> world voxelspace
+	PrismSize  geom.Int3            // in world voxelspace units
+	PrismTop   []image.Point        // polygon vertices anticlockwise, Y means Z
+	Sheet      Sheet
 
 	game      *Game
 	pwinverse geom.RatMatrix3
@@ -152,7 +151,7 @@ func (p *Prism) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 
 func (p *Prism) DrawOrder() (int, int) {
 	return p.m.PosToWorld.Apply(p.pos).Z,
-		geom.Dot(p.pos.XY(), p.m.DrawOrderBias)
+		geom.Dot(p.pos.XY(), image.Point(p.m.game.Projection).Mul(-1))
 }
 
 func (p *Prism) Transform() (opts ebiten.DrawImageOptions) {

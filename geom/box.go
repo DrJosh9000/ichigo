@@ -36,6 +36,11 @@ func (b Box) Size() Int3 {
 	return b.Max.Sub(b.Min)
 }
 
+// Centre returns the centre point of the box.
+func (b Box) Centre() Int3 {
+	return b.Min.Add(b.Max).Div(2)
+}
+
 // Add offsets the box by vector p.
 func (b Box) Add(p Int3) Box {
 	return Box{

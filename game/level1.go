@@ -30,8 +30,8 @@ func Level1() *engine.Scene {
 				Factor: 0.5,
 			},
 			&engine.PrismMap{
-				ID:            "hexagons",
-				DrawOrderBias: image.Pt(0, -1), // draw higher Y after lower Y
+				ID: "hexagons",
+				//DrawOrderBias: image.Pt(0, -1), // draw higher Y after lower Y
 				PosToWorld: geom.IntMatrix3x4{
 					// For each tile in the X direction, go right by 24 and
 					// forward by 8, etc
@@ -264,9 +264,12 @@ func Level1() *engine.Scene {
 					Actor: engine.Actor{
 						CollisionDomain: "level_1",
 						Pos:             geom.Pt3(100, -64, 100),
-						Size:            geom.Pt3(8, 16, 2),
+						Bounds: geom.Box{
+							Min: geom.Pt3(-4, -16, -1),
+							Max: geom.Pt3(4, 0, 1),
+						},
 					},
-					DrawOffset: image.Pt(-1, 0),
+					DrawOffset: image.Pt(-5, -16),
 					Sheet: engine.Sheet{
 						AnimDefs: map[string]*engine.AnimDef{
 							"idle_left": {Steps: []engine.AnimStep{
