@@ -37,6 +37,7 @@ type Awakeman struct {
 	coyoteTimer int
 	jumpBuffer  int
 	noclip      bool
+	spawnPoint  geom.Int3
 
 	anims map[string]*engine.Anim
 }
@@ -104,7 +105,13 @@ func (aw *Awakeman) realUpdate() error {
 		runVelocity    = sqrt2
 		coyoteTime     = 5
 		jumpBufferTime = 5
+		respawnY       = 1000
 	)
+
+	// Fell below some threshold?
+	if aw.Sprite.Actor.Pos.Y > respawnY {
+		aw.Sprite.Actor.Pos = aw.spawnPoint
+	}
 
 	// High-school physics time! Under constant acceleration:
 	//   v = v_0 + a*t
@@ -224,14 +231,7 @@ func (aw *Awakeman) Prepare(game *engine.Game) error {
 	}
 	aw.toast = tst
 	aw.anims = aw.Sprite.Sheet.NewAnims()
-
-	/*
-		idle_left
-		idle_right
-		run_left
-		run_right
-		run_vert
-	*/
+	aw.spawnPoint = aw.Sprite.Actor.Pos
 
 	return nil
 }
