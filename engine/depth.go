@@ -8,20 +8,14 @@ import (
 
 const screenShaderSrc = `package main
 
-var ScreenSize vec2
-
 func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
-
 	return imageSrc0UnsafeAt(texCoord)
 }
 `
 
 const depthShaderSrc = `package main
 
-var ScreenSize vec2
-
 func Fragment(position vec4, texCoord vec2, color vec4) vec4 {
-
 	return imageSrc0UnsafeAt(texCoord)
 }
 `

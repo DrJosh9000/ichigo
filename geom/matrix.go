@@ -97,32 +97,48 @@ func (a RatMatrix3) IntApply(v Int3) Int3 {
 	}
 }
 
-// Inverse returns the inverse of the matrix.
-func (a RatMatrix3) Inverse() (RatMatrix3, error) {
-	adj := RatMatrix3{
+// Mul multiplies the whole matrix by a scalar.
+func (a RatMatrix3) Mul(r Rat) RatMatrix3 {
+	// "A little repetition..."
+	a[0][0] = a[0][0].Mul(r)
+	a[0][1] = a[0][1].Mul(r)
+	a[0][2] = a[0][2].Mul(r)
+	a[1][0] = a[1][0].Mul(r)
+	a[1][1] = a[1][1].Mul(r)
+	a[1][2] = a[1][2].Mul(r)
+	a[2][0] = a[2][0].Mul(r)
+	a[2][1] = a[2][1].Mul(r)
+	a[2][2] = a[2][2].Mul(r)
+	return a
+}
+
+// Adjugate returns the adjugate of the matrix.
+func (a RatMatrix3) Adjugate() RatMatrix3 {
+	return RatMatrix3{
 		0: [3]Rat{
 			0: a[1][1].Mul(a[2][2]).Sub(a[1][2].Mul(a[2][1])),
+			1: a[0][1].Mul(a[2][2]).Sub(a[0][2].Mul(a[2][1])).Neg(),
+			2: a[0][1].Mul(a[1][2]).Sub(a[0][2].Mul(a[1][1])),
 		},
 		1: [3]Rat{
 			0: a[1][0].Mul(a[2][2]).Sub(a[1][2].Mul(a[2][0])).Neg(),
+			1: a[0][0].Mul(a[2][2]).Sub(a[0][2].Mul(a[2][0])),
+			2: a[0][0].Mul(a[1][2]).Sub(a[0][2].Mul(a[1][0])).Neg(),
 		},
 		2: [3]Rat{
 			0: a[1][0].Mul(a[2][1]).Sub(a[1][1].Mul(a[2][0])),
+			1: a[0][0].Mul(a[2][1]).Sub(a[0][1].Mul(a[2][0])).Neg(),
+			2: a[0][0].Mul(a[1][1]).Sub(a[0][1].Mul(a[1][0])),
 		},
-		// other columns after determinant...
 	}
+}
+
+// Inverse returns the inverse of the matrix.
+func (a RatMatrix3) Inverse() (RatMatrix3, error) {
+	adj := a.Adjugate()
 	det := a[0][0].Mul(adj[0][0]).Add(a[0][1].Mul(adj[1][0])).Add(a[0][2].Mul(adj[2][0]))
 	if det.N == 0 {
 		return RatMatrix3{}, errors.New("matrix is singular")
 	}
-	adj[0][0] = adj[0][0].Div(det)
-	adj[1][0] = adj[1][0].Div(det)
-	adj[2][0] = adj[2][0].Div(det)
-	adj[0][1] = a[0][1].Mul(a[2][2]).Sub(a[0][2].Mul(a[2][1])).Neg().Div(det)
-	adj[0][2] = a[0][1].Mul(a[1][2]).Sub(a[0][2].Mul(a[1][1])).Div(det)
-	adj[1][1] = a[0][0].Mul(a[2][2]).Sub(a[0][2].Mul(a[2][0])).Div(det)
-	adj[1][2] = a[0][0].Mul(a[1][2]).Sub(a[0][2].Mul(a[1][0])).Neg().Div(det)
-	adj[2][1] = a[0][0].Mul(a[2][1]).Sub(a[0][1].Mul(a[2][0])).Neg().Div(det)
-	adj[2][2] = a[0][0].Mul(a[1][1]).Sub(a[0][1].Mul(a[1][0])).Div(det)
-	return adj, nil
+	return adj.Mul(det.Invert()), nil
 }
