@@ -32,7 +32,7 @@ type Awakeman struct {
 
 	camera      *engine.Camera
 	toast       *engine.DebugToast
-	vx, vy, vz  float64
+	vel         geom.Float3
 	facingLeft  bool
 	coyoteTimer int
 	jumpBuffer  int
@@ -49,7 +49,7 @@ func (aw *Awakeman) Update() error {
 	// TODO: better cheat for noclip
 	if inpututil.IsKeyJustPressed(ebiten.KeyN) {
 		aw.noclip = !aw.noclip
-		aw.vx, aw.vy, aw.vz = 0, 0, 0
+		aw.vel = geom.Float3{}
 		if aw.toast != nil {
 			if aw.noclip {
 				aw.toast.Toast("noclip enabled")
@@ -111,6 +111,7 @@ func (aw *Awakeman) realUpdate() error {
 	// Fell below some threshold?
 	if aw.Sprite.Actor.Pos.Y > respawnY {
 		aw.Sprite.Actor.Pos = aw.spawnPoint
+		aw.vel = geom.Float3{}
 	}
 
 	// High-school physics time! Under constant acceleration:
@@ -123,24 +124,24 @@ func (aw *Awakeman) realUpdate() error {
 	// and
 	//   s = (v_0 + v) / 2.
 	// Capture current v_0 to use later.
-	ux, uy, uz := aw.vx, aw.vy, aw.vz
+	v0 := aw.vel
 
 	// Has traction?
-	if aw.vy >= 0 && aw.Sprite.Actor.CollidesAt(aw.Sprite.Actor.Pos.Add(geom.Pt3(0, 1, 0))) {
+	if aw.vel.Y >= 0 && aw.Sprite.Actor.CollidesAt(aw.Sprite.Actor.Pos.Add(geom.Pt3(0, 1, 0))) {
 		// Not falling.
 		// Instantly decelerate (AW absorbs all kinetic E in legs, or something)
 		if aw.jumpBuffer > 0 {
 			// Tried to jump recently -- so jump
-			aw.vy = jumpVelocity
+			aw.vel.Y = jumpVelocity
 			aw.jumpBuffer = 0
 		} else {
 			// Can jump now or soon.
-			aw.vy = 0
+			aw.vel.Y = 0
 			aw.coyoteTimer = coyoteTime
 		}
 	} else {
 		// Falling. v = v_0 + a, and a = gravity + airResistance(v_0)
-		aw.vy += gravity + airResistance*aw.vy
+		aw.vel.Y += gravity + airResistance*aw.vel.Y
 		if aw.coyoteTimer > 0 {
 			aw.coyoteTimer--
 		}
@@ -156,46 +157,46 @@ func (aw *Awakeman) realUpdate() error {
 		// On ground or recently on ground?
 		if aw.coyoteTimer > 0 {
 			// Jump. One frame of v = jumpVelocity (ignoring any gravity already applied this tick).
-			aw.vy = jumpVelocity
+			aw.vel.Y = jumpVelocity
 		} else {
 			// Buffer the jump in case aw hits the ground soon.
 			aw.jumpBuffer = jumpBufferTime
 		}
 	}
 	// Left, right, away, toward
-	aw.vx, aw.vz = 0, 0
+	aw.vel.X, aw.vel.Z = 0, 0
 	switch {
 	case ebiten.IsKeyPressed(ebiten.KeyLeft):
-		aw.vx = -runVelocity
+		aw.vel.X = -runVelocity
 	case ebiten.IsKeyPressed(ebiten.KeyRight):
-		aw.vx = runVelocity
+		aw.vel.X = runVelocity
 	}
 	switch {
 	case ebiten.IsKeyPressed(ebiten.KeyUp):
-		aw.vz = -runVelocity
+		aw.vel.Z = -runVelocity
 	case ebiten.IsKeyPressed(ebiten.KeyDown):
-		aw.vz = runVelocity
+		aw.vel.Z = runVelocity
 	}
 
 	// Animations and velocity correction
 	switch {
-	case aw.vx != 0 && aw.vz != 0: // Diagonal
+	case aw.vel.X != 0 && aw.vel.Z != 0: // Diagonal
 		aw.Sprite.SetAnim(aw.anims["run_vert"])
 		// Pythagorean theorem; |vx| = |vz|, so the hypotenuse is √2 too big
 		// if we want to run at runVelocity always
-		aw.vx /= sqrt2
-		aw.vz /= sqrt2
-	case aw.vx == 0 && aw.vz != 0: // Vertical
+		aw.vel.X /= sqrt2
+		aw.vel.Z /= sqrt2
+	case aw.vel.X == 0 && aw.vel.Z != 0: // Vertical
 		aw.Sprite.SetAnim(aw.anims["run_vert"])
 
 	// vz == 0 for all remaining cases
-	case aw.vx < 0: // Left
+	case aw.vel.X < 0: // Left
 		aw.Sprite.SetAnim(aw.anims["run_left"])
 		aw.facingLeft = true
-	case aw.vx > 0: // Right
+	case aw.vel.X > 0: // Right
 		aw.Sprite.SetAnim(aw.anims["run_right"])
 		aw.facingLeft = false
-	default: // aw.vx == 0; Idle
+	default: // aw.velocity.X == 0; Idle
 		aw.Sprite.SetAnim(aw.anims["idle_right"])
 		if aw.facingLeft {
 			aw.Sprite.SetAnim(aw.anims["idle_left"])
@@ -203,19 +204,19 @@ func (aw *Awakeman) realUpdate() error {
 	}
 
 	// s = (v_0 + v) / 2.
-	aw.Sprite.Actor.MoveX((ux+aw.vx)/2, nil)
+	aw.Sprite.Actor.MoveX((v0.X+aw.vel.X)/2, nil)
 	// For Y, on collision from going upwards, bounce a little bit.
 	// Does not apply to X because controls override it anyway.
-	aw.Sprite.Actor.MoveY((uy+aw.vy)/2, func() {
-		if aw.vy > 0 {
+	aw.Sprite.Actor.MoveY((v0.Y+aw.vel.Y)/2, func() {
+		if aw.vel.Y > 0 {
 			return
 		}
-		aw.vy *= restitution
-		if math.Abs(aw.vy) < ε {
-			aw.vy = 0
+		aw.vel.Y *= restitution
+		if math.Abs(aw.vel.Y) < ε {
+			aw.vel.Y = 0
 		}
 	})
-	aw.Sprite.Actor.MoveZ((uz+aw.vz)/2, nil)
+	aw.Sprite.Actor.MoveZ((v0.Z+aw.vel.Z)/2, nil)
 	return nil
 }
 

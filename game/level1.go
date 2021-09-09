@@ -263,7 +263,7 @@ func Level1() *engine.Scene {
 				Sprite: engine.Sprite{
 					Actor: engine.Actor{
 						CollisionDomain: "level_1",
-						Pos:             geom.Pt3(100, -32, 100),
+						Pos:             geom.Pt3(100, -64, 100),
 						Size:            geom.Pt3(8, 16, 2),
 					},
 					DrawOffset: image.Pt(-1, 0),
