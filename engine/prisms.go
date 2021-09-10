@@ -47,6 +47,7 @@ type PrismMap struct {
 	pwinverse geom.RatMatrix3
 }
 
+// CollidesWith checks if the box collides with any prism.
 func (m *PrismMap) CollidesWith(b geom.Box) bool {
 	if m.Ersatz {
 		return false
@@ -73,17 +74,16 @@ func (m *PrismMap) CollidesWith(b geom.Box) bool {
 		for pp.Y = rb.Min.Y; pp.Y <= rb.Max.Y; pp.Y++ {
 			for pp.X = rb.Min.X; pp.X <= rb.Max.X; pp.X++ {
 				// Is there a prism here?
-				if _, found := m.Map[pp]; !found {
+				prism, found := m.Map[pp]
+				if !found {
 					continue
 				}
-				// Map it back to worldspace to get a bounding box for the prism
-				wp := m.PosToWorld.Apply(pp)
-				cb := geom.Box{Min: wp, Max: wp.Add(m.PrismSize)}
-				if !b.Overlaps(cb) {
+				// Do a cheaper test first against the bounding box.
+				if !b.Overlaps(prism.BoundingBox()) {
 					continue
 				}
-				// Take into account the prism shape
-				r := b.XZ().Sub(wp.XZ())
+				// Exact test that takes into account the prism shape.
+				r := b.XZ().Sub(prism.pos.XZ())
 				if geom.PolygonRectOverlap(m.PrismTop, r) {
 					return true
 				}
@@ -110,6 +110,7 @@ func (m *PrismMap) CollidesWith(b geom.Box) bool {
 	return false
 }
 
+// Prepare computes an inverse of PosToWorld and prepares all the prisms.
 func (m *PrismMap) Prepare(g *Game) error {
 	m.game = g
 	pwi, err := m.PosToWorld.ToRatMatrix3().Inverse()
@@ -118,12 +119,13 @@ func (m *PrismMap) Prepare(g *Game) error {
 	}
 	m.pwinverse = pwi
 	for v, p := range m.Map {
-		p.pos = v
+		p.pos = m.PosToWorld.Apply(v)
 		p.m = m
 	}
 	return nil
 }
 
+// Scan returns the Sheet and all the Prisms.
 func (m *PrismMap) Scan() []interface{} {
 	c := make([]interface{}, 1, len(m.Map)+1)
 	c[0] = &m.Sheet
@@ -133,29 +135,39 @@ func (m *PrismMap) Scan() []interface{} {
 	return c
 }
 
+// Transform retrurns a translation by the draw offset.
 func (m *PrismMap) Transform() (opts ebiten.DrawImageOptions) {
 	opts.GeoM.Translate(geom.CFloat(m.DrawOffset))
 	return opts
 }
 
+// Prism represents a single prism in a PrismMap.
 type Prism struct {
 	Cell int
 
-	pos geom.Int3
+	pos geom.Int3 // world coordinates
 	m   *PrismMap
 }
 
+// BoundingBox returns a bounding box for the prism.
+func (p *Prism) BoundingBox() geom.Box {
+	return geom.Box{Min: p.pos, Max: p.pos.Add(p.m.PrismSize)}
+}
+
+// Draw draws the prism.
 func (p *Prism) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	screen.DrawImage(p.m.Sheet.SubImage(p.Cell), opts)
 }
 
+// DrawOrder returns the projected draw distance.
 func (p *Prism) DrawOrder() float64 {
-	return p.m.game.Projection.DrawOrder(p.m.PosToWorld.Apply(p.pos))
+	return p.m.game.Projection.DrawOrder(p.pos)
 }
 
+// Transform returns a translation by the projected position.
 func (p *Prism) Transform() (opts ebiten.DrawImageOptions) {
 	opts.GeoM.Translate(geom.CFloat(
-		p.m.game.Projection.Project(p.m.PosToWorld.Apply(p.pos)),
+		p.m.game.Projection.Project(p.pos),
 	))
 	return opts
 }
