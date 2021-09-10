@@ -45,10 +45,6 @@ func (s *Sprite) DrawAfter(x Drawer) bool {
 	switch d := x.(type) {
 	case BoundingBoxer:
 		xb := d.BoundingBox()
-		/*// No X overlap - no comparison needed
-		if sb.Max.X <= xb.Min.X || sb.Min.X >= xb.Max.X {
-			return false
-		}*/
 		// Z ?
 		if sb.Min.Z >= xb.Max.Z { // s is unambiguously in front
 			return true
@@ -61,6 +57,13 @@ func (s *Sprite) DrawAfter(x Drawer) bool {
 			return true
 		}
 		if sb.Min.Y >= xb.Max.Y { // s is unambiguously below
+			return false
+		}
+		// Hexagon special
+		if sb.Min.Z > xb.Min.Z+8 {
+			return true
+		}
+		if sb.Max.Z < sb.Min.Z+8 {
 			return false
 		}
 	case zpositioner:

@@ -4,7 +4,6 @@ import (
 	"encoding/gob"
 	"fmt"
 	"image"
-	"log"
 
 	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -144,63 +143,36 @@ func (p *Prism) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	screen.DrawImage(p.m.Sheet.SubImage(p.Cell), opts)
 }
 
-func (p *Prism) logue(c Drawer, s string) {
-	if p.pos.Y != -16 {
-		return
-	}
-	if _, ok := c.(*Sprite); ok {
-		log.Print(s)
-	}
-}
-
 // DrawAfter reports if the prism should be drawn after x.
 func (p *Prism) DrawAfter(x Drawer) bool {
 	pb := p.BoundingBox()
 	switch d := x.(type) {
-	case *Prism:
-		if p.pos.Z == d.pos.Z {
-			return p.pos.Y < d.pos.Y
-		}
-		return p.pos.Z > d.pos.Z
 	case BoundingBoxer:
 		xb := d.BoundingBox()
-		/*// No X overlap - no comparison needed
-		if pb.Max.X <= xb.Min.X || pb.Min.X >= xb.Max.X {
-			p.logue(x, "no x overlap")
-			return false
-		}*/
 		// Z ?
 		if pb.Min.Z >= xb.Max.Z { // p is unambiguously in front
-			p.logue(x, "prism unambiguously in front")
 			return true
 		}
 		if pb.Max.Z <= xb.Min.Z { // p is unambiguously behind
-			p.logue(x, "prism unambiguously behind")
 			return false
 		}
 		// Y ? (NB: up is negative)
 		if pb.Max.Y <= xb.Min.Y { // p is above
-			p.logue(x, "prism unambiguously above")
 			return true
 		}
 		if pb.Min.Y >= xb.Max.Y { // p is below
-			p.logue(x, "prism unambiguously below")
 			return false
 		}
-		// Try Z again
+		// The hexagon special
 		if pb.Min.Z+8 >= xb.Max.Z {
-			p.logue(x, "prism midsection after max Z")
 			return true
 		}
 		if pb.Min.Z+8 <= xb.Min.Z {
-			p.logue(x, "prism midsection before min Z")
 			return false
 		}
 	case zpositioner:
-		p.logue(x, "zpositioner test??")
 		return pb.Min.Z > int(d.zposition())
 	}
-	p.logue(x, "no tests at all???")
 	return false
 }
 
