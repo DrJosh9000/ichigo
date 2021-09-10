@@ -90,23 +90,6 @@ func (m *PrismMap) CollidesWith(b geom.Box) bool {
 			}
 		}
 	}
-
-	/*
-		// Here's the test-every-prism approach
-		for pos := range m.Map {
-			// Map it back to worldspace to get a bounding box for the prism
-			wp := m.PosToWorld.Apply(pos)
-			cb := Box{Min: wp, Max: wp.Add(m.PrismSize)}
-			if !b.Overlaps(cb) {
-				continue
-			}
-			// Take into account the prism shape
-			r := b.XZ().Sub(wp.XZ())
-			if geom.PolygonRectOverlap(m.PrismTop, r) {
-				return true
-			}
-		}
-	*/
 	return false
 }
 
