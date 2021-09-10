@@ -7,7 +7,10 @@ import (
 )
 
 // Ensure Actor satisfies interfaces.
-var _ Prepper = &Actor{}
+var _ interface {
+	BoundingBoxer
+	Prepper
+} = &Actor{}
 
 func init() {
 	gob.Register(&Actor{})
@@ -26,6 +29,7 @@ type Actor struct {
 	game *Game
 }
 
+// BoundingBox returns the box Bounds.Add(Pos).
 func (a *Actor) BoundingBox() geom.Box {
 	return a.Bounds.Add(a.Pos)
 }

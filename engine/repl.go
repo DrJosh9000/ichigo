@@ -40,6 +40,8 @@ func (g *Game) REPL(src io.Reader, dst io.Writer, assets fs.FS) error {
 			g.cmdHide(dst, argv)
 		case "show":
 			g.cmdShow(dst, argv)
+		case "print":
+			g.cmdPrint(dst, argv)
 		}
 		fmt.Fprint(dst, prompt)
 	}
@@ -183,4 +185,12 @@ func (g *Game) cmdShow(dst io.Writer, argv []string) {
 		return
 	}
 	h.Show()
+}
+
+func (g *Game) cmdPrint(dst io.Writer, argv []string) {
+	c := g.cmdutilComponentArg1(dst, argv)
+	if c == nil {
+		return
+	}
+	fmt.Fprintf(dst, "%#v\n", c)
 }

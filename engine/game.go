@@ -7,7 +7,6 @@ import (
 	"image"
 	"io/fs"
 	"log"
-	"math"
 	"reflect"
 	"sort"
 	"sync"
@@ -180,7 +179,7 @@ func (g *Game) Update() error {
 	sort.Stable(g.drawList)
 	// Truncate tombstones from the end.
 	for i := len(g.drawList) - 1; i >= 0; i-- {
-		if g.drawList[i] == (tombstone{}) {
+		if g.drawList[i] == (Tombstone{}) {
 			g.drawList = g.drawList[:i]
 		}
 	}
@@ -408,7 +407,7 @@ func (g *Game) unregister(component interface{}) {
 	// unregister from g.drawList
 	for i, d := range g.drawList {
 		if d == component {
-			g.drawList[i] = tombstone{}
+			g.drawList[i] = Tombstone{}
 		}
 	}
 
@@ -425,25 +424,23 @@ type abKey struct {
 	behaviour reflect.Type
 }
 
-var _ Drawer = tombstone{}
+var _ Drawer = Tombstone{}
 
-type tombstone struct{}
+type Tombstone struct{}
 
-func (tombstone) Draw(*ebiten.Image, *ebiten.DrawImageOptions) {}
+func (Tombstone) Draw(*ebiten.Image, *ebiten.DrawImageOptions) {}
 
-func (tombstone) DrawOrder() float64 { return math.Inf(1) }
+func (Tombstone) DrawAfter(x Drawer) bool {
+	return x != Tombstone{}
+}
 
 type drawList []Drawer
 
-func (d drawList) Less(i, j int) bool {
-	return d[i].DrawOrder() < d[j].DrawOrder()
-}
+func (d drawList) Less(i, j int) bool { return d[j].DrawAfter(d[i]) }
+func (d drawList) Len() int           { return len(d) }
+func (d drawList) Swap(i, j int)      { d[i], d[j] = d[j], d[i] }
 
-func (d drawList) Len() int      { return len(d) }
-func (d drawList) Swap(i, j int) { d[i], d[j] = d[j], d[i] }
-
-// ConcatOpts returns the combined options (as though a was applied and then
-// b).
+// ConcatOpts returns the combined options (as though a was applied and then b).
 func ConcatOpts(a, b ebiten.DrawImageOptions) ebiten.DrawImageOptions {
 	a.ColorM.Concat(b.ColorM)
 	a.GeoM.Concat(b.GeoM)

@@ -54,9 +54,13 @@ func PolygonRectOverlap(convex []image.Point, rect image.Rectangle) bool {
 	if PolygonContains(convex, rect.Min) {
 		return true
 	}
-
 	// Reduced Max (to the inclusive bound).
 	rmax := rect.Max.Sub(image.Pt(1, 1))
+	// Since we went to the trouble of computing another point...
+	// TODO: this shouldn't be necessary
+	if PolygonContains(convex, rmax) {
+		return true
+	}
 
 	// Only remaining cases involve line intersection between the rect and poly
 	// having eliminated the possibility that one is entirely within another.

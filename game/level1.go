@@ -15,23 +15,22 @@ func Level1() *engine.Scene {
 		Bounds: engine.Bounds(image.Rect(-32, -32, 320+32, 240+32)),
 		Components: []interface{}{
 			&engine.Fill{
-				ID:     "bg_fill",
-				Color:  color.Gray{100},
-				ZOrder: -1000,
+				ID:        "bg_fill",
+				Color:     color.Gray{100},
+				ZPosition: -1000,
 			},
 			&engine.Parallax{
 				CameraID: "game_camera",
 				Child: &engine.Billboard{
-					ID:     "bg_image",
-					ZOrder: -900,
-					Pos:    image.Pt(-160, -120),
-					Src:    engine.ImageRef{Path: "assets/space.png"},
+					ID:        "bg_image",
+					ZPosition: -900,
+					Pos:       image.Pt(-160, -120),
+					Src:       engine.ImageRef{Path: "assets/space.png"},
 				},
 				Factor: 0.5,
 			},
 			&engine.PrismMap{
 				ID: "hexagons",
-				//DrawOrderBias: image.Pt(0, -1), // draw higher Y after lower Y
 				PosToWorld: geom.IntMatrix3x4{
 					// For each tile in the X direction, go right by 24 and
 					// forward by 8, etc

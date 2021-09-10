@@ -92,7 +92,7 @@ type WallUnit struct {
 	Disabled
 	Hidden
 	Tile Tile // chooses which cell in wall.Sheet to draw
-	ZOrder
+	ZPosition
 
 	pos  image.Point // tilespace coordinates
 	wall *Wall

@@ -26,7 +26,7 @@ type Billboard struct {
 	Hidden
 	Pos image.Point
 	Src ImageRef
-	ZOrder
+	ZPosition
 }
 
 // Draw draws the image.

@@ -17,7 +17,7 @@ var (
 )
 
 type scener interface {
-	Bounder
+	BoundingRecter
 	Disabler
 	Hider
 	Identifier

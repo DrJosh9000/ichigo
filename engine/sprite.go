@@ -10,6 +10,7 @@ import (
 
 // Ensure Sprite satisfies interfaces.
 var _ interface {
+	BoundingBoxer
 	Drawer
 	Scanner
 	Transformer
@@ -30,14 +31,42 @@ type Sprite struct {
 	anim *Anim
 }
 
+// BoundingBox forwards the call to Actor.
+func (s *Sprite) BoundingBox() geom.Box { return s.Actor.BoundingBox() }
+
 // Draw draws the current cell to the screen.
 func (s *Sprite) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	screen.DrawImage(s.Sheet.SubImage(s.anim.Cell()), opts)
 }
 
-// DrawOrder returns the projected draw order.
-func (s *Sprite) DrawOrder() float64 {
-	return s.Actor.game.Projection.DrawOrder(s.Actor.Pos)
+// DrawAfter reports if the sprite must be drawn after x.
+func (s *Sprite) DrawAfter(x Drawer) bool {
+	sb := s.BoundingBox()
+	switch d := x.(type) {
+	case BoundingBoxer:
+		xb := d.BoundingBox()
+		/*// No X overlap - no comparison needed
+		if sb.Max.X <= xb.Min.X || sb.Min.X >= xb.Max.X {
+			return false
+		}*/
+		// Z ?
+		if sb.Min.Z >= xb.Max.Z { // s is unambiguously in front
+			return true
+		}
+		if sb.Max.Z <= xb.Min.Z { // s is unambiguously behind
+			return false
+		}
+		// Y ? (NB: up is negative)
+		if sb.Max.Y <= xb.Min.Y { // s is unambiguously above
+			return true
+		}
+		if sb.Min.Y >= xb.Max.Y { // s is unambiguously below
+			return false
+		}
+	case zpositioner:
+		return sb.Min.Z > int(d.zposition())
+	}
+	return false
 }
 
 // Scan returns the Actor and the Sheet.

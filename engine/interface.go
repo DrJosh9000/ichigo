@@ -13,22 +13,24 @@ import (
 var (
 	// TypeOf(pointer to interface).Elem() is "idiomatic" -
 	// see https://pkg.go.dev/reflect#example-TypeOf
-	BounderType     = reflect.TypeOf((*Bounder)(nil)).Elem()
-	ColliderType    = reflect.TypeOf((*Collider)(nil)).Elem()
-	DisablerType    = reflect.TypeOf((*Disabler)(nil)).Elem()
-	DrawerType      = reflect.TypeOf((*Drawer)(nil)).Elem()
-	HiderType       = reflect.TypeOf((*Hider)(nil)).Elem()
-	IdentifierType  = reflect.TypeOf((*Identifier)(nil)).Elem()
-	LoaderType      = reflect.TypeOf((*Loader)(nil)).Elem()
-	PrepperType     = reflect.TypeOf((*Prepper)(nil)).Elem()
-	ScannerType     = reflect.TypeOf((*Scanner)(nil)).Elem()
-	SaverType       = reflect.TypeOf((*Saver)(nil)).Elem()
-	TransformerType = reflect.TypeOf((*Transformer)(nil)).Elem()
-	UpdaterType     = reflect.TypeOf((*Updater)(nil)).Elem()
+	BoundingRecterType = reflect.TypeOf((*BoundingRecter)(nil)).Elem()
+	BoundingBoxerType  = reflect.TypeOf((*BoundingBoxer)(nil)).Elem()
+	ColliderType       = reflect.TypeOf((*Collider)(nil)).Elem()
+	DisablerType       = reflect.TypeOf((*Disabler)(nil)).Elem()
+	DrawerType         = reflect.TypeOf((*Drawer)(nil)).Elem()
+	HiderType          = reflect.TypeOf((*Hider)(nil)).Elem()
+	IdentifierType     = reflect.TypeOf((*Identifier)(nil)).Elem()
+	LoaderType         = reflect.TypeOf((*Loader)(nil)).Elem()
+	PrepperType        = reflect.TypeOf((*Prepper)(nil)).Elem()
+	ScannerType        = reflect.TypeOf((*Scanner)(nil)).Elem()
+	SaverType          = reflect.TypeOf((*Saver)(nil)).Elem()
+	TransformerType    = reflect.TypeOf((*Transformer)(nil)).Elem()
+	UpdaterType        = reflect.TypeOf((*Updater)(nil)).Elem()
 
 	// Behaviours lists all the behaviours that can be queried with Game.Query.
 	Behaviours = []reflect.Type{
-		BounderType,
+		BoundingRecterType,
+		BoundingBoxerType,
 		ColliderType,
 		DisablerType,
 		DrawerType,
@@ -43,9 +45,14 @@ var (
 	}
 )
 
-// Bounder components have a bounding rectangle.
-type Bounder interface {
+// BoundingRecter components have a bounding rectangle.
+type BoundingRecter interface {
 	BoundingRect() image.Rectangle
+}
+
+// BoundingBoxer components have a bounding box.
+type BoundingBoxer interface {
+	BoundingBox() geom.Box
 }
 
 // Collider components have tangible form.
@@ -65,7 +72,7 @@ type Disabler interface {
 // passed to Game.Register or returned from Scan).
 type Drawer interface {
 	Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions)
-	DrawOrder() float64
+	DrawAfter(x Drawer) bool
 }
 
 // Hider components can be hidden.

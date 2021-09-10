@@ -39,7 +39,7 @@ type Camera struct {
 // for the bounds of the child component (if available).
 func (c *Camera) PointAt(centre geom.Int3, zoom float64) {
 	// Special sauce: if Child has a BoundingRect, make some adjustments
-	bnd, ok := c.Child.(Bounder)
+	bnd, ok := c.Child.(BoundingRecter)
 	if !ok {
 		c.Centre = c.game.Projection.Project(centre)
 		c.Zoom = zoom

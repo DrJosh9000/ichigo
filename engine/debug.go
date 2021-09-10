@@ -4,7 +4,6 @@ import (
 	"encoding/gob"
 	"fmt"
 	"image"
-	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -41,9 +40,9 @@ func (d *DebugToast) Draw(screen *ebiten.Image, _ *ebiten.DrawImageOptions) {
 	ebitenutil.DebugPrintAt(screen, d.Text, d.Pos.X, d.Pos.Y)
 }
 
-func (d *DebugToast) DrawOrder() float64 {
+func (DebugToast) DrawAfter(x Drawer) bool {
 	// Always draw on top
-	return math.MaxFloat64
+	return x != Tombstone{}
 }
 
 func (d *DebugToast) Toast(text string) {
@@ -68,7 +67,7 @@ func (p PerfDisplay) Draw(screen *ebiten.Image, _ *ebiten.DrawImageOptions) {
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f  FPS: %0.2f", ebiten.CurrentTPS(), ebiten.CurrentFPS()))
 }
 
-func (PerfDisplay) DrawOrder() float64 {
+func (PerfDisplay) DrawAfter(x Drawer) bool {
 	// Always draw on top
-	return math.MaxFloat64
+	return x != Tombstone{}
 }

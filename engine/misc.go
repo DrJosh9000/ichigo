@@ -40,8 +40,22 @@ func (h *Hidden) Hide() { *h = true }
 // Show sets h to false.
 func (h *Hidden) Show() { *h = false }
 
-// ZOrder implements DrawOrder (in Drawer) directly (as a numeric value).
-type ZOrder float64
+// ZPosition implements DrawAfter and DrawPosition as a simple Z coordinate.
+type ZPosition int
 
-// DrawOrder returns z.
-func (z ZOrder) DrawOrder() float64 { return float64(z) }
+// DrawAfter reports if z > x.Z.
+func (z ZPosition) DrawAfter(x Drawer) bool {
+	switch d := x.(type) {
+	case BoundingBoxer:
+		return int(z) > d.BoundingBox().Max.Z
+	case zpositioner:
+		return z.zposition() > d.zposition()
+	}
+	return false
+}
+
+func (z ZPosition) zposition() int { return int(z) }
+
+type zpositioner interface {
+	zposition() int
+}

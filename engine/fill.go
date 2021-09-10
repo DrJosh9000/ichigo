@@ -25,7 +25,7 @@ type Fill struct {
 	ID
 	Color color.Color
 	Hidden
-	ZOrder
+	ZPosition
 }
 
 func (f *Fill) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
