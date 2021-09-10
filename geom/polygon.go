@@ -1,13 +1,40 @@
 package geom
 
-import "image"
+import (
+	"image"
+	"math"
+)
 
-// PolygonContains reports if a polygon contains a point. The polygon must be in
-// clockwise order if +Y is pointing upwards, or anticlockwise if +Y is pointing
-// downwards.
-func PolygonContains(polygon []image.Point, p image.Point) bool {
-	for i, q := range polygon {
-		r := polygon[(i+1)%len(polygon)]
+// PolygonExtrema returns the most northerly, easterly, southerly, and westerly
+// points (north is in the -Y direction, east is in the +X direction).
+func PolygonExtrema(polygon []image.Point) (e, n, w, s image.Point) {
+	e.X = math.MinInt
+	n.Y = math.MaxInt
+	w.X = math.MaxInt
+	s.Y = math.MinInt
+	for _, p := range polygon {
+		if p.X > e.X {
+			e = p
+		}
+		if p.X < w.X {
+			w = p
+		}
+		if p.Y > s.Y {
+			s = p
+		}
+		if p.Y < n.Y {
+			n = p
+		}
+	}
+	return e, n, w, s
+}
+
+// PolygonContains reports if a convex polygon contains a point. The polygon
+// must be in clockwise order if +Y is pointing upwards, or anticlockwise if +Y
+// is pointing downwards.
+func PolygonContains(convex []image.Point, p image.Point) bool {
+	for i, q := range convex {
+		r := convex[(i+1)%len(convex)]
 		// ∆(p q r) should have positive signed area
 		q, r = q.Sub(p), r.Sub(p)
 		if q.X*r.Y > r.X*q.Y {
@@ -17,14 +44,14 @@ func PolygonContains(polygon []image.Point, p image.Point) bool {
 	return true
 }
 
-// PolygonRectOverlap reports if a polygon overlaps a rectangle.
-func PolygonRectOverlap(polygon []image.Point, rect image.Rectangle) bool {
-	if polygon[0].In(rect) {
+// PolygonRectOverlap reports if a convex polygon overlaps a rectangle.
+func PolygonRectOverlap(convex []image.Point, rect image.Rectangle) bool {
+	if convex[0].In(rect) {
 		return true
 	}
 
 	// Check if any vertex of the rect is inside the polygon.
-	if PolygonContains(polygon, rect.Min) {
+	if PolygonContains(convex, rect.Min) {
 		return true
 	}
 
@@ -37,8 +64,8 @@ func PolygonRectOverlap(polygon []image.Point, rect image.Rectangle) bool {
 	// Since rect is an axis-aligned rectangle, we only need vertical and
 	// horizontal line intersection tests.
 	// Walk each edge of polygon.
-	for i, p := range polygon {
-		q := polygon[(i+1)%len(polygon)]
+	for i, p := range convex {
+		q := convex[(i+1)%len(convex)]
 		// Pretend the edge is a rectangle. Exclude those that don't overlap.
 		if !rect.Overlaps(image.Rectangle{p, q}.Canon()) {
 			continue
