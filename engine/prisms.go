@@ -148,15 +148,15 @@ func (p *Prism) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 // DrawAfter reports if the prism should be drawn after x.
 func (p *Prism) DrawAfter(x Drawer) bool {
 	pb := p.BoundingBox()
-	switch d := x.(type) {
+	switch x := x.(type) {
 	case *Prism:
 		// Fast path for other prisms
-		if p.pos.Z == d.pos.Z {
-			return p.pos.Y < d.pos.Y
+		if p.pos.Z == x.pos.Z {
+			return p.pos.Y < x.pos.Y
 		}
-		return p.pos.Z > d.pos.Z
+		return p.pos.Z > x.pos.Z
 	case BoundingBoxer:
-		xb := d.BoundingBox()
+		xb := x.BoundingBox()
 		if pb.Max.Z <= xb.Min.Z { // p is behind x
 			return false
 		}
@@ -183,8 +183,8 @@ func (p *Prism) DrawAfter(x Drawer) bool {
 			return true
 		}
 
-	case zpositioner:
-		return pb.Min.Z > int(d.zposition()) // p is after x
+	case ZPositioner:
+		return pb.Min.Z > int(x.ZPos()) // p is after x
 	}
 	return false
 }
@@ -192,15 +192,15 @@ func (p *Prism) DrawAfter(x Drawer) bool {
 // DrawBefore reports if the prism should be drawn before x.
 func (p *Prism) DrawBefore(x Drawer) bool {
 	pb := p.BoundingBox()
-	switch d := x.(type) {
+	switch x := x.(type) {
 	case *Prism:
 		// Fast path for other prisms
-		if p.pos.Z == d.pos.Z {
-			return p.pos.Y > d.pos.Y
+		if p.pos.Z == x.pos.Z {
+			return p.pos.Y > x.pos.Y
 		}
-		return p.pos.Z < d.pos.Z
+		return p.pos.Z < x.pos.Z
 	case BoundingBoxer:
-		xb := d.BoundingBox()
+		xb := x.BoundingBox()
 		if pb.Min.Z >= xb.Max.Z { // p is in front of x
 			return false
 		}
@@ -225,8 +225,8 @@ func (p *Prism) DrawBefore(x Drawer) bool {
 		if pb.Min.Z+threshold <= xb.Min.Z { // x is in front of the front half of p
 			return true
 		}
-	case zpositioner:
-		return pb.Max.Z < int(d.zposition()) // p is before x
+	case ZPositioner:
+		return pb.Max.Z < int(x.ZPos()) // p is before x
 	}
 	return false
 }

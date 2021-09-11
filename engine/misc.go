@@ -40,33 +40,30 @@ func (h *Hidden) Hide() { *h = true }
 // Show sets h to false.
 func (h *Hidden) Show() { *h = false }
 
-// ZPosition implements DrawAfter and DrawPosition as a simple Z coordinate.
+// ZPosition implements DrawAfter and DrawBefore using only Z information.
 type ZPosition int
 
 // DrawAfter reports if z >= x.Max.Z.
 func (z ZPosition) DrawAfter(x Drawer) bool {
-	switch d := x.(type) {
+	switch x := x.(type) {
 	case BoundingBoxer:
-		return int(z) >= d.BoundingBox().Max.Z
-	case zpositioner:
-		return z.zposition() > d.zposition()
+		return int(z) >= x.BoundingBox().Max.Z
+	case ZPositioner:
+		return z.ZPos() > x.ZPos()
 	}
 	return false
 }
 
 // DrawBefore reports if z < x.Min.Z.
 func (z ZPosition) DrawBefore(x Drawer) bool {
-	switch d := x.(type) {
+	switch x := x.(type) {
 	case BoundingBoxer:
-		return int(z) < d.BoundingBox().Min.Z
-	case zpositioner:
-		return z.zposition() < d.zposition()
+		return int(z) < x.BoundingBox().Min.Z
+	case ZPositioner:
+		return z.ZPos() < x.ZPos()
 	}
 	return false
 }
 
-func (z ZPosition) zposition() int { return int(z) }
-
-type zpositioner interface {
-	zposition() int
-}
+// ZPos returns itself.
+func (z ZPosition) ZPos() int { return int(z) }

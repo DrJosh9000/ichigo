@@ -127,3 +127,11 @@ type Transformer interface {
 type Updater interface {
 	Update() error
 }
+
+// ZPositioner components opt into a simpler method of determining draw order
+// than DrawAfter/DrawBefore. Drawer implementations should handle the
+// ZPositioner case as though the component were a flat infinite plane given by
+// z = ZPos().
+type ZPositioner interface {
+	ZPos() int
+}

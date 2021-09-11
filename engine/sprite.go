@@ -42,9 +42,9 @@ func (s *Sprite) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 // DrawAfter reports if the sprite should be drawn after x.
 func (s *Sprite) DrawAfter(x Drawer) bool {
 	sb := s.BoundingBox()
-	switch d := x.(type) {
+	switch x := x.(type) {
 	case BoundingBoxer:
-		xb := d.BoundingBox()
+		xb := x.BoundingBox()
 		if sb.Max.Z <= xb.Min.Z { // s is behind x
 			return false
 		}
@@ -57,8 +57,8 @@ func (s *Sprite) DrawAfter(x Drawer) bool {
 		if sb.Max.Y <= xb.Min.Y { // s is above x
 			return true
 		}
-	case zpositioner:
-		return sb.Min.Z > int(d.zposition()) // s is after
+	case ZPositioner:
+		return sb.Min.Z > int(x.ZPos()) // s is after
 	}
 	return false
 }
@@ -66,9 +66,9 @@ func (s *Sprite) DrawAfter(x Drawer) bool {
 // DrawBefore reports if the sprite should be drawn before x.
 func (s *Sprite) DrawBefore(x Drawer) bool {
 	sb := s.BoundingBox()
-	switch d := x.(type) {
+	switch x := x.(type) {
 	case BoundingBoxer:
-		xb := d.BoundingBox()
+		xb := x.BoundingBox()
 		if sb.Min.Z >= xb.Max.Z { // s is in front of x
 			return false
 		}
@@ -81,8 +81,8 @@ func (s *Sprite) DrawBefore(x Drawer) bool {
 		if sb.Min.Y >= xb.Max.Y { // s is below x
 			return true
 		}
-	case zpositioner:
-		return sb.Max.Z < int(d.zposition()) // s is before
+	case ZPositioner:
+		return sb.Max.Z < int(x.ZPos()) // s is before
 	}
 	return false
 }
