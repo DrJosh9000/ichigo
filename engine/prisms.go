@@ -46,6 +46,7 @@ type PrismMap struct {
 
 	game      *Game
 	pwinverse geom.RatMatrix3
+	topext    [4]image.Point
 }
 
 // CollidesWith checks if the box collides with any prism.
@@ -106,6 +107,7 @@ func (m *PrismMap) Prepare(g *Game) error {
 		p.pos = m.PosToWorld.Apply(v)
 		p.m = m
 	}
+	m.topext = geom.PolygonExtrema(m.PrismTop)
 	return nil
 }
 
@@ -148,6 +150,7 @@ func (p *Prism) DrawAfter(x Drawer) bool {
 	pb := p.BoundingBox()
 	switch d := x.(type) {
 	case *Prism:
+		// Fast path for other prisms
 		if p.pos.Z == d.pos.Z {
 			return p.pos.Y < d.pos.Y
 		}
@@ -155,34 +158,23 @@ func (p *Prism) DrawAfter(x Drawer) bool {
 	case BoundingBoxer:
 		xb := d.BoundingBox()
 		if pb.Max.Z <= xb.Min.Z { // p is behind x
-			/*if _, ok := x.(*Sprite); ok && pb.Min.Y < 0 {
-				log.Print("p.DrawAfter: prism is behind sprite")
-			}*/
 			return false
 		}
 		if pb.Min.Z >= xb.Max.Z { // p is in front of x
-			/*if _, ok := x.(*Sprite); ok && pb.Min.Y < 0 {
-				log.Print("p.DrawAfter: prism is in front of sprite")
-			}*/
 			return true
 		}
 		if pb.Min.Y >= xb.Max.Y { // p is below x
-			/*if _, ok := x.(*Sprite); ok && pb.Min.Y < 0 {
-				log.Print("p.DrawAfter: prism is below sprite")
-			}*/
 			return false
 		}
 		if pb.Max.Y <= xb.Min.Y { // p is above x
-			/*if _, ok := x.(*Sprite); ok && pb.Min.Y < 0 {
-				log.Print("p.DrawAfter: prism is above sprite")
-			}*/
 			return true
 		}
+
 		// The hexagon special
-		if pb.Min.Z+8 <= xb.Min.Z {
+		if pb.Min.Z+8 <= xb.Min.Z { // x is in front of the front half of p
 			return false
 		}
-		if pb.Min.Z+8 >= xb.Max.Z {
+		if pb.Min.Z+8 >= xb.Max.Z { // x is behind the front half of p
 			return true
 		}
 
@@ -197,6 +189,7 @@ func (p *Prism) DrawBefore(x Drawer) bool {
 	pb := p.BoundingBox()
 	switch d := x.(type) {
 	case *Prism:
+		// Fast path for other prisms
 		if p.pos.Z == d.pos.Z {
 			return p.pos.Y > d.pos.Y
 		}
@@ -204,34 +197,22 @@ func (p *Prism) DrawBefore(x Drawer) bool {
 	case BoundingBoxer:
 		xb := d.BoundingBox()
 		if pb.Min.Z >= xb.Max.Z { // p is in front of x
-			/*if _, ok := x.(*Sprite); ok && pb.Min.Y < 0 {
-				log.Print("p.DrawBefore: prism is in front of sprite")
-			}*/
 			return false
 		}
 		if pb.Max.Z <= xb.Min.Z { // p is behind x
-			/*if _, ok := x.(*Sprite); ok && pb.Min.Y < 0 {
-				log.Print("p.DrawBefore: prism is behind sprite")
-			}*/
 			return true
 		}
 		if pb.Max.Y <= xb.Min.Y { // p is above x
-			/*if pb.Min.Y < 0 {
-				log.Print("p.DrawBefore: prism is above sprite")
-			}*/
 			return false
 		}
 		if pb.Min.Y >= xb.Max.Y { // p is below x
-			/*if pb.Min.Y < 0 {
-				log.Print("p.DrawBefore: prism is below sprite")
-			}*/
 			return true
 		}
 		// The hexagon special
-		if pb.Min.Z+8 >= xb.Max.Z {
+		if pb.Min.Z+8 >= xb.Max.Z { // x is behind the front half of p
 			return false
 		}
-		if pb.Min.Z+8 <= xb.Min.Z {
+		if pb.Min.Z+8 <= xb.Min.Z { // x is in front of the front half of p
 			return true
 		}
 	case zpositioner:

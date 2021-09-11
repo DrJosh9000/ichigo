@@ -99,7 +99,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			}
 			// p is not hidden, so compute its cumulative opts.
 			if tf, ok := p.(Transformer); ok {
-				st.opts = ConcatOpts(tf.Transform(), st.opts)
+				st.opts = concatOpts(tf.Transform(), st.opts)
 			}
 			accum[p] = st
 		}
@@ -176,11 +176,10 @@ func (g *Game) Update() error {
 	}
 
 	// Sort the draw list (on every frame - this isn't as bad as it sounds)
-	//sort.Stable(g.drawList)
-	sort.Sort(g.drawList)
+	sort.Stable(g.drawList)
 	// Truncate tombstones from the end.
 	for i := len(g.drawList) - 1; i >= 0; i-- {
-		if g.drawList[i] == (Tombstone{}) {
+		if g.drawList[i] == (tombstone{}) {
 			g.drawList = g.drawList[:i]
 		}
 	}
@@ -408,7 +407,7 @@ func (g *Game) unregister(component interface{}) {
 	// unregister from g.drawList
 	for i, d := range g.drawList {
 		if d == component {
-			g.drawList[i] = Tombstone{}
+			g.drawList[i] = tombstone{}
 		}
 	}
 
@@ -425,14 +424,14 @@ type abKey struct {
 	behaviour reflect.Type
 }
 
-var _ Drawer = Tombstone{}
+var _ Drawer = tombstone{}
 
-type Tombstone struct{}
+type tombstone struct{}
 
-func (Tombstone) Draw(*ebiten.Image, *ebiten.DrawImageOptions) {}
+func (tombstone) Draw(*ebiten.Image, *ebiten.DrawImageOptions) {}
 
-func (Tombstone) DrawAfter(x Drawer) bool { return x != Tombstone{} }
-func (Tombstone) DrawBefore(Drawer) bool  { return false }
+func (tombstone) DrawAfter(x Drawer) bool { return x != tombstone{} }
+func (tombstone) DrawBefore(Drawer) bool  { return false }
 
 type drawList []Drawer
 
@@ -442,8 +441,8 @@ func (d drawList) Less(i, j int) bool {
 func (d drawList) Len() int      { return len(d) }
 func (d drawList) Swap(i, j int) { d[i], d[j] = d[j], d[i] }
 
-// ConcatOpts returns the combined options (as though a was applied and then b).
-func ConcatOpts(a, b ebiten.DrawImageOptions) ebiten.DrawImageOptions {
+// concatOpts returns the combined options (as though a was applied and then b).
+func concatOpts(a, b ebiten.DrawImageOptions) ebiten.DrawImageOptions {
 	a.ColorM.Concat(b.ColorM)
 	a.GeoM.Concat(b.GeoM)
 	if b.CompositeMode != 0 {

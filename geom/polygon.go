@@ -5,9 +5,18 @@ import (
 	"math"
 )
 
-// PolygonExtrema returns the most northerly, easterly, southerly, and westerly
-// points (north is in the -Y direction, east is in the +X direction).
-func PolygonExtrema(polygon []image.Point) (e, n, w, s image.Point) {
+const (
+	East = iota
+	North
+	West
+	South
+)
+
+// PolygonExtrema returns the most easterly, northerly, westerly, and southerly
+// points (north is in the -Y direction, east is in the +X direction, etc). If
+// there are multiple points furthest in any direction, the first one is used.
+func PolygonExtrema(polygon []image.Point) [4]image.Point {
+	var e, n, w, s image.Point
 	e.X = math.MinInt
 	n.Y = math.MaxInt
 	w.X = math.MaxInt
@@ -26,7 +35,7 @@ func PolygonExtrema(polygon []image.Point) (e, n, w, s image.Point) {
 			n = p
 		}
 	}
-	return e, n, w, s
+	return [4]image.Point{East: e, North: n, West: w, South: s}
 }
 
 // PolygonContains reports if a convex polygon contains a point. The polygon

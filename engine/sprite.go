@@ -46,27 +46,15 @@ func (s *Sprite) DrawAfter(x Drawer) bool {
 	case BoundingBoxer:
 		xb := d.BoundingBox()
 		if sb.Max.Z <= xb.Min.Z { // s is behind x
-			/*if xb.Min.Y < 0 {
-				log.Print("s.DrawAfter: sprite is behind prism")
-			}*/
 			return false
 		}
 		if sb.Min.Z >= xb.Max.Z { // s is in front of x
-			/*if xb.Min.Y < 0 {
-				log.Print("s.DrawAfter: sprite is in front of prism")
-			}*/
 			return true
 		}
 		if sb.Min.Y >= xb.Max.Y { // s is below x
-			/*if xb.Min.Y < 0 {
-				log.Print("s.DrawAfter: sprite is below prism")
-			}*/
 			return false
 		}
 		if sb.Max.Y <= xb.Min.Y { // s is above x
-			/*if xb.Min.Y < 0 {
-				log.Print("s.DrawAfter: sprite is above prism")
-			}*/
 			return true
 		}
 	case zpositioner:
@@ -82,27 +70,15 @@ func (s *Sprite) DrawBefore(x Drawer) bool {
 	case BoundingBoxer:
 		xb := d.BoundingBox()
 		if sb.Min.Z >= xb.Max.Z { // s is in front of x
-			/*if xb.Min.Y < 0 {
-				log.Print("s.DrawBefore: sprite is in front of prism")
-			}*/
 			return false
 		}
 		if sb.Max.Z <= xb.Min.Z { // s is behind x
-			/*if xb.Min.Y < 0 {
-				log.Print("s.DrawBefore: sprite is behind prism")
-			}*/
 			return true
 		}
 		if sb.Max.Y <= xb.Min.Y { // s is above x
-			/*if xb.Min.Y < 0 {
-				log.Print("s.DrawBefore: sprite is above prism")
-			}*/
 			return false
 		}
 		if sb.Min.Y >= xb.Max.Y { // s is below x
-			/*if xb.Min.Y < 0 {
-				log.Print("s.DrawBefore: sprite is below prism")
-			}*/
 			return true
 		}
 	case zpositioner:
