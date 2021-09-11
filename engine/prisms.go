@@ -170,11 +170,16 @@ func (p *Prism) DrawAfter(x Drawer) bool {
 			return true
 		}
 
-		// The hexagon special
-		if pb.Min.Z+8 <= xb.Min.Z { // x is in front of the front half of p
+		// The prism special
+		split := p.m.topext[geom.North].X
+		threshold := p.m.topext[geom.East].Y
+		if xb.Min.X > split {
+			threshold = p.m.topext[geom.West].Y
+		}
+		if pb.Min.Z+threshold <= xb.Min.Z { // x is in front of the front half of p
 			return false
 		}
-		if pb.Min.Z+8 >= xb.Max.Z { // x is behind the front half of p
+		if pb.Min.Z+threshold >= xb.Max.Z { // x is behind the front half of p
 			return true
 		}
 
@@ -208,11 +213,16 @@ func (p *Prism) DrawBefore(x Drawer) bool {
 		if pb.Min.Y >= xb.Max.Y { // p is below x
 			return true
 		}
-		// The hexagon special
-		if pb.Min.Z+8 >= xb.Max.Z { // x is behind the front half of p
+		// The prism special
+		split := p.m.topext[geom.North].X
+		threshold := p.m.topext[geom.East].Y
+		if xb.Min.X > split {
+			threshold = p.m.topext[geom.West].Y
+		}
+		if pb.Min.Z+threshold >= xb.Max.Z { // x is behind the front half of p
 			return false
 		}
-		if pb.Min.Z+8 <= xb.Min.Z { // x is in front of the front half of p
+		if pb.Min.Z+threshold <= xb.Min.Z { // x is in front of the front half of p
 			return true
 		}
 	case zpositioner:
