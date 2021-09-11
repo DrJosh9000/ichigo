@@ -176,7 +176,8 @@ func (g *Game) Update() error {
 	}
 
 	// Sort the draw list (on every frame - this isn't as bad as it sounds)
-	sort.Stable(g.drawList)
+	//sort.Stable(g.drawList)
+	sort.Sort(g.drawList)
 	// Truncate tombstones from the end.
 	for i := len(g.drawList) - 1; i >= 0; i-- {
 		if g.drawList[i] == (Tombstone{}) {
@@ -430,15 +431,16 @@ type Tombstone struct{}
 
 func (Tombstone) Draw(*ebiten.Image, *ebiten.DrawImageOptions) {}
 
-func (Tombstone) DrawAfter(x Drawer) bool {
-	return x != Tombstone{}
-}
+func (Tombstone) DrawAfter(x Drawer) bool { return x != Tombstone{} }
+func (Tombstone) DrawBefore(Drawer) bool  { return false }
 
 type drawList []Drawer
 
-func (d drawList) Less(i, j int) bool { return d[j].DrawAfter(d[i]) }
-func (d drawList) Len() int           { return len(d) }
-func (d drawList) Swap(i, j int)      { d[i], d[j] = d[j], d[i] }
+func (d drawList) Less(i, j int) bool {
+	return d[i].DrawBefore(d[j]) || d[j].DrawAfter(d[i])
+}
+func (d drawList) Len() int      { return len(d) }
+func (d drawList) Swap(i, j int) { d[i], d[j] = d[j], d[i] }
 
 // ConcatOpts returns the combined options (as though a was applied and then b).
 func ConcatOpts(a, b ebiten.DrawImageOptions) ebiten.DrawImageOptions {

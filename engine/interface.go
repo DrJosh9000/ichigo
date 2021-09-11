@@ -71,8 +71,9 @@ type Disabler interface {
 // must call Draw on any internal components not known to the engine (i.e. not
 // passed to Game.Register or returned from Scan).
 type Drawer interface {
-	Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions)
-	DrawAfter(x Drawer) bool
+	Draw(*ebiten.Image, *ebiten.DrawImageOptions)
+	DrawAfter(Drawer) bool
+	DrawBefore(Drawer) bool
 }
 
 // Hider components can be hidden.

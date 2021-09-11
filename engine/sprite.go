@@ -39,35 +39,74 @@ func (s *Sprite) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	screen.DrawImage(s.Sheet.SubImage(s.anim.Cell()), opts)
 }
 
-// DrawAfter reports if the sprite must be drawn after x.
+// DrawAfter reports if the sprite should be drawn after x.
 func (s *Sprite) DrawAfter(x Drawer) bool {
 	sb := s.BoundingBox()
 	switch d := x.(type) {
 	case BoundingBoxer:
 		xb := d.BoundingBox()
-		// Z ?
-		if sb.Min.Z >= xb.Max.Z { // s is unambiguously in front
-			return true
-		}
-		if sb.Max.Z <= xb.Min.Z { // s is unambiguously behind
+		if sb.Max.Z <= xb.Min.Z { // s is behind x
+			/*if xb.Min.Y < 0 {
+				log.Print("s.DrawAfter: sprite is behind prism")
+			}*/
 			return false
 		}
-		// Y ? (NB: up is negative)
-		if sb.Max.Y <= xb.Min.Y { // s is unambiguously above
+		if sb.Min.Z >= xb.Max.Z { // s is in front of x
+			/*if xb.Min.Y < 0 {
+				log.Print("s.DrawAfter: sprite is in front of prism")
+			}*/
 			return true
 		}
-		if sb.Min.Y >= xb.Max.Y { // s is unambiguously below
+		if sb.Min.Y >= xb.Max.Y { // s is below x
+			/*if xb.Min.Y < 0 {
+				log.Print("s.DrawAfter: sprite is below prism")
+			}*/
 			return false
 		}
-		// Hexagon special
-		if sb.Min.Z > xb.Min.Z+8 {
+		if sb.Max.Y <= xb.Min.Y { // s is above x
+			/*if xb.Min.Y < 0 {
+				log.Print("s.DrawAfter: sprite is above prism")
+			}*/
 			return true
-		}
-		if sb.Max.Z < sb.Min.Z+8 {
-			return false
 		}
 	case zpositioner:
-		return sb.Min.Z > int(d.zposition())
+		return sb.Min.Z > int(d.zposition()) // s is after
+	}
+	return false
+}
+
+// DrawBefore reports if the sprite should be drawn before x.
+func (s *Sprite) DrawBefore(x Drawer) bool {
+	sb := s.BoundingBox()
+	switch d := x.(type) {
+	case BoundingBoxer:
+		xb := d.BoundingBox()
+		if sb.Min.Z >= xb.Max.Z { // s is in front of x
+			/*if xb.Min.Y < 0 {
+				log.Print("s.DrawBefore: sprite is in front of prism")
+			}*/
+			return false
+		}
+		if sb.Max.Z <= xb.Min.Z { // s is behind x
+			/*if xb.Min.Y < 0 {
+				log.Print("s.DrawBefore: sprite is behind prism")
+			}*/
+			return true
+		}
+		if sb.Max.Y <= xb.Min.Y { // s is above x
+			/*if xb.Min.Y < 0 {
+				log.Print("s.DrawBefore: sprite is above prism")
+			}*/
+			return false
+		}
+		if sb.Min.Y >= xb.Max.Y { // s is below x
+			/*if xb.Min.Y < 0 {
+				log.Print("s.DrawBefore: sprite is below prism")
+			}*/
+			return true
+		}
+	case zpositioner:
+		return sb.Max.Z < int(d.zposition()) // s is before
 	}
 	return false
 }
