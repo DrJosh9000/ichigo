@@ -40,9 +40,9 @@ func (d *DebugToast) Draw(screen *ebiten.Image, _ *ebiten.DrawImageOptions) {
 	ebitenutil.DebugPrintAt(screen, d.Text, d.Pos.X, d.Pos.Y)
 }
 
-// Draw last, but sort tombstones later.
-func (DebugToast) DrawAfter(x Drawer) bool  { return x != tombstone{} }
-func (DebugToast) DrawBefore(x Drawer) bool { return x == tombstone{} }
+// Draw last.
+func (DebugToast) DrawAfter(Drawer) bool  { return true }
+func (DebugToast) DrawBefore(Drawer) bool { return false }
 
 func (d *DebugToast) Toast(text string) {
 	d.Text = text
@@ -66,6 +66,6 @@ func (p PerfDisplay) Draw(screen *ebiten.Image, _ *ebiten.DrawImageOptions) {
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f  FPS: %0.2f", ebiten.CurrentTPS(), ebiten.CurrentFPS()))
 }
 
-// Draw last, but sort tombstones later.
-func (PerfDisplay) DrawAfter(x Drawer) bool  { return x != tombstone{} }
-func (PerfDisplay) DrawBefore(x Drawer) bool { return x == tombstone{} }
+// Draw last.
+func (PerfDisplay) DrawAfter(Drawer) bool  { return true }
+func (PerfDisplay) DrawBefore(Drawer) bool { return false }
