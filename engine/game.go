@@ -69,7 +69,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		g: {hidden: false},
 	}
 	// Draw everything in g.drawList, where not hidden (itself or any parent)
-	for _, d := range g.drawList {
+	for _, d := range g.drawList.list {
 		// Is d hidden itself?
 		if h, ok := d.(Hider); ok && h.IsHidden() {
 			accum[d] = state{hidden: true}
@@ -178,9 +178,9 @@ func (g *Game) Update() error {
 	// Sort the draw list (on every frame - this isn't as bad as it sounds)
 	sort.Stable(g.drawList)
 	// Truncate tombstones from the end.
-	for i := len(g.drawList) - 1; i >= 0; i-- {
-		if g.drawList[i] == (tombstone{}) {
-			g.drawList = g.drawList[:i]
+	for i := g.drawList.Len() - 1; i >= 0; i-- {
+		if g.drawList.list[i] == (tombstone{}) {
+			g.drawList.list = g.drawList.list[:i]
 		}
 	}
 	return nil
@@ -288,6 +288,7 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	g.dbmu.Lock()
 	g.byID = make(map[string]Identifier)
 	g.byAB = make(map[abKey]map[interface{}]struct{})
+	g.drawList.rev = make(map[Drawer]int)
 	g.par = make(map[interface{}]interface{})
 	if err := PreorderWalk(g, g.register); err != nil {
 		return err
@@ -325,7 +326,7 @@ func (g *Game) Register(component, parent interface{}) error {
 }
 
 func (g *Game) register(component, parent interface{}) error {
-	// register in g.byID if needed. nothing else errors so do this first
+	// register in g.byID if needed
 	if i, ok := component.(Identifier); ok {
 		id := i.Ident()
 		if _, exists := g.byID[id]; exists {
@@ -341,7 +342,12 @@ func (g *Game) register(component, parent interface{}) error {
 
 	// register in g.drawList
 	if d, ok := component.(Drawer); ok {
-		g.drawList = append(g.drawList, d)
+		if _, exists := g.drawList.rev[d]; exists {
+			// already registered
+			return fmt.Errorf("double registration of %v", d)
+		}
+		g.drawList.rev[d] = len(g.drawList.list)
+		g.drawList.list = append(g.drawList.list, d)
 	}
 
 	// register in g.byAB
@@ -405,9 +411,10 @@ func (g *Game) unregister(component interface{}) {
 	delete(g.par, component)
 
 	// unregister from g.drawList
-	for i, d := range g.drawList {
-		if d == component {
-			g.drawList[i] = tombstone{}
+	if d, ok := component.(Drawer); ok {
+		if i, found := g.drawList.rev[d]; found {
+			g.drawList.list[i] = tombstone{}
+			delete(g.drawList.rev, d)
 		}
 	}
 
@@ -433,23 +440,29 @@ func (tombstone) Draw(*ebiten.Image, *ebiten.DrawImageOptions) {}
 func (tombstone) DrawAfter(x Drawer) bool { return x != tombstone{} }
 func (tombstone) DrawBefore(Drawer) bool  { return false }
 
-type drawList []Drawer
+type drawList struct {
+	list []Drawer
+	rev  map[Drawer]int
+}
 
 func (d drawList) Less(i, j int) bool {
 	// Ideally other components wouldn't need to know about tombstones. So
 	// skip evaluating before/after for them.
-	if d[i] == (tombstone{}) {
+	if d.list[i] == (tombstone{}) {
 		// tombstones are not less than anything
 		return false
 	}
-	if d[j] == (tombstone{}) {
+	if d.list[j] == (tombstone{}) {
 		// non-tombstones are less than tombstones
 		return true
 	}
-	return d[i].DrawBefore(d[j]) || d[j].DrawAfter(d[i])
+	return d.list[i].DrawBefore(d.list[j]) || d.list[j].DrawAfter(d.list[i])
 }
-func (d drawList) Len() int      { return len(d) }
-func (d drawList) Swap(i, j int) { d[i], d[j] = d[j], d[i] }
+func (d drawList) Len() int { return len(d.list) }
+func (d drawList) Swap(i, j int) {
+	d.rev[d.list[i]], d.rev[d.list[j]] = j, i
+	d.list[i], d.list[j] = d.list[j], d.list[i]
+}
 
 // concatOpts returns the combined options (as though a was applied and then b).
 func concatOpts(a, b ebiten.DrawImageOptions) ebiten.DrawImageOptions {
