@@ -25,7 +25,7 @@ func init() {
 type Sprite struct {
 	Actor      Actor
 	DrawOffset image.Point
-	Hidden
+	Hides
 	Sheet Sheet
 
 	anim *Anim

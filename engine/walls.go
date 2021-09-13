@@ -89,8 +89,8 @@ func (w *Wall) Transform() (opts ebiten.DrawImageOptions) {
 // WallUnit is a unit in a wall. Unlike a tile in a tilemap, WallUnit is
 // responsible for drawing itself.
 type WallUnit struct {
-	Disabled
-	Hidden
+	Disables
+	Hides
 	Tile Tile // chooses which cell in wall.Sheet to draw
 	ZPosition
 

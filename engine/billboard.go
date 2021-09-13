@@ -23,7 +23,7 @@ func init() {
 // Billboard draws an image at a position.
 type Billboard struct {
 	ID
-	Hidden
+	Hides
 	Pos image.Point
 	Src ImageRef
 	ZPosition

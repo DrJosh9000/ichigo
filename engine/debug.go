@@ -30,7 +30,7 @@ func init() {
 // DebugToast debugprints a string for a while, then disappears.
 type DebugToast struct {
 	ID
-	Hidden
+	Hides
 	Pos   image.Point
 	Timer int // ticks
 	Text  string
@@ -47,11 +47,11 @@ func (DebugToast) DrawBefore(Drawer) bool { return false }
 func (d *DebugToast) Toast(text string) {
 	d.Text = text
 	d.Timer = 120
-	d.Hidden = false
+	d.Hides = false
 }
 
 func (d *DebugToast) Update() error {
-	if d.Hidden = d.Timer <= 0; !d.Hidden {
+	if d.Hides = d.Timer <= 0; !d.Hides {
 		d.Timer--
 	}
 	return nil
@@ -59,7 +59,7 @@ func (d *DebugToast) Update() error {
 
 // PerfDisplay debugprints CurrentTPS and CurrentFPS in the top left.
 type PerfDisplay struct {
-	Hidden
+	Hides
 }
 
 func (p PerfDisplay) Draw(screen *ebiten.Image, _ *ebiten.DrawImageOptions) {

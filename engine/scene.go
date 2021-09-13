@@ -34,8 +34,8 @@ type Scene struct {
 	ID
 	Bounds     // world coordinates
 	Components []interface{}
-	Disabled
-	Hidden
+	Disables
+	Hides
 }
 
 // Scan returns all immediate subcomponents (including the camera, if not nil).

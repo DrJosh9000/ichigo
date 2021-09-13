@@ -37,8 +37,8 @@ func init() {
 // component must be the designated root component - usually a scene of some
 // kind.
 type Game struct {
-	Disabled
-	Hidden
+	Disables
+	Hides
 	ScreenSize image.Point
 	Root       interface{} // typically a *Scene or SceneRef though
 	Projection geom.IntProjection
@@ -53,7 +53,7 @@ type Game struct {
 
 // Draw draws everything.
 func (g *Game) Draw(screen *ebiten.Image) {
-	if g.Hidden {
+	if g.Hidden() {
 		return
 	}
 
@@ -71,7 +71,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// Draw everything in g.drawList, where not hidden (itself or any parent)
 	for _, d := range g.drawList.list {
 		// Is d hidden itself?
-		if h, ok := d.(Hider); ok && h.IsHidden() {
+		if h, ok := d.(Hider); ok && h.Hidden() {
 			accum[d] = state{hidden: true}
 			continue // skip drawing
 		}
@@ -91,7 +91,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			p := stack[l1]
 			stack = stack[:l1]
 			if h, ok := p.(Hider); ok {
-				st.hidden = st.hidden || h.IsHidden()
+				st.hidden = st.hidden || h.Hidden()
 			}
 			if st.hidden {
 				accum[p] = state{hidden: true}
@@ -119,7 +119,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
 
 // Update updates everything.
 func (g *Game) Update() error {
-	if g.Disabled {
+	if g.Disabled() {
 		return nil
 	}
 
@@ -139,7 +139,7 @@ func (g *Game) Update() error {
 		}
 
 		// Is u disabled itself?
-		if d, ok := u.(Disabler); ok && d.IsDisabled() {
+		if d, ok := u.(Disabler); ok && d.Disabled() {
 			accum[u] = true
 			continue
 		}
@@ -160,7 +160,7 @@ func (g *Game) Update() error {
 			p := stack[l1]
 			stack = stack[:l1]
 			if d, ok := p.(Disabler); ok {
-				st = st || d.IsDisabled()
+				st = st || d.Disabled()
 			}
 			accum[p] = st
 		}
@@ -179,9 +179,10 @@ func (g *Game) Update() error {
 	sort.Stable(g.drawList)
 	// Truncate tombstones from the end.
 	for i := g.drawList.Len() - 1; i >= 0; i-- {
-		if g.drawList.list[i] == (tombstone{}) {
-			g.drawList.list = g.drawList.list[:i]
+		if g.drawList.list[i] != (tombstone{}) {
+			break
 		}
+		g.drawList.list = g.drawList.list[:i]
 	}
 	return nil
 }

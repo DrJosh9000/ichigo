@@ -38,8 +38,8 @@ func init() {
 // Tilemap renders a grid of rectangular tiles at equal Z position.
 type Tilemap struct {
 	ID
-	Disabled
-	Hidden
+	Disables
+	Hides
 	Map    map[image.Point]Tile // tilespace coordinate -> tile
 	Ersatz bool                 // disables collisions ("fake wall")
 	Offset image.Point          // world coordinates

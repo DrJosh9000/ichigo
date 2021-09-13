@@ -25,7 +25,7 @@ func init() {
 
 // Awakeman is a bit of a god object for now...
 type Awakeman struct {
-	engine.Disabled
+	engine.Disables
 	Sprite   engine.Sprite
 	CameraID string
 	ToastID  string

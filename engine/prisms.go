@@ -34,8 +34,8 @@ func init() {
 // PrismMap is a generalised 3D tilemap/wallmap/etc.
 type PrismMap struct {
 	ID
-	Disabled
-	Hidden
+	Disables
+	Hides
 	Ersatz     bool
 	Map        map[geom.Int3]*Prism // pos -> prism
 	DrawOffset image.Point          // offset applies to whole map

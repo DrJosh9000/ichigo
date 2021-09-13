@@ -24,7 +24,7 @@ func init() {
 type Fill struct {
 	ID
 	Color color.Color
-	Hidden
+	Hides
 	ZPosition
 }
 

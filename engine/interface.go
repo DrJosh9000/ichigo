@@ -62,7 +62,7 @@ type Collider interface {
 
 // Disabler components can be disabled.
 type Disabler interface {
-	IsDisabled() bool
+	Disabled() bool
 	Disable()
 	Enable()
 }
@@ -78,7 +78,7 @@ type Drawer interface {
 
 // Hider components can be hidden.
 type Hider interface {
-	IsHidden() bool
+	Hidden() bool
 	Hide()
 	Show()
 }

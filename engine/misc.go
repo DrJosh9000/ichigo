@@ -16,29 +16,29 @@ type Bounds image.Rectangle
 // BoundingRect returns b as an image.Rectangle.
 func (b Bounds) BoundingRect() image.Rectangle { return image.Rectangle(b) }
 
-// Disabled implements Disabler directly (as a bool).
-type Disabled bool
+// Disables implements Disabler directly (as a bool).
+type Disables bool
 
-// IsHidden returns h as a bool.
-func (d Disabled) IsDisabled() bool { return bool(d) }
+// Disabled returns d as a bool.
+func (d Disables) Disabled() bool { return bool(d) }
+
+// Disable sets d to true.
+func (d *Disables) Disable() { *d = true }
+
+// Enable sets d to false.
+func (d *Disables) Enable() { *d = false }
+
+// Hides implements Hider directly (as a bool).
+type Hides bool
+
+// Hidden returns h as a bool.
+func (h Hides) Hidden() bool { return bool(h) }
 
 // Hide sets h to true.
-func (d *Disabled) Disable() { *d = true }
+func (h *Hides) Hide() { *h = true }
 
 // Show sets h to false.
-func (d *Disabled) Enable() { *d = false }
-
-// Hidden implements Hider directly (as a bool).
-type Hidden bool
-
-// IsHidden returns h as a bool.
-func (h Hidden) IsHidden() bool { return bool(h) }
-
-// Hide sets h to true.
-func (h *Hidden) Hide() { *h = true }
-
-// Show sets h to false.
-func (h *Hidden) Show() { *h = false }
+func (h *Hides) Show() { *h = false }
 
 // ZPosition implements DrawAfter and DrawBefore using only Z information.
 type ZPosition int
