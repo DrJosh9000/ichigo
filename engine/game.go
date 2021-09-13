@@ -289,6 +289,7 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	g.dbmu.Lock()
 	g.byID = make(map[string]Identifier)
 	g.byAB = make(map[abKey]map[interface{}]struct{})
+	g.drawList.list = nil
 	g.drawList.rev = make(map[Drawer]int)
 	g.par = make(map[interface{}]interface{})
 	if err := PreorderWalk(g, g.register); err != nil {
