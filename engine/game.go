@@ -460,7 +460,9 @@ func (d drawList) Less(i, j int) bool {
 	}
 	return d.list[i].DrawBefore(d.list[j]) || d.list[j].DrawAfter(d.list[i])
 }
+
 func (d drawList) Len() int { return len(d.list) }
+
 func (d drawList) Swap(i, j int) {
 	d.rev[d.list[i]], d.rev[d.list[j]] = j, i
 	d.list[i], d.list[j] = d.list[j], d.list[i]
