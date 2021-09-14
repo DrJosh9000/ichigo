@@ -60,26 +60,26 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// Hiding a parent component should hide the child objects, and the
 	// transform applied to a child should be the cumulative transform of all
 	// parents as well.
-	// accum memoises the results for each component.
+	// cache memoises the results for each component.
 	type state struct {
 		hidden bool
 		opts   ebiten.DrawImageOptions
 	}
-	accum := map[interface{}]state{
+	cache := map[interface{}]state{
 		g: {hidden: false},
 	}
 	// Draw everything in g.drawList, where not hidden (itself or any parent)
 	for _, d := range g.drawList.list {
 		// Is d hidden itself?
 		if h, ok := d.(Hider); ok && h.Hidden() {
-			accum[d] = state{hidden: true}
+			cache[d] = state{hidden: true}
 			continue // skip drawing
 		}
 		// Walk up g.par to find the nearest state in accum.
 		var st state
 		stack := []interface{}{d}
 		for p := g.par[d]; ; p = g.par[p] {
-			if s, found := accum[p]; found {
+			if s, found := cache[p]; found {
 				st = s
 				break
 			}
@@ -94,14 +94,14 @@ func (g *Game) Draw(screen *ebiten.Image) {
 				st.hidden = st.hidden || h.Hidden()
 			}
 			if st.hidden {
-				accum[p] = state{hidden: true}
+				cache[p] = state{hidden: true}
 				continue
 			}
 			// p is not hidden, so compute its cumulative opts.
 			if tf, ok := p.(Transformer); ok {
 				st.opts = concatOpts(tf.Transform(), st.opts)
 			}
-			accum[p] = st
+			cache[p] = st
 		}
 
 		// Skip drawing if hidden.
@@ -125,8 +125,8 @@ func (g *Game) Update() error {
 
 	// Need to do a similar trick for Draw: disabling a parent object should
 	// disable the child objects.
-	// accum memoises the disabled state for each component.
-	accum := map[interface{}]bool{
+	// cache memoises the disabled state for each component.
+	cache := map[interface{}]bool{
 		g: false,
 	}
 
@@ -140,7 +140,7 @@ func (g *Game) Update() error {
 
 		// Is u disabled itself?
 		if d, ok := u.(Disabler); ok && d.Disabled() {
-			accum[u] = true
+			cache[u] = true
 			continue
 		}
 
@@ -148,7 +148,7 @@ func (g *Game) Update() error {
 		var st bool
 		stack := []interface{}{u}
 		for p := g.par[u]; ; p = g.par[p] {
-			if s, found := accum[p]; found {
+			if s, found := cache[p]; found {
 				st = s
 				break
 			}
@@ -162,7 +162,7 @@ func (g *Game) Update() error {
 			if d, ok := p.(Disabler); ok {
 				st = st || d.Disabled()
 			}
-			accum[p] = st
+			cache[p] = st
 		}
 
 		// Skip updating if disabled.
