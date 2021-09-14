@@ -448,14 +448,10 @@ type drawList struct {
 }
 
 func (d drawList) Less(i, j int) bool {
-	// Ideally other components wouldn't need to know about tombstones. So
-	// skip evaluating before/after for them.
 	if d.list[i] == (tombstone{}) {
-		// tombstones are not less than anything
 		return false
 	}
 	if d.list[j] == (tombstone{}) {
-		// non-tombstones are less than tombstones
 		return true
 	}
 	return d.list[i].DrawBefore(d.list[j]) || d.list[j].DrawAfter(d.list[i])
