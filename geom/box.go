@@ -72,12 +72,9 @@ func (b Box) Canon() Box {
 }
 
 // BoundingRect returns an image.Rectangle that bounds the box if it were
-// projected, i.e. Rectangle{Min: π(Min), Max: π(Max)}.
+// projected.
 func (b Box) BoundingRect(π IntProjection) image.Rectangle {
-	return image.Rectangle{
-		Min: π.Project(b.Min),
-		Max: π.Project(b.Max),
-	}
+	return b.Back(π).Union(b.Front(π))
 }
 
 // Back returns an image.Rectangle representing the back of the box, using
