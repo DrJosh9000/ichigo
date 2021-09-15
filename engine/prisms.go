@@ -169,7 +169,6 @@ func (p *Prism) DrawAfter(x Drawer) bool {
 		if pb.Max.Y <= xb.Min.Y { // p is above x
 			return true
 		}
-
 		// The prism special
 		split := p.m.topext[geom.North].X
 		threshold := p.m.topext[geom.East].Y
@@ -225,6 +224,7 @@ func (p *Prism) DrawBefore(x Drawer) bool {
 		if pb.Min.Z+threshold <= xb.Min.Z { // x is in front of the front half of p
 			return true
 		}
+
 	case ZPositioner:
 		return pb.Max.Z < int(x.ZPos()) // p is before x
 	}
