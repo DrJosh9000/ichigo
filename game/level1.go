@@ -22,10 +22,9 @@ func Level1() *engine.Scene {
 			&engine.Parallax{
 				CameraID: "game_camera",
 				Child: &engine.Billboard{
-					ID:        "bg_image",
-					ZPosition: -900,
-					Pos:       image.Pt(-160, -120),
-					Src:       engine.ImageRef{Path: "assets/space.png"},
+					ID:  "bg_image",
+					Pos: geom.Pt3(-160, -120, -1),
+					Src: engine.ImageRef{Path: "assets/space.png"},
 				},
 				Factor: 0.5,
 			},
