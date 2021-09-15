@@ -158,17 +158,19 @@ func (p *Prism) DrawAfter(x Drawer) bool {
 
 	case BoundingBoxer:
 		xb := x.BoundingBox()
-		if pb.Max.Z <= xb.Min.Z { // p is behind x
-			return false
-		}
-		if pb.Min.Z >= xb.Max.Z { // p is in front of x
-			return true
-		}
-		if pb.Min.Y >= xb.Max.Y { // p is below x
-			return false
-		}
-		if pb.Max.Y <= xb.Min.Y { // p is above x
-			return true
+		if false {
+			if pb.Max.Z <= xb.Min.Z { // p is behind x
+				return false
+			}
+			if pb.Min.Z >= xb.Max.Z { // p is in front of x
+				return true
+			}
+			if pb.Min.Y >= xb.Max.Y { // p is below x
+				return false
+			}
+			if pb.Max.Y <= xb.Min.Y { // p is above x
+				return true
+			}
 		}
 		// The prism special
 		split := p.m.topext[geom.North].X
@@ -183,8 +185,8 @@ func (p *Prism) DrawAfter(x Drawer) bool {
 			return true
 		}
 
-	case ZPositioner:
-		return pb.Min.Z > int(x.ZPos()) // p is after x
+		//case ZPositioner:
+		//	return pb.Min.Z > x.ZPos() // p is after x
 	}
 	return false
 }
@@ -202,17 +204,19 @@ func (p *Prism) DrawBefore(x Drawer) bool {
 
 	case BoundingBoxer:
 		xb := x.BoundingBox()
-		if pb.Min.Z >= xb.Max.Z { // p is in front of x
-			return false
-		}
-		if pb.Max.Z <= xb.Min.Z { // p is behind x
-			return true
-		}
-		if pb.Max.Y <= xb.Min.Y { // p is above x
-			return false
-		}
-		if pb.Min.Y >= xb.Max.Y { // p is below x
-			return true
+		if false {
+			if pb.Min.Z >= xb.Max.Z { // p is in front of x
+				return false
+			}
+			if pb.Max.Z <= xb.Min.Z { // p is behind x
+				return true
+			}
+			if pb.Max.Y <= xb.Min.Y { // p is above x
+				return false
+			}
+			if pb.Min.Y >= xb.Max.Y { // p is below x
+				return true
+			}
 		}
 		// The prism special
 		split := p.m.topext[geom.North].X
@@ -227,8 +231,8 @@ func (p *Prism) DrawBefore(x Drawer) bool {
 			return true
 		}
 
-	case ZPositioner:
-		return pb.Max.Z < int(x.ZPos()) // p is before x
+		//case ZPositioner:
+		//	return pb.Max.Z < x.ZPos() // p is before x
 	}
 	return false
 }

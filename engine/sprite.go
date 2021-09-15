@@ -41,48 +41,52 @@ func (s *Sprite) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 
 // DrawAfter reports if the sprite should be drawn after x.
 func (s *Sprite) DrawAfter(x Drawer) bool {
-	sb := s.BoundingBox()
-	switch x := x.(type) {
-	case BoundingBoxer:
-		xb := x.BoundingBox()
-		if sb.Max.Z <= xb.Min.Z { // s is behind x
-			return false
+	if false {
+		sb := s.BoundingBox()
+		switch x := x.(type) {
+		case BoundingBoxer:
+			xb := x.BoundingBox()
+			if sb.Max.Z <= xb.Min.Z { // s is behind x
+				return false
+			}
+			if sb.Min.Z >= xb.Max.Z { // s is in front of x
+				return true
+			}
+			if sb.Min.Y >= xb.Max.Y { // s is below x
+				return false
+			}
+			if sb.Max.Y <= xb.Min.Y { // s is above x
+				return true
+			}
+		case ZPositioner:
+			return sb.Min.Z > x.ZPos() // s is after
 		}
-		if sb.Min.Z >= xb.Max.Z { // s is in front of x
-			return true
-		}
-		if sb.Min.Y >= xb.Max.Y { // s is below x
-			return false
-		}
-		if sb.Max.Y <= xb.Min.Y { // s is above x
-			return true
-		}
-	case ZPositioner:
-		return sb.Min.Z > int(x.ZPos()) // s is after
 	}
 	return false
 }
 
 // DrawBefore reports if the sprite should be drawn before x.
 func (s *Sprite) DrawBefore(x Drawer) bool {
-	sb := s.BoundingBox()
-	switch x := x.(type) {
-	case BoundingBoxer:
-		xb := x.BoundingBox()
-		if sb.Min.Z >= xb.Max.Z { // s is in front of x
-			return false
+	if false {
+		sb := s.BoundingBox()
+		switch x := x.(type) {
+		case BoundingBoxer:
+			xb := x.BoundingBox()
+			if sb.Min.Z >= xb.Max.Z { // s is in front of x
+				return false
+			}
+			if sb.Max.Z <= xb.Min.Z { // s is behind x
+				return true
+			}
+			if sb.Max.Y <= xb.Min.Y { // s is above x
+				return false
+			}
+			if sb.Min.Y >= xb.Max.Y { // s is below x
+				return true
+			}
+		case ZPositioner:
+			return sb.Max.Z < x.ZPos() // s is before
 		}
-		if sb.Max.Z <= xb.Min.Z { // s is behind x
-			return true
-		}
-		if sb.Max.Y <= xb.Min.Y { // s is above x
-			return false
-		}
-		if sb.Min.Y >= xb.Max.Y { // s is below x
-			return true
-		}
-	case ZPositioner:
-		return sb.Max.Z < int(x.ZPos()) // s is before
 	}
 	return false
 }
