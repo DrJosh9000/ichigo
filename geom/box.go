@@ -71,6 +71,15 @@ func (b Box) Canon() Box {
 	return b
 }
 
+// BoundingRect returns an image.Rectangle that bounds the box if it were
+// projected, i.e. Rectangle{Min: π(Min), Max: π(Max)}.
+func (b Box) BoundingRect(π IntProjection) image.Rectangle {
+	return image.Rectangle{
+		Min: π.Project(b.Min),
+		Max: π.Project(b.Max),
+	}
+}
+
 // Back returns an image.Rectangle representing the back of the box, using
 // the given projection π.
 func (b Box) Back(π IntProjection) image.Rectangle {
@@ -91,7 +100,8 @@ func (b Box) Front(π IntProjection) image.Rectangle {
 	}
 }
 
-// XY returns the image.Rectangle representing the box if we forgot about Z.
+// XY returns the image.Rectangle representing the box if we forgot about Z
+// (a vertical cross-section).
 func (b Box) XY() image.Rectangle {
 	return image.Rectangle{
 		Min: b.Min.XY(),
@@ -99,7 +109,8 @@ func (b Box) XY() image.Rectangle {
 	}
 }
 
-// XZ returns the image.Rectangle representing the box if we forgot about Y.
+// XZ returns the image.Rectangle representing the box if we forgot about Y
+// (the horizontal cross-section).
 func (b Box) XZ() image.Rectangle {
 	return image.Rectangle{
 		Min: b.Min.XZ(),
