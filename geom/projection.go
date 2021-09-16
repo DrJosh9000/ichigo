@@ -24,8 +24,6 @@ type IntProjection image.Point
 // Otherwise, x projects to x + z/π.X and y projects to y + z/π.Y.
 func (π IntProjection) Project(p Int3) image.Point {
 	/*
-		I'm using the π character because I'm a maths wanker.
-
 		Dividing is used because there's little reason for an isometric
 		projection in a game to exaggerate the Z position.
 
