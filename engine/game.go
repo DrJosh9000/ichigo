@@ -14,6 +14,7 @@ import (
 
 	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
 var _ interface {
@@ -109,6 +110,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			continue
 		}
 		d.Draw(screen, &st.opts)
+	}
+
+	if true {
+		// Infodump about draw list
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("len(drawList.list) = %d", len(g.drawList.list)), 0, 30)
+		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("len(drawList.rev) = %d", len(g.drawList.list)), 0, 45)
 	}
 }
 
