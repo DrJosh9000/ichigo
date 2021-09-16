@@ -84,7 +84,8 @@ type Hider interface {
 }
 
 // Identifier components have a sense of self. This makes it easier for
-// components to find and interact with one another.
+// components to find and interact with one another. Returning the empty string
+// is treated as having no identifier.
 type Identifier interface {
 	Ident() string
 }

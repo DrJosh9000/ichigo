@@ -330,11 +330,12 @@ func (g *Game) Register(component, parent interface{}) error {
 func (g *Game) register(component, parent interface{}) error {
 	// register in g.byID if needed
 	if i, ok := component.(Identifier); ok {
-		id := i.Ident()
-		if _, exists := g.byID[id]; exists {
-			return fmt.Errorf("duplicate id %q", id)
+		if id := i.Ident(); id != "" {
+			if _, exists := g.byID[id]; exists {
+				return fmt.Errorf("duplicate id %q", id)
+			}
+			g.byID[id] = i
 		}
-		g.byID[id] = i
 	}
 
 	// register in g.par
@@ -360,11 +361,11 @@ func (g *Game) register(component, parent interface{}) error {
 		}
 		// TODO: better than O(len(path)^2) time and memory?
 		for p := component; p != nil; p = g.par[p] {
-			i, ok := p.(Identifier)
-			if !ok {
+			id, ok := p.(Identifier)
+			if !ok || id.Ident() == "" {
 				continue
 			}
-			k := abKey{i.Ident(), b}
+			k := abKey{id.Ident(), b}
 			if g.byAB[k] == nil {
 				g.byAB[k] = make(map[interface{}]struct{})
 			}
@@ -397,11 +398,11 @@ func (g *Game) unregister(component interface{}) {
 			continue
 		}
 		for p := component; p != nil; p = g.par[p] {
-			i, ok := p.(Identifier)
-			if !ok {
+			id, ok := p.(Identifier)
+			if !ok || id.Ident() == "" {
 				continue
 			}
-			k := abKey{i.Ident(), b}
+			k := abKey{id.Ident(), b}
 			if g.byAB[k] == nil {
 				continue
 			}
@@ -421,8 +422,8 @@ func (g *Game) unregister(component interface{}) {
 	}
 
 	// unregister from g.byID if needed
-	if i, ok := component.(Identifier); ok {
-		delete(g.byID, i.Ident())
+	if id, ok := component.(Identifier); ok && id.Ident() != "" {
+		delete(g.byID, id.Ident())
 	}
 }
 
