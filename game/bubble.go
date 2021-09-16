@@ -1,6 +1,8 @@
 package game
 
 import (
+	"math/rand"
+
 	"drjosh.dev/gurgle/engine"
 )
 
@@ -25,5 +27,7 @@ func (b *Bubble) Update() error {
 	if b.Life <= 0 {
 		b.game.Unregister(b)
 	}
+	b.Sprite.Actor.MoveX(float64(rand.Intn(3)-1), nil)
+	b.Sprite.Actor.MoveY(-1, nil)
 	return nil
 }

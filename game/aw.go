@@ -134,6 +134,7 @@ func (aw *Awakeman) realUpdate() error {
 								{Cell: 4, Duration: 3},
 								{Cell: 5, Duration: 2},
 							},
+							OneShot: true,
 						},
 					},
 					CellSize: image.Pt(8, 8),
@@ -141,19 +142,23 @@ func (aw *Awakeman) realUpdate() error {
 				},
 			},
 		}
-		engine.PreorderWalk(bubble, func(c, _ interface{}) error {
+		if err := engine.PreorderWalk(bubble, func(c, _ interface{}) error {
 			if p, ok := c.(engine.Loader); ok {
 				return p.Load(Assets)
 			}
 			return nil
-		})
+		}); err != nil {
+			return err
+		}
 		aw.game.Register(bubble, aw.game.Parent(aw))
-		engine.PreorderWalk(bubble, func(c, _ interface{}) error {
+		if err := engine.PreorderWalk(bubble, func(c, _ interface{}) error {
 			if p, ok := c.(engine.Prepper); ok {
 				return p.Prepare(aw.game)
 			}
 			return nil
-		})
+		}); err != nil {
+			return err
+		}
 		bubble.Sprite.SetAnim(bubble.Sprite.Sheet.NewAnim("bubble"))
 	}
 
