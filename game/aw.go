@@ -3,6 +3,7 @@ package game
 import (
 	"encoding/gob"
 	"fmt"
+	"image"
 	"math"
 
 	"drjosh.dev/gurgle/engine"
@@ -30,6 +31,7 @@ type Awakeman struct {
 	CameraID string
 	ToastID  string
 
+	game        *engine.Game
 	camera      *engine.Camera
 	toast       *engine.DebugToast
 	vel         geom.Float3
@@ -38,6 +40,7 @@ type Awakeman struct {
 	jumpBuffer  int
 	noclip      bool
 	spawnPoint  geom.Int3
+	bubbleTimer int
 
 	anims map[string]*engine.Anim
 }
@@ -104,7 +107,55 @@ func (aw *Awakeman) realUpdate() error {
 		coyoteTime     = 5
 		jumpBufferTime = 5
 		respawnY       = 1000
+		bubblePeriod   = 6
 	)
+
+	// Add a bubble?
+	aw.bubbleTimer--
+	if aw.bubbleTimer <= 0 {
+		aw.bubbleTimer = bubblePeriod
+		bubble := &Bubble{
+			Life: 60,
+			Sprite: engine.Sprite{
+				Actor: engine.Actor{
+					CollisionDomain: aw.Sprite.Actor.CollisionDomain,
+					Pos:             aw.Sprite.Actor.Pos.Add(geom.Pt3(1, -15, -1)),
+					Bounds:          geom.Box{Min: geom.Pt3(-4, -4, -4), Max: geom.Pt3(4, 4, 4)},
+				},
+				DrawOffset: image.Pt(-4, -4),
+				Sheet: engine.Sheet{
+					AnimDefs: map[string]*engine.AnimDef{
+						"bubble": {
+							Steps: []engine.AnimStep{
+								{Cell: 0, Duration: 5},
+								{Cell: 1, Duration: 15},
+								{Cell: 2, Duration: 20},
+								{Cell: 3, Duration: 15},
+								{Cell: 4, Duration: 3},
+								{Cell: 5, Duration: 2},
+							},
+						},
+					},
+					CellSize: image.Pt(8, 8),
+					Src:      engine.ImageRef{Path: "assets/bubble.png"},
+				},
+			},
+		}
+		engine.PreorderWalk(bubble, func(c, _ interface{}) error {
+			if p, ok := c.(engine.Loader); ok {
+				return p.Load(Assets)
+			}
+			return nil
+		})
+		aw.game.Register(bubble, aw.game.Parent(aw))
+		engine.PreorderWalk(bubble, func(c, _ interface{}) error {
+			if p, ok := c.(engine.Prepper); ok {
+				return p.Prepare(aw.game)
+			}
+			return nil
+		})
+		bubble.Sprite.SetAnim(bubble.Sprite.Sheet.NewAnim("bubble"))
+	}
 
 	// Fell below some threshold?
 	if aw.Sprite.Actor.Pos.Y > respawnY {
@@ -219,6 +270,7 @@ func (aw *Awakeman) realUpdate() error {
 }
 
 func (aw *Awakeman) Prepare(game *engine.Game) error {
+	aw.game = game
 	cam, ok := game.Component(aw.CameraID).(*engine.Camera)
 	if !ok {
 		return fmt.Errorf("component %q not *engine.Camera", aw.CameraID)
