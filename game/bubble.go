@@ -4,6 +4,7 @@ import (
 	"math/rand"
 
 	"drjosh.dev/gurgle/engine"
+	"drjosh.dev/gurgle/geom"
 )
 
 type Bubble struct {
@@ -27,7 +28,10 @@ func (b *Bubble) Update() error {
 	if b.Life <= 0 {
 		b.game.Unregister(b)
 	}
-	b.Sprite.Actor.MoveX(float64(rand.Intn(3)-1), nil)
-	b.Sprite.Actor.MoveY(-1, nil)
+	// not using MoveX/MoveY/... because collisions are unnecessary -
+	// this is an effect particle, if it overlaps a solid, who cares
+	b.Sprite.Actor.Pos = b.Sprite.Actor.Pos.Add(geom.Pt3(
+		rand.Intn(3)-1, -1, rand.Intn(2)-1,
+	))
 	return nil
 }
