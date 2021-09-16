@@ -158,7 +158,7 @@ func (p *Prism) DrawAfter(x Drawer) bool {
 
 	case BoundingBoxer:
 		xb := x.BoundingBox()
-		if false {
+		if !commonDrawerComparisons {
 			if pb.Max.Z <= xb.Min.Z { // p is behind x
 				return false
 			}
@@ -185,8 +185,8 @@ func (p *Prism) DrawAfter(x Drawer) bool {
 			return true
 		}
 
-		//case ZPositioner:
-		//	return pb.Min.Z > x.ZPos() // p is after x
+	case ZPositioner:
+		return pb.Min.Z > x.ZPos() // p is after x
 	}
 	return false
 }
@@ -204,7 +204,7 @@ func (p *Prism) DrawBefore(x Drawer) bool {
 
 	case BoundingBoxer:
 		xb := x.BoundingBox()
-		if false {
+		if !commonDrawerComparisons {
 			if pb.Min.Z >= xb.Max.Z { // p is in front of x
 				return false
 			}
@@ -231,8 +231,8 @@ func (p *Prism) DrawBefore(x Drawer) bool {
 			return true
 		}
 
-		//case ZPositioner:
-		//	return pb.Max.Z < x.ZPos() // p is before x
+	case ZPositioner:
+		return pb.Max.Z < x.ZPos() // p is before x
 	}
 	return false
 }

@@ -41,7 +41,7 @@ func (s *Sprite) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 
 // DrawAfter reports if the sprite should be drawn after x.
 func (s *Sprite) DrawAfter(x Drawer) bool {
-	if false {
+	if !commonDrawerComparisons {
 		sb := s.BoundingBox()
 		switch x := x.(type) {
 		case BoundingBoxer:
@@ -67,7 +67,7 @@ func (s *Sprite) DrawAfter(x Drawer) bool {
 
 // DrawBefore reports if the sprite should be drawn before x.
 func (s *Sprite) DrawBefore(x Drawer) bool {
-	if false {
+	if !commonDrawerComparisons {
 		sb := s.BoundingBox()
 		switch x := x.(type) {
 		case BoundingBoxer:

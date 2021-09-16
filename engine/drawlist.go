@@ -2,6 +2,8 @@ package engine
 
 import "github.com/hajimehoshi/ebiten/v2"
 
+const commonDrawerComparisons = false
+
 var _ Drawer = tombstone{}
 
 type tombstone struct{}
@@ -26,36 +28,38 @@ func (d drawList) Less(i, j int) bool {
 		return true
 	}
 
-	// Common logic for known interfaces (BoundingBoxer, ZPositioner), to
-	// simplify Draw{Before,After} implementations.
-	switch x := d.list[i].(type) {
-	case BoundingBoxer:
-		xb := x.BoundingBox()
-		switch y := d.list[j].(type) {
+	if commonDrawerComparisons {
+		// Common logic for known interfaces (BoundingBoxer, ZPositioner), to
+		// simplify Draw{Before,After} implementations.
+		switch x := d.list[i].(type) {
 		case BoundingBoxer:
-			yb := y.BoundingBox()
-			if xb.Min.Z >= yb.Max.Z { // x is in front of y
-				return false
+			xb := x.BoundingBox()
+			switch y := d.list[j].(type) {
+			case BoundingBoxer:
+				yb := y.BoundingBox()
+				if xb.Min.Z >= yb.Max.Z { // x is in front of y
+					return false
+				}
+				if xb.Max.Z <= yb.Min.Z { // x is behind y
+					return true
+				}
+				if xb.Max.Y <= yb.Min.Y { // x is above y
+					return false
+				}
+				if xb.Min.Y >= yb.Max.Y { // x is below y
+					return true
+				}
+			case ZPositioner:
+				return xb.Max.Z < y.ZPos() // x is before y
 			}
-			if xb.Max.Z <= yb.Min.Z { // x is behind y
-				return true
-			}
-			if xb.Max.Y <= yb.Min.Y { // x is above y
-				return false
-			}
-			if xb.Min.Y >= yb.Max.Y { // x is below y
-				return true
-			}
-		case ZPositioner:
-			return xb.Max.Z < y.ZPos() // x is before y
-		}
 
-	case ZPositioner:
-		switch y := d.list[j].(type) {
-		case BoundingBoxer:
-			return x.ZPos() < y.BoundingBox().Min.Z
 		case ZPositioner:
-			return x.ZPos() < y.ZPos()
+			switch y := d.list[j].(type) {
+			case BoundingBoxer:
+				return x.ZPos() < y.BoundingBox().Min.Z
+			case ZPositioner:
+				return x.ZPos() < y.ZPos()
+			}
 		}
 	}
 
