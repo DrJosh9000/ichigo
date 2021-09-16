@@ -8,7 +8,6 @@ import (
 	"io/fs"
 	"log"
 	"reflect"
-	"sort"
 	"sync"
 	"time"
 
@@ -183,7 +182,10 @@ func (g *Game) Update() error {
 	}
 
 	// Sort the draw list (on every frame - this isn't as bad as it sounds)
-	sort.Stable(g.drawList)
+	//sort.Stable(g.drawList)
+	if err := g.drawList.topsort(); err != nil {
+		return fmt.Errorf("drawList.topsort: %v", err)
+	}
 	// Truncate tombstones from the end.
 	for i := g.drawList.Len() - 1; i >= 0; i-- {
 		if g.drawList.list[i] != (tombstone{}) {

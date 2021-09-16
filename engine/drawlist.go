@@ -1,6 +1,10 @@
 package engine
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"errors"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 const commonDrawerComparisons = false
 
@@ -72,4 +76,52 @@ func (d drawList) Len() int { return len(d.list) }
 func (d drawList) Swap(i, j int) {
 	d.rev[d.list[i]], d.rev[d.list[j]] = j, i
 	d.list[i], d.list[j] = d.list[j], d.list[i]
+}
+
+// Bad, slow, topological sort
+func (d *drawList) topsort() error {
+	// Count indegrees
+	indegree := make(map[Drawer]int)
+	for _, u := range d.list {
+		for _, v := range d.list {
+			if u == v {
+				continue
+			}
+			if u.DrawBefore(v) || v.DrawAfter(u) {
+				indegree[v]++
+			}
+		}
+	}
+	// Sort into new list
+	list := make([]Drawer, 0, len(d.list))
+	for len(indegree) > 0 {
+		var bag []Drawer
+		for v, n := range indegree {
+			if n == 0 {
+				bag = append(bag, v)
+				break
+			}
+		}
+		if len(bag) == 0 {
+			return errors.New("no vertices with zero indegree")
+		}
+		list = append(list, bag...)
+		for _, u := range bag {
+			delete(indegree, u)
+		}
+		for _, u := range bag {
+			for v := range indegree {
+				if u.DrawBefore(v) || v.DrawAfter(u) {
+					indegree[v]--
+				}
+			}
+		}
+	}
+	// Replace list
+	d.list = list
+	// Update rev
+	for i, v := range list {
+		d.rev[v] = i
+	}
+	return nil
 }
