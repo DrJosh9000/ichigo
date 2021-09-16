@@ -2,6 +2,18 @@ package geom
 
 import "image"
 
+// Projection uses floats to define a projection.
+type Projection struct{ X, Y float64 }
+
+// Project performs a parallel projection of a 3D coordiante into 2D.
+// x projects to (x + z*π.X), and y to (y + z*π.Y)
+func (π Projection) Project(p Int3) image.Point {
+	return image.Pt(
+		p.X+int(π.X*float64(p.Z)),
+		p.Y+int(π.Y*float64(p.Z)),
+	)
+}
+
 // IntProjection holds an integer projection definition.
 // It is designed for projecting Z onto X and Y with integer fractions as would
 // be used in e.g. a diametric projection (IntProjection{X:0, Y:-2}).
