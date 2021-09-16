@@ -3,7 +3,6 @@ package game
 import (
 	"encoding/gob"
 	"fmt"
-	"image"
 	"math"
 
 	"drjosh.dev/gurgle/engine"
@@ -114,34 +113,7 @@ func (aw *Awakeman) realUpdate() error {
 	aw.bubbleTimer--
 	if aw.bubbleTimer <= 0 {
 		aw.bubbleTimer = bubblePeriod
-		bubble := &Bubble{
-			Life: 60,
-			Sprite: engine.Sprite{
-				Actor: engine.Actor{
-					CollisionDomain: aw.Sprite.Actor.CollisionDomain,
-					Pos:             aw.Sprite.Actor.Pos.Add(geom.Pt3(1, -15, -1)),
-					Bounds:          geom.Box{Min: geom.Pt3(-4, -4, -4), Max: geom.Pt3(4, 4, 4)},
-				},
-				DrawOffset: image.Pt(-4, -4),
-				Sheet: engine.Sheet{
-					AnimDefs: map[string]*engine.AnimDef{
-						"bubble": {
-							Steps: []engine.AnimStep{
-								{Cell: 0, Duration: 5},
-								{Cell: 1, Duration: 15},
-								{Cell: 2, Duration: 20},
-								{Cell: 3, Duration: 15},
-								{Cell: 4, Duration: 3},
-								{Cell: 5, Duration: 2},
-							},
-							OneShot: true,
-						},
-					},
-					CellSize: image.Pt(8, 8),
-					Src:      engine.ImageRef{Path: "assets/bubble.png"},
-				},
-			},
-		}
+		bubble := NewBubble(aw.Sprite.Actor.Pos.Add(geom.Pt3(1, -15, -1)))
 		if err := engine.PreorderWalk(bubble, func(c, _ interface{}) error {
 			if p, ok := c.(engine.Loader); ok {
 				return p.Load(Assets)

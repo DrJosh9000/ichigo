@@ -1,6 +1,7 @@
 package game
 
 import (
+	"image"
 	"math/rand"
 
 	"drjosh.dev/gurgle/engine"
@@ -12,6 +13,39 @@ type Bubble struct {
 	Sprite engine.Sprite
 
 	game *engine.Game
+}
+
+func NewBubble(pos geom.Int3) *Bubble {
+	return &Bubble{
+		Life: 60,
+		Sprite: engine.Sprite{
+			Actor: engine.Actor{
+				Pos: pos,
+				Bounds: geom.Box{
+					Min: geom.Pt3(-4, -4, -4),
+					Max: geom.Pt3(4, 4, 4),
+				},
+			},
+			DrawOffset: image.Pt(-4, -4),
+			Sheet: engine.Sheet{
+				AnimDefs: map[string]*engine.AnimDef{
+					"bubble": {
+						Steps: []engine.AnimStep{
+							{Cell: 0, Duration: 5},
+							{Cell: 1, Duration: 15},
+							{Cell: 2, Duration: 20},
+							{Cell: 3, Duration: 15},
+							{Cell: 4, Duration: 3},
+							{Cell: 5, Duration: 2},
+						},
+						OneShot: true,
+					},
+				},
+				CellSize: image.Pt(8, 8),
+				Src:      engine.ImageRef{Path: "assets/bubble.png"},
+			},
+		},
+	}
 }
 
 func (b *Bubble) Scan() []interface{} {
