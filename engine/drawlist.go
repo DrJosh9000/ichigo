@@ -83,7 +83,7 @@ func (d drawList) Swap(i, j int) {
 }
 
 // Slow topological sort. Uses a projection π to flatten bounding boxes for
-// overlap tests, so that the graph is reduced.
+// overlap tests, in order to reduce edge count.
 func (d *drawList) topsort(π geom.Projector) {
 	// Produce edge lists and count indegrees - O(|V|^2)
 	// TODO: optimise this

@@ -43,11 +43,12 @@ func (d *DebugToast) Draw(screen *ebiten.Image, _ *ebiten.DrawImageOptions) {
 // Draw last.
 func (DebugToast) DrawAfter(x Drawer) bool {
 	switch x.(type) {
-	case *DebugToast, PerfDisplay, tombstone:
+	case *DebugToast, PerfDisplay:
 		return false
 	}
 	return true
 }
+
 func (DebugToast) DrawBefore(x Drawer) bool {
 	return false
 }
@@ -81,7 +82,7 @@ func (p PerfDisplay) Draw(screen *ebiten.Image, _ *ebiten.DrawImageOptions) {
 // Draw last.
 func (PerfDisplay) DrawAfter(x Drawer) bool {
 	switch x.(type) {
-	case *DebugToast, PerfDisplay, tombstone:
+	case *DebugToast, PerfDisplay:
 		return false
 	}
 	return true
