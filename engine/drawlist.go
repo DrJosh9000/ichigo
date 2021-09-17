@@ -2,7 +2,7 @@ package engine
 
 import (
 	"image"
-	"log"
+	"math"
 
 	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -82,41 +82,36 @@ func (d drawList) Swap(i, j int) {
 	d.list[i], d.list[j] = d.list[j], d.list[i]
 }
 
-// Slow topological sort
-func (d *drawList) topsort() {
-	// Produce edge lists - O(|V|^2)
-	// Count indegrees - also O(|V|^2)
+// Slow topological sort. Uses a projection π to flatten bounding boxes for
+// overlap tests, so that the graph is reduced.
+func (d *drawList) topsort(π geom.Projector) {
+	// Produce edge lists and count indegrees - O(|V|^2)
+	// TODO: optimise this
 	edges := make([][]int, len(d.list))
 	indegree := make([]int, len(d.list))
 	for i, u := range d.list {
 		if u == (tombstone{}) {
+			// Prevents processing this vertex later on
+			indegree[i] = -1
 			continue
 		}
-		var ub image.Rectangle
-		switch x := u.(type) {
-		case BoundingBoxer:
-			ub = x.BoundingBox().BoundingRect(geom.IntProjection{X: 0, Y: 1})
-		default:
-			ub = image.Rect(0, 0, 320, 240)
+		// If we can't get a more specific bounding rect, assume entire plane.
+		ub := image.Rect(math.MinInt, math.MinInt, math.MaxInt, math.MaxInt)
+		if x, ok := u.(BoundingBoxer); ok {
+			ub = x.BoundingBox().BoundingRect(π)
 		}
+		// For each possible neighbor...
 		for j, v := range d.list {
-			if i == j {
+			if i == j || v == (tombstone{}) {
 				continue
 			}
-			if v == (tombstone{}) {
-				continue
+			// Does it have a bounding rect? Do overlap test.
+			if y, ok := v.(BoundingBoxer); ok {
+				if vb := y.BoundingBox().BoundingRect(π); !ub.Overlaps(vb) {
+					continue
+				}
 			}
-			var vb image.Rectangle
-			switch y := v.(type) {
-			case BoundingBoxer:
-				vb = y.BoundingBox().BoundingRect(geom.IntProjection{X: 0, Y: 1})
-			default:
-				vb = image.Rect(0, 0, 320, 240)
-			}
-			if !ub.Overlaps(vb) {
-				// No overlap, no need to emit an edge
-				continue
-			}
+			// If the edge goes u->v, add it.
 			if u.DrawBefore(v) || v.DrawAfter(u) {
 				edges[i] = append(edges[i], j)
 				indegree[j]++
@@ -124,42 +119,31 @@ func (d *drawList) topsort() {
 		}
 	}
 
-	// Start queue with all zero-indegree vertices
+	// Initialise queue with all the zero-indegree vertices
 	var queue []int
 	for i, n := range indegree {
-		if d.list[i] == (tombstone{}) {
-			continue
-		}
 		if n == 0 {
 			queue = append(queue, i)
 		}
 	}
 
-	// Process into new list
+	// Process into new list. O(|V| + |E|)
 	list := make([]Drawer, 0, len(d.list))
 	for len(queue) > 0 {
+		// Get front of queue.
 		i := queue[0]
 		queue = queue[1:]
+		// Add to output list.
 		d.rev[d.list[i]] = len(list)
 		list = append(list, d.list[i])
+		// Reduce indegree for all outgoing edges, enqueue if indegree now 0.
 		for _, j := range edges[i] {
 			indegree[j]--
-			if indegree[j] <= 0 {
-				if indegree[j] < 0 {
-					log.Printf("indegree[%d] = %d (component %v)", j, indegree[j], d.list[j])
-				}
+			if indegree[j] == 0 {
 				queue = append(queue, j)
 			}
 		}
 	}
-
-	// Replace list
+	// Job done!
 	d.list = list
-	if false {
-		// Update rev
-		d.rev = make(map[Drawer]int, len(list))
-		for i, v := range list {
-			d.rev[v] = i
-		}
-	}
 }

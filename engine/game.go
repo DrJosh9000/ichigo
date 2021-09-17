@@ -186,7 +186,7 @@ func (g *Game) Update() error {
 
 	// Sort the draw list (on every frame - this isn't as bad as it sounds)
 	if topologicalDrawSort {
-		g.drawList.topsort()
+		g.drawList.topsort(g.Projection)
 	} else {
 		sort.Stable(g.drawList)
 
