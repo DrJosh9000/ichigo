@@ -16,7 +16,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-const showDrawListSize = true
+const showDrawListSize = false
 
 var _ interface {
 	Disabler

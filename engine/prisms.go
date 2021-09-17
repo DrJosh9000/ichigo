@@ -152,6 +152,7 @@ func (p *Prism) DrawAfter(x Drawer) bool {
 	case *Prism:
 		// Fast path for other prisms
 		if p.pos.Z == x.pos.Z {
+			// TODO: account for projection
 			return p.pos.Y < x.pos.Y
 		}
 		return p.pos.Z > x.pos.Z
@@ -181,6 +182,7 @@ func (p *Prism) DrawBefore(x Drawer) bool {
 	case *Prism:
 		// Fast path for other prisms
 		if p.pos.Z == x.pos.Z {
+			// TODO: account for projection
 			return p.pos.Y > x.pos.Y
 		}
 		return p.pos.Z < x.pos.Z
