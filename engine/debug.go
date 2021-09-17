@@ -41,8 +41,20 @@ func (d *DebugToast) Draw(screen *ebiten.Image, _ *ebiten.DrawImageOptions) {
 }
 
 // Draw last.
-func (DebugToast) DrawAfter(Drawer) bool  { return true }
-func (DebugToast) DrawBefore(Drawer) bool { return false }
+func (DebugToast) DrawAfter(x Drawer) bool {
+	switch x.(type) {
+	case *DebugToast, PerfDisplay, tombstone:
+		return false
+	}
+	return true
+}
+func (DebugToast) DrawBefore(x Drawer) bool {
+	return false
+}
+
+func (d *DebugToast) String() string {
+	return fmt.Sprintf("DebugToast@%v", d.Pos)
+}
 
 func (d *DebugToast) Toast(text string) {
 	d.Text = text
@@ -67,5 +79,16 @@ func (p PerfDisplay) Draw(screen *ebiten.Image, _ *ebiten.DrawImageOptions) {
 }
 
 // Draw last.
-func (PerfDisplay) DrawAfter(Drawer) bool  { return true }
-func (PerfDisplay) DrawBefore(Drawer) bool { return false }
+func (PerfDisplay) DrawAfter(x Drawer) bool {
+	switch x.(type) {
+	case *DebugToast, PerfDisplay, tombstone:
+		return false
+	}
+	return true
+}
+
+func (PerfDisplay) DrawBefore(Drawer) bool {
+	return false
+}
+
+func (PerfDisplay) String() string { return "PerfDisplay" }

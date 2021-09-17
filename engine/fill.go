@@ -31,3 +31,5 @@ type Fill struct {
 func (f *Fill) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	screen.Fill(opts.ColorM.Apply(f.Color))
 }
+
+func (f *Fill) String() string { return "Fill" }

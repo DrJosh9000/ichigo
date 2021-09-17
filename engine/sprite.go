@@ -2,6 +2,7 @@ package engine
 
 import (
 	"encoding/gob"
+	"fmt"
 	"image"
 
 	"drjosh.dev/gurgle/geom"
@@ -106,6 +107,10 @@ func (s *Sprite) SetAnim(a *Anim) {
 		a.Reset()
 	}
 	s.anim = a
+}
+
+func (s *Sprite) String() string {
+	return fmt.Sprintf("Sprite@%v", s.Actor.Pos)
 }
 
 // Transform returns a translation by the DrawOffset and Actor.Pos projected

@@ -17,6 +17,8 @@ func (tombstone) Draw(*ebiten.Image, *ebiten.DrawImageOptions) {}
 func (tombstone) DrawAfter(x Drawer) bool { return x != tombstone{} }
 func (tombstone) DrawBefore(Drawer) bool  { return false }
 
+func (tombstone) String() string { return "tombstone" }
+
 type drawList struct {
 	list []Drawer
 	rev  map[Drawer]int
@@ -80,9 +82,10 @@ func (d drawList) Swap(i, j int) {
 
 // Bad, slow, topological sort
 func (d *drawList) topsort() error {
-	// Count indegrees
+	// Count indegrees - O(|V|^2)
 	indegree := make(map[Drawer]int)
 	for _, u := range d.list {
+		indegree[u] += 0
 		for _, v := range d.list {
 			if u == v {
 				continue
@@ -92,6 +95,7 @@ func (d *drawList) topsort() error {
 			}
 		}
 	}
+	//log.Printf("indegree: %v", indegree)
 	// Sort into new list
 	list := make([]Drawer, 0, len(d.list))
 	for len(indegree) > 0 {
@@ -99,10 +103,11 @@ func (d *drawList) topsort() error {
 		for v, n := range indegree {
 			if n == 0 {
 				bag = append(bag, v)
-				break
 			}
 		}
+		//log.Printf("zero indegree vertices: %v", bag)
 		if len(bag) == 0 {
+			//log.Printf("remaining vertices: %v", indegree)
 			return errors.New("no vertices with zero indegree")
 		}
 		list = append(list, bag...)

@@ -109,29 +109,31 @@ func (aw *Awakeman) realUpdate() error {
 		bubblePeriod   = 6
 	)
 
-	// Add a bubble?
-	aw.bubbleTimer--
-	if aw.bubbleTimer <= 0 {
-		aw.bubbleTimer = bubblePeriod
-		bubble := NewBubble(aw.Sprite.Actor.Pos.Add(geom.Pt3(1, -15, -1)))
-		if err := engine.PreorderWalk(bubble, func(c, _ interface{}) error {
-			if p, ok := c.(engine.Loader); ok {
-				return p.Load(Assets)
+	if false {
+		// Add a bubble?
+		aw.bubbleTimer--
+		if aw.bubbleTimer <= 0 {
+			aw.bubbleTimer = bubblePeriod
+			bubble := NewBubble(aw.Sprite.Actor.Pos.Add(geom.Pt3(1, -15, -1)))
+			if err := engine.PreorderWalk(bubble, func(c, _ interface{}) error {
+				if p, ok := c.(engine.Loader); ok {
+					return p.Load(Assets)
+				}
+				return nil
+			}); err != nil {
+				return err
 			}
-			return nil
-		}); err != nil {
-			return err
-		}
-		aw.game.Register(bubble, aw.game.Parent(aw))
-		if err := engine.PreorderWalk(bubble, func(c, _ interface{}) error {
-			if p, ok := c.(engine.Prepper); ok {
-				return p.Prepare(aw.game)
+			aw.game.Register(bubble, aw.game.Parent(aw))
+			if err := engine.PreorderWalk(bubble, func(c, _ interface{}) error {
+				if p, ok := c.(engine.Prepper); ok {
+					return p.Prepare(aw.game)
+				}
+				return nil
+			}); err != nil {
+				return err
 			}
-			return nil
-		}); err != nil {
-			return err
+			bubble.Sprite.SetAnim(bubble.Sprite.Sheet.NewAnim("bubble"))
 		}
-		bubble.Sprite.SetAnim(bubble.Sprite.Sheet.NewAnim("bubble"))
 	}
 
 	// Fell below some threshold?
@@ -265,3 +267,7 @@ func (aw *Awakeman) Prepare(game *engine.Game) error {
 }
 
 func (aw *Awakeman) Scan() []interface{} { return []interface{}{&aw.Sprite} }
+
+func (aw *Awakeman) String() string {
+	return fmt.Sprintf("Awakeman@%v", aw.Sprite.Actor.Pos)
+}

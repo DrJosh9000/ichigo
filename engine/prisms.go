@@ -237,6 +237,10 @@ func (p *Prism) DrawBefore(x Drawer) bool {
 	return false
 }
 
+func (p *Prism) String() string {
+	return fmt.Sprintf("Prism(%d)@%v", p.Cell, p.pos)
+}
+
 // Transform returns a translation by the projected position.
 func (p *Prism) Transform() (opts ebiten.DrawImageOptions) {
 	opts.GeoM.Translate(geom.CFloat(

@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"image"
 	"math/rand"
 
@@ -50,6 +51,10 @@ func NewBubble(pos geom.Int3) *Bubble {
 
 func (b *Bubble) Scan() []interface{} {
 	return []interface{}{&b.Sprite}
+}
+
+func (b *Bubble) String() string {
+	return fmt.Sprintf("Bubble@%v", b.Sprite.Actor.Pos)
 }
 
 func (b *Bubble) Prepare(g *engine.Game) error {

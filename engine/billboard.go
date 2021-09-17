@@ -2,6 +2,7 @@ package engine
 
 import (
 	"encoding/gob"
+	"fmt"
 
 	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -74,6 +75,10 @@ func (b *Billboard) Prepare(g *Game) error {
 
 // Scan returns a slice containing Src.
 func (b *Billboard) Scan() []interface{} { return []interface{}{&b.Src} }
+
+func (b *Billboard) String() string {
+	return fmt.Sprintf("Billboard@%v", b.Pos)
+}
 
 // Transform returns a translation by the projected position.
 func (b *Billboard) Transform() (opts ebiten.DrawImageOptions) {
