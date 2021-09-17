@@ -71,15 +71,19 @@ func (b Box) Canon() Box {
 	return b
 }
 
+type Projector interface {
+	Project(Int3) image.Point
+}
+
 // BoundingRect returns an image.Rectangle that bounds the box if it were
 // projected.
-func (b Box) BoundingRect(π IntProjection) image.Rectangle {
+func (b Box) BoundingRect(π Projector) image.Rectangle {
 	return b.Back(π).Union(b.Front(π))
 }
 
 // Back returns an image.Rectangle representing the back of the box, using
 // the given projection π.
-func (b Box) Back(π IntProjection) image.Rectangle {
+func (b Box) Back(π Projector) image.Rectangle {
 	b.Max.Z = b.Min.Z
 	return image.Rectangle{
 		Min: π.Project(b.Min),
@@ -89,7 +93,7 @@ func (b Box) Back(π IntProjection) image.Rectangle {
 
 // Front returns an image.Rectangle representing the front of the box, using
 // the given projection π.
-func (b Box) Front(π IntProjection) image.Rectangle {
+func (b Box) Front(π Projector) image.Rectangle {
 	b.Min.Z = b.Max.Z
 	return image.Rectangle{
 		Min: π.Project(b.Min),

@@ -109,7 +109,7 @@ func (aw *Awakeman) realUpdate() error {
 		bubblePeriod   = 6
 	)
 
-	if false {
+	if true {
 		// Add a bubble?
 		aw.bubbleTimer--
 		if aw.bubbleTimer <= 0 {

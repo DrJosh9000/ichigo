@@ -1,8 +1,10 @@
 package engine
 
 import (
+	"image"
 	"log"
 
+	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -80,7 +82,7 @@ func (d drawList) Swap(i, j int) {
 	d.list[i], d.list[j] = d.list[j], d.list[i]
 }
 
-// Bad, slow, topological sort
+// Slow topological sort
 func (d *drawList) topsort() {
 	// Produce edge lists - O(|V|^2)
 	// Count indegrees - also O(|V|^2)
@@ -90,11 +92,29 @@ func (d *drawList) topsort() {
 		if u == (tombstone{}) {
 			continue
 		}
+		var ub image.Rectangle
+		switch x := u.(type) {
+		case BoundingBoxer:
+			ub = x.BoundingBox().BoundingRect(geom.IntProjection{X: 0, Y: 1})
+		default:
+			ub = image.Rect(0, 0, 320, 240)
+		}
 		for j, v := range d.list {
 			if i == j {
 				continue
 			}
 			if v == (tombstone{}) {
+				continue
+			}
+			var vb image.Rectangle
+			switch y := v.(type) {
+			case BoundingBoxer:
+				vb = y.BoundingBox().BoundingRect(geom.IntProjection{X: 0, Y: 1})
+			default:
+				vb = image.Rect(0, 0, 320, 240)
+			}
+			if !ub.Overlaps(vb) {
+				// No overlap, no need to emit an edge
 				continue
 			}
 			if u.DrawBefore(v) || v.DrawAfter(u) {
@@ -120,9 +140,7 @@ func (d *drawList) topsort() {
 	for len(queue) > 0 {
 		i := queue[0]
 		queue = queue[1:]
-		if false {
-			d.rev[d.list[i]] = len(list)
-		}
+		d.rev[d.list[i]] = len(list)
 		list = append(list, d.list[i])
 		for _, j := range edges[i] {
 			indegree[j]--
@@ -137,9 +155,11 @@ func (d *drawList) topsort() {
 
 	// Replace list
 	d.list = list
-	// Update rev
-	d.rev = make(map[Drawer]int, len(list))
-	for i, v := range list {
-		d.rev[v] = i
+	if false {
+		// Update rev
+		d.rev = make(map[Drawer]int, len(list))
+		for i, v := range list {
+			d.rev[v] = i
+		}
 	}
 }
