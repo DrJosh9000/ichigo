@@ -26,37 +26,47 @@ type drawList struct {
 
 // edge reports if there is a draw ordering constraint between u and v (where
 // u draws before v).
-func edge(u, v Drawer) bool {
+func edge(u, v Drawer, πsign image.Point) bool {
 	// Common logic for known interfaces (BoundingBoxer, ZPositioner), to
 	// simplify DrawOrderer implementations.
-	switch x := u.(type) {
+	switch u := u.(type) {
 	case BoundingBoxer:
-		xb := x.BoundingBox()
-		switch y := v.(type) {
+		ub := u.BoundingBox()
+		switch v := v.(type) {
 		case BoundingBoxer:
-			yb := y.BoundingBox()
-			if xb.Min.Z >= yb.Max.Z { // x is in front of y
+			vb := v.BoundingBox()
+			if ub.Min.Z >= vb.Max.Z { // u is in front of v
 				return false
 			}
-			if xb.Max.Z <= yb.Min.Z { // x is behind y
+			if ub.Max.Z <= vb.Min.Z { // u is behind v
 				return true
 			}
-			if xb.Max.Y <= yb.Min.Y { // x is above y
-				return false
+			if πsign.X != 0 {
+				if ub.Max.X*πsign.X <= vb.Min.X*πsign.X { // u is to the left of v
+					return false
+				}
+				if ub.Min.X*πsign.X >= vb.Max.X*πsign.X { // u is to the right of v
+					return true
+				}
 			}
-			if xb.Min.Y >= yb.Max.Y { // x is below y
-				return true
+			if πsign.Y != 0 {
+				if ub.Max.Y*πsign.Y <= vb.Min.Y*πsign.Y { // u is above v
+					return false
+				}
+				if ub.Min.Y*πsign.Y >= vb.Max.Y*πsign.Y { // u is below v
+					return true
+				}
 			}
 		case ZPositioner:
-			return xb.Max.Z < y.ZPos() // x is before y
+			return ub.Max.Z < v.ZPos() // u is before v
 		}
 
 	case ZPositioner:
 		switch y := v.(type) {
 		case BoundingBoxer:
-			return x.ZPos() < y.BoundingBox().Min.Z
+			return u.ZPos() < y.BoundingBox().Min.Z
 		case ZPositioner:
-			return x.ZPos() < y.ZPos()
+			return u.ZPos() < y.ZPos()
 		}
 	}
 
@@ -72,6 +82,8 @@ func edge(u, v Drawer) bool {
 	return false
 }
 
+var wholePlane = image.Rect(math.MinInt, math.MinInt, math.MaxInt, math.MaxInt)
+
 // Topological sort. Uses a projection π to flatten bounding boxes for
 // overlap tests, in order to reduce edge count.
 func (d *drawList) topsort(π geom.Projector) {
@@ -86,7 +98,7 @@ func (d *drawList) topsort(π geom.Projector) {
 			continue
 		}
 		// If we can't get a more specific bounding rect, assume entire plane.
-		ub := image.Rect(math.MinInt, math.MinInt, math.MaxInt, math.MaxInt)
+		ub := wholePlane
 		if x, ok := u.(BoundingBoxer); ok {
 			ub = x.BoundingBox().BoundingRect(π)
 		}
@@ -103,7 +115,7 @@ func (d *drawList) topsort(π geom.Projector) {
 			}
 
 			// If the edge goes u->v, add it.
-			if edge(u, v) {
+			if edge(u, v, π.Sign()) {
 				edges[i] = append(edges[i], j)
 				indegree[j]++
 			}

@@ -71,10 +71,6 @@ func (b Box) Canon() Box {
 	return b
 }
 
-type Projector interface {
-	Project(Int3) image.Point
-}
-
 // BoundingRect returns an image.Rectangle that bounds the box if it were
 // projected.
 func (b Box) BoundingRect(π Projector) image.Rectangle {

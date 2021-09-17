@@ -196,15 +196,15 @@ func (aw *Awakeman) realUpdate() error {
 	// Left, right, away, toward
 	aw.vel.X, aw.vel.Z = 0, 0
 	switch {
-	case ebiten.IsKeyPressed(ebiten.KeyLeft):
+	case ebiten.IsKeyPressed(ebiten.KeyLeft) || ebiten.IsKeyPressed(ebiten.KeyJ):
 		aw.vel.X = -runVelocity
-	case ebiten.IsKeyPressed(ebiten.KeyRight):
+	case ebiten.IsKeyPressed(ebiten.KeyRight) || ebiten.IsKeyPressed(ebiten.KeyL):
 		aw.vel.X = runVelocity
 	}
 	switch {
-	case ebiten.IsKeyPressed(ebiten.KeyUp):
+	case ebiten.IsKeyPressed(ebiten.KeyUp) || ebiten.IsKeyPressed(ebiten.KeyI):
 		aw.vel.Z = -runVelocity
-	case ebiten.IsKeyPressed(ebiten.KeyDown):
+	case ebiten.IsKeyPressed(ebiten.KeyDown) || ebiten.IsKeyPressed(ebiten.KeyK):
 		aw.vel.Z = runVelocity
 	}
 

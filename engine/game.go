@@ -43,7 +43,7 @@ type Game struct {
 	Hides
 	ScreenSize image.Point
 	Root       interface{} // typically a *Scene or SceneRef though
-	Projection geom.IntProjection
+	Projection geom.Projector
 	VoxelScale geom.Float3
 
 	dbmu     sync.RWMutex
