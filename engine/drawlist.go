@@ -8,7 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-const commonDrawerComparisons = false
+const commonDrawerComparisons = true
 
 var _ Drawer = tombstone{}
 
@@ -111,8 +111,9 @@ func (d *drawList) topsort(π geom.Projector) {
 					continue
 				}
 			}
+
 			// If the edge goes u->v, add it.
-			if u.DrawBefore(v) || v.DrawAfter(u) {
+			if d.Less(i, j) {
 				edges[i] = append(edges[i], j)
 				indegree[j]++
 			}
