@@ -114,7 +114,7 @@ func (aw *Awakeman) realUpdate() error {
 		aw.bubbleTimer--
 		if aw.bubbleTimer <= 0 {
 			aw.bubbleTimer = bubblePeriod
-			bubble := NewBubble(aw.Sprite.Actor.Pos.Add(geom.Pt3(1, -15, -1)))
+			bubble := NewBubble(aw.Sprite.Actor.Pos.Add(geom.Pt3(-3, -20, -1)))
 			if err := engine.PreorderWalk(bubble, func(c, _ interface{}) error {
 				if p, ok := c.(engine.Loader); ok {
 					return p.Load(Assets)

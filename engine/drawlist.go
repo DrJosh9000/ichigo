@@ -1,7 +1,7 @@
 package engine
 
 import (
-	"errors"
+	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -81,52 +81,65 @@ func (d drawList) Swap(i, j int) {
 }
 
 // Bad, slow, topological sort
-func (d *drawList) topsort() error {
-	// Count indegrees - O(|V|^2)
-	indegree := make(map[Drawer]int)
-	for _, u := range d.list {
-		indegree[u] += 0
-		for _, v := range d.list {
-			if u == v {
+func (d *drawList) topsort() {
+	// Produce edge lists - O(|V|^2)
+	// Count indegrees - also O(|V|^2)
+	edges := make([][]int, len(d.list))
+	indegree := make([]int, len(d.list))
+	for i, u := range d.list {
+		if u == (tombstone{}) {
+			continue
+		}
+		for j, v := range d.list {
+			if i == j {
+				continue
+			}
+			if v == (tombstone{}) {
 				continue
 			}
 			if u.DrawBefore(v) || v.DrawAfter(u) {
-				indegree[v]++
+				edges[i] = append(edges[i], j)
+				indegree[j]++
 			}
 		}
 	}
-	//log.Printf("indegree: %v", indegree)
-	// Sort into new list
+
+	// Start queue with all zero-indegree vertices
+	var queue []int
+	for i, n := range indegree {
+		if d.list[i] == (tombstone{}) {
+			continue
+		}
+		if n == 0 {
+			queue = append(queue, i)
+		}
+	}
+
+	// Process into new list
 	list := make([]Drawer, 0, len(d.list))
-	for len(indegree) > 0 {
-		var bag []Drawer
-		for v, n := range indegree {
-			if n == 0 {
-				bag = append(bag, v)
-			}
+	for len(queue) > 0 {
+		i := queue[0]
+		queue = queue[1:]
+		if false {
+			d.rev[d.list[i]] = len(list)
 		}
-		//log.Printf("zero indegree vertices: %v", bag)
-		if len(bag) == 0 {
-			//log.Printf("remaining vertices: %v", indegree)
-			return errors.New("no vertices with zero indegree")
-		}
-		list = append(list, bag...)
-		for _, u := range bag {
-			delete(indegree, u)
-		}
-		for _, u := range bag {
-			for v := range indegree {
-				if u.DrawBefore(v) || v.DrawAfter(u) {
-					indegree[v]--
+		list = append(list, d.list[i])
+		for _, j := range edges[i] {
+			indegree[j]--
+			if indegree[j] <= 0 {
+				if indegree[j] < 0 {
+					log.Printf("indegree[%d] = %d (component %v)", j, indegree[j], d.list[j])
 				}
+				queue = append(queue, j)
 			}
 		}
 	}
+
 	// Replace list
 	d.list = list
 	// Update rev
+	d.rev = make(map[Drawer]int, len(list))
 	for i, v := range list {
 		d.rev[v] = i
 	}
-	return nil
 }

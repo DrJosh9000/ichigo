@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"log"
 	"reflect"
+	"sort"
 	"sync"
 	"time"
 
@@ -15,6 +16,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
+
+const topologicalDrawSort = true
 
 var _ interface {
 	Disabler
@@ -182,16 +185,18 @@ func (g *Game) Update() error {
 	}
 
 	// Sort the draw list (on every frame - this isn't as bad as it sounds)
-	//sort.Stable(g.drawList)
-	if err := g.drawList.topsort(); err != nil {
-		return fmt.Errorf("drawList.topsort: %v", err)
-	}
-	// Truncate tombstones from the end.
-	for i := g.drawList.Len() - 1; i >= 0; i-- {
-		if g.drawList.list[i] != (tombstone{}) {
-			break
+	if topologicalDrawSort {
+		g.drawList.topsort()
+	} else {
+		sort.Stable(g.drawList)
+
+		// Truncate tombstones from the end.
+		for i := g.drawList.Len() - 1; i >= 0; i-- {
+			if g.drawList.list[i] != (tombstone{}) {
+				break
+			}
+			g.drawList.list = g.drawList.list[:i]
 		}
-		g.drawList.list = g.drawList.list[:i]
 	}
 	return nil
 }
