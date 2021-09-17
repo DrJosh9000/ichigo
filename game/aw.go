@@ -11,6 +11,8 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
+const awakemanProducesBubbles = true
+
 var _ interface {
 	engine.Identifier
 	engine.Disabler
@@ -109,7 +111,7 @@ func (aw *Awakeman) realUpdate() error {
 		bubblePeriod   = 6
 	)
 
-	if true {
+	if awakemanProducesBubbles {
 		// Add a bubble?
 		aw.bubbleTimer--
 		if aw.bubbleTimer <= 0 {

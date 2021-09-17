@@ -158,20 +158,6 @@ func (p *Prism) DrawAfter(x Drawer) bool {
 
 	case BoundingBoxer:
 		xb := x.BoundingBox()
-		if !commonDrawerComparisons {
-			if pb.Max.Z <= xb.Min.Z { // p is behind x
-				return false
-			}
-			if pb.Min.Z >= xb.Max.Z { // p is in front of x
-				return true
-			}
-			if pb.Min.Y >= xb.Max.Y { // p is below x
-				return false
-			}
-			if pb.Max.Y <= xb.Min.Y { // p is above x
-				return true
-			}
-		}
 		// The prism special
 		split := p.m.topext[geom.North].X
 		threshold := p.m.topext[geom.East].Y
@@ -184,9 +170,6 @@ func (p *Prism) DrawAfter(x Drawer) bool {
 		if pb.Min.Z+threshold >= xb.Max.Z { // x is behind the front half of p
 			return true
 		}
-
-	case ZPositioner:
-		return pb.Min.Z > x.ZPos() // p is after x
 	}
 	return false
 }
@@ -204,20 +187,6 @@ func (p *Prism) DrawBefore(x Drawer) bool {
 
 	case BoundingBoxer:
 		xb := x.BoundingBox()
-		if !commonDrawerComparisons {
-			if pb.Min.Z >= xb.Max.Z { // p is in front of x
-				return false
-			}
-			if pb.Max.Z <= xb.Min.Z { // p is behind x
-				return true
-			}
-			if pb.Max.Y <= xb.Min.Y { // p is above x
-				return false
-			}
-			if pb.Min.Y >= xb.Max.Y { // p is below x
-				return true
-			}
-		}
 		// The prism special
 		split := p.m.topext[geom.North].X
 		threshold := p.m.topext[geom.East].Y
@@ -230,9 +199,6 @@ func (p *Prism) DrawBefore(x Drawer) bool {
 		if pb.Min.Z+threshold <= xb.Min.Z { // x is in front of the front half of p
 			return true
 		}
-
-	case ZPositioner:
-		return pb.Max.Z < x.ZPos() // p is before x
 	}
 	return false
 }

@@ -8,7 +8,6 @@ import (
 	"io/fs"
 	"log"
 	"reflect"
-	"sort"
 	"sync"
 	"time"
 
@@ -17,7 +16,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
 
-const topologicalDrawSort = true
+const showDrawListSize = true
 
 var _ interface {
 	Disabler
@@ -114,7 +113,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		d.Draw(screen, &st.opts)
 	}
 
-	if true {
+	if showDrawListSize {
 		// Infodump about draw list
 		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("len(drawList.list) = %d", len(g.drawList.list)), 0, 30)
 		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("len(drawList.rev) = %d", len(g.drawList.list)), 0, 45)
@@ -185,19 +184,7 @@ func (g *Game) Update() error {
 	}
 
 	// Sort the draw list (on every frame - this isn't as bad as it sounds)
-	if topologicalDrawSort {
-		g.drawList.topsort(g.Projection)
-	} else {
-		sort.Stable(g.drawList)
-
-		// Truncate tombstones from the end.
-		for i := g.drawList.Len() - 1; i >= 0; i-- {
-			if g.drawList.list[i] != (tombstone{}) {
-				break
-			}
-			g.drawList.list = g.drawList.list[:i]
-		}
-	}
+	g.drawList.topsort(g.Projection)
 	return nil
 }
 

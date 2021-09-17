@@ -72,6 +72,11 @@ type Disabler interface {
 // passed to Game.Register or returned from Scan).
 type Drawer interface {
 	Draw(*ebiten.Image, *ebiten.DrawImageOptions)
+}
+
+// DrawOrderer components have more specific ideas about draw ordering than
+// merely "my Z is bigger than yours".
+type DrawOrderer interface {
 	DrawAfter(Drawer) bool
 	DrawBefore(Drawer) bool
 }
