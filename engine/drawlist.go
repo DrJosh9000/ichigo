@@ -98,9 +98,9 @@ func (d *drawList) topsort(π geom.Projector) {
 			continue
 		}
 		// If we can't get a more specific bounding rect, assume entire plane.
-		ub := wholePlane
+		ubr := wholePlane
 		if x, ok := u.(BoundingBoxer); ok {
-			ub = x.BoundingBox().BoundingRect(π)
+			ubr = x.BoundingBox().BoundingRect(π)
 		}
 		// For each possible neighbor...
 		for j, v := range d.list {
@@ -109,7 +109,7 @@ func (d *drawList) topsort(π geom.Projector) {
 			}
 			// Does it have a bounding rect? Do overlap test.
 			if y, ok := v.(BoundingBoxer); ok {
-				if vb := y.BoundingBox().BoundingRect(π); !ub.Overlaps(vb) {
+				if vbr := y.BoundingBox().BoundingRect(π); !ubr.Overlaps(vbr) {
 					continue
 				}
 			}
