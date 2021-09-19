@@ -153,7 +153,6 @@ func (d *drawList) topsort(π geom.Projector) {
 
 type drawDAG struct {
 	*dag
-	planes    set
 	chunks    map[image.Point]set
 	chunksRev map[Drawer]image.Rectangle
 	chunkSize int
@@ -163,7 +162,6 @@ type drawDAG struct {
 func newDrawDAG(chunkSize int) *drawDAG {
 	return &drawDAG{
 		dag:       newDAG(),
-		planes:    make(set),                        // drawers that take up whole plane
 		chunks:    make(map[image.Point]set),        // chunk coord -> drawers with bounding rects intersecting chunk
 		chunksRev: make(map[Drawer]image.Rectangle), // drawer -> rectangle of chunk coords
 		chunkSize: chunkSize,
@@ -172,28 +170,31 @@ func newDrawDAG(chunkSize int) *drawDAG {
 
 // add adds a Drawer and any needed edges to the DAG and chunk map.
 func (d *drawDAG) add(x Drawer) {
-	switch x := x.(type) {
-	case BoundingBoxer:
-		br := x.BoundingBox().BoundingRect(d.proj)
-		min := br.Min.Div(d.chunkSize)
-		max := br.Max.Sub(image.Pt(1, 1)).Div(d.chunkSize)
-		cand := make(set)
-		for j := min.Y; j <= max.Y; j++ {
-			for i := min.X; i <= max.X; i++ {
-				for c := range d.chunks[image.Pt(i, j)] {
-					cand[c] = struct{}{}
-				}
+	bb := x.(BoundingBoxer)
+	br := bb.BoundingBox().BoundingRect(d.proj)
+	min := br.Min.Div(d.chunkSize)
+	max := br.Max.Sub(image.Pt(1, 1)).Div(d.chunkSize)
+	cand := make(set)
+	for j := min.Y; j <= max.Y; j++ {
+		for i := min.X; i <= max.X; i++ {
+			cell := d.chunks[image.Pt(i, j)]
+			// Merge cell into cand
+			for c := range cell {
+				cand[c] = struct{}{}
 			}
+			// Add x to cell
+			cell[x] = struct{}{}
 		}
-		for c := range cand {
-			// TODO: x before or after c?
-			d.dag.addEdge(c, x)
-			d.dag.addEdge(x, c)
+	}
+	// Add edges between x and elements of cand
+	for c := range cand {
+		y := c.(Drawer)
+		switch {
+		case edge(y, x, d.proj.Sign()):
+			d.dag.addEdge(y, x)
+		case edge(x, y, d.proj.Sign()):
+			d.dag.addEdge(x, y)
 		}
-
-	case ZPositioner:
-		// TODO: Flat plane
-		d.planes[x] = struct{}{}
 	}
 }
 
