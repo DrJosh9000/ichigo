@@ -80,20 +80,20 @@ func (b Box) BoundingRect(π Projector) image.Rectangle {
 // Back returns an image.Rectangle representing the back of the box, using
 // the given projection π.
 func (b Box) Back(π Projector) image.Rectangle {
-	b.Max.Z = b.Min.Z
+	p := π.Project(Int3{0, 0, b.Min.Z})
 	return image.Rectangle{
-		Min: π.Project(b.Min),
-		Max: π.Project(b.Max),
+		Min: b.Min.XY().Add(p),
+		Max: b.Max.XY().Add(p),
 	}
 }
 
 // Front returns an image.Rectangle representing the front of the box, using
 // the given projection π.
 func (b Box) Front(π Projector) image.Rectangle {
-	b.Min.Z = b.Max.Z
+	p := π.Project(Int3{0, 0, b.Max.Z})
 	return image.Rectangle{
-		Min: π.Project(b.Min),
-		Max: π.Project(b.Max),
+		Min: b.Min.XY().Add(p),
+		Max: b.Max.XY().Add(p),
 	}
 }
 
