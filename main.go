@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	enableCPUProfile = false
+	enableCPUProfile = true
 	enableREPL       = true
 	hardcodedLevel1  = true
 	rewriteLevel1    = false

@@ -2,7 +2,6 @@ package engine
 
 import (
 	"image"
-	"math"
 
 	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -82,8 +81,6 @@ func edge(u, v Drawer, πsign image.Point) bool {
 	return false
 }
 
-var wholePlane = image.Rect(math.MinInt, math.MinInt, math.MaxInt, math.MaxInt)
-
 // Topological sort. Uses a projection π to flatten bounding boxes for
 // overlap tests, in order to reduce edge count.
 func (d *drawList) topsort(π geom.Projector) {
@@ -98,9 +95,10 @@ func (d *drawList) topsort(π geom.Projector) {
 			continue
 		}
 		// If we can't get a more specific bounding rect, assume entire plane.
-		ubr := wholePlane
-		if x, ok := u.(BoundingBoxer); ok {
-			ubr = x.BoundingBox().BoundingRect(π)
+		var ubr image.Rectangle
+		ub, brCheck := u.(BoundingBoxer)
+		if brCheck {
+			ubr = ub.BoundingBox().BoundingRect(π)
 		}
 		// For each possible neighbor...
 		for j, v := range d.list {
@@ -108,9 +106,11 @@ func (d *drawList) topsort(π geom.Projector) {
 				continue
 			}
 			// Does it have a bounding rect? Do overlap test.
-			if y, ok := v.(BoundingBoxer); ok {
-				if vbr := y.BoundingBox().BoundingRect(π); !ubr.Overlaps(vbr) {
-					continue
+			if brCheck {
+				if vb, ok := v.(BoundingBoxer); ok {
+					if vbr := vb.BoundingBox().BoundingRect(π); !ubr.Overlaps(vbr) {
+						continue
+					}
 				}
 			}
 
@@ -123,7 +123,7 @@ func (d *drawList) topsort(π geom.Projector) {
 	}
 
 	// Initialise queue with all the zero-indegree vertices
-	var queue []int
+	queue := make([]int, 0, len(d.list))
 	for i, n := range indegree {
 		if n == 0 {
 			queue = append(queue, i)
@@ -149,4 +149,128 @@ func (d *drawList) topsort(π geom.Projector) {
 	}
 	// Job done!
 	d.list = list
+}
+
+type drawDAG struct {
+	*dag
+	planes    set
+	chunks    map[image.Point]set
+	chunksRev map[Drawer]image.Rectangle
+	chunkSize int
+	proj      geom.Projector
+}
+
+func newDrawDAG(chunkSize int) *drawDAG {
+	return &drawDAG{
+		dag:       newDAG(),
+		planes:    make(set),                        // drawers that take up whole plane
+		chunks:    make(map[image.Point]set),        // chunk coord -> drawers with bounding rects intersecting chunk
+		chunksRev: make(map[Drawer]image.Rectangle), // drawer -> rectangle of chunk coords
+		chunkSize: chunkSize,
+	}
+}
+
+// add adds a Drawer and any needed edges to the DAG and chunk map.
+func (d *drawDAG) add(x Drawer) {
+	switch x := x.(type) {
+	case BoundingBoxer:
+		br := x.BoundingBox().BoundingRect(d.proj)
+		min := br.Min.Div(d.chunkSize)
+		max := br.Max.Sub(image.Pt(1, 1)).Div(d.chunkSize)
+		cand := make(set)
+		for j := min.Y; j <= max.Y; j++ {
+			for i := min.X; i <= max.X; i++ {
+				for c := range d.chunks[image.Pt(i, j)] {
+					cand[c] = struct{}{}
+				}
+			}
+		}
+		for c := range cand {
+			// TODO: x before or after c?
+			d.dag.addEdge(c, x)
+			d.dag.addEdge(x, c)
+		}
+
+	case ZPositioner:
+		// TODO: Flat plane
+		d.planes[x] = struct{}{}
+	}
+}
+
+type set map[interface{}]struct{}
+
+type dag struct {
+	in, out map[interface{}]set
+}
+
+func newDAG() *dag {
+	return &dag{
+		in:  make(map[interface{}]set),
+		out: make(map[interface{}]set),
+	}
+}
+
+// addEdge adds the edge u-v in O(1).
+func (d *dag) addEdge(u, v interface{}) {
+	if d.in[v] == nil {
+		d.in[v] = make(set)
+	}
+	if d.out[u] == nil {
+		d.out[u] = make(set)
+	}
+	d.in[v][u] = struct{}{}
+	d.out[u][v] = struct{}{}
+}
+
+// removeEdge removes the edge u-v in O(1).
+func (d *dag) removeEdge(u, v interface{}) {
+	delete(d.in[v], u)
+	delete(d.out[u], v)
+}
+
+// removeVertex removes all in and out edges associated with v in O(degree(v)).
+func (d *dag) removeVertex(v interface{}) {
+	for u := range d.in[v] {
+		// u-v is no longer an edge
+		delete(d.out[u], v)
+	}
+	for w := range d.out[v] {
+		// v-w is no longer an edge
+		delete(d.in[w], v)
+	}
+	delete(d.in, v)
+	delete(d.out, v)
+}
+
+// topIterate visits each vertex in topological order, in time O(|V| + |E|) and
+// O(|V|) temporary memory.
+func (d *dag) topIterate(visit func(interface{})) {
+	// Count indegrees - indegree(v) = len(d.in[v]) for each v.
+	// If indegree(v) = 0, enqueue. Total: O(|V|).
+	queue := make([]interface{}, 0, len(d.in))
+	indegree := make(map[interface{}]int)
+	for u, e := range d.in {
+		if len(e) == 0 {
+			queue = append(queue, u)
+		} else {
+			indegree[u] = len(e)
+		}
+	}
+
+	// Visit every vertex (O(|V|)) and decrement indegrees for every out edge
+	// of each vertex visited (O(|E|)). Total: O(|V|+|E|).
+	for len(queue) > 0 {
+		u := queue[0]
+		visit(u)
+		queue = queue[1:]
+
+		// Decrement indegree for all out edges, and enqueue target if its
+		// indegree is now 0.
+		for v := range d.out[u] {
+			indegree[v]--
+			if indegree[v] == 0 {
+				queue = append(queue, v)
+			}
+		}
+	}
 }
