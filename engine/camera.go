@@ -41,7 +41,7 @@ func (c *Camera) PointAt(centre geom.Int3, zoom float64) {
 	// Special sauce: if Child has a BoundingRect, make some adjustments
 	bnd, ok := c.Child.(BoundingRecter)
 	if !ok {
-		c.Centre = c.game.Projection.Project(centre)
+		c.Centre = geom.Project(c.game.Projection, centre)
 		c.Zoom = zoom
 		return
 	}
@@ -63,7 +63,7 @@ func (c *Camera) PointAt(centre geom.Int3, zoom float64) {
 	// Camera frame currently Rectangle{ centre ± (screen/(2*zoom)) }.
 	sw2, sh2 := geom.CFloat(c.game.ScreenSize.Div(2))
 	swz, shz := int(sw2/zoom), int(sh2/zoom)
-	cent := c.game.Projection.Project(centre)
+	cent := geom.Project(c.game.Projection, centre)
 	if cent.X-swz < br.Min.X {
 		cent.X = br.Min.X + swz
 	}

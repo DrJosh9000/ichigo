@@ -83,7 +83,7 @@ func (b *Billboard) String() string {
 // Transform returns a translation by the projected position.
 func (b *Billboard) Transform() (opts ebiten.DrawImageOptions) {
 	opts.GeoM.Translate(geom.CFloat(
-		b.game.Projection.Project(b.Pos),
+		geom.Project(b.game.Projection, b.Pos),
 	))
 	return opts
 }

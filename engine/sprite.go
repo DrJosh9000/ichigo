@@ -67,7 +67,8 @@ func (s *Sprite) Transform() (opts ebiten.DrawImageOptions) {
 		// Reaching into Actor for a reference to Game so I don't have to
 		// implement Prepare in this file, but writing this long comment
 		// providing exposition...
-		s.Actor.game.Projection.Project(s.Actor.Pos).Add(s.DrawOffset),
+		geom.Project(s.Actor.game.Projection, s.Actor.Pos).
+			Add(s.DrawOffset),
 	))
 	return opts
 }

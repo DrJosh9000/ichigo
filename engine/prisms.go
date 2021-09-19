@@ -212,7 +212,7 @@ func (p *Prism) String() string {
 // Transform returns a translation by the projected position.
 func (p *Prism) Transform() (opts ebiten.DrawImageOptions) {
 	opts.GeoM.Translate(geom.CFloat(
-		p.m.game.Projection.Project(p.pos),
+		geom.Project(p.m.game.Projection, p.pos),
 	))
 	return opts
 }
