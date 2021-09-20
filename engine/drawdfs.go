@@ -20,8 +20,6 @@ func (d *DrawDFS) DrawAll(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	}
 }
 
-func (d *DrawDFS) Scan() []interface{} { return d.Components }
-
 func (d *DrawDFS) draw(component interface{}, screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	// Hidden? stop drawing
 	if h, ok := component.(Hider); ok && h.Hidden() {
@@ -48,3 +46,5 @@ func (d *DrawDFS) draw(component interface{}, screen *ebiten.Image, opts ebiten.
 		}
 	}
 }
+
+func (d *DrawDFS) Scan() []interface{} { return d.Components }

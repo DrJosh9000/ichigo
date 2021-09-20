@@ -131,15 +131,18 @@ func (d *DrawDAG) Update() error {
 func (d *DrawDAG) Add(x DrawBoxer) {
 	πsign := d.proj.Sign()
 
+	// Ensure vertex is present
+	d.dag.addVertex(x)
+
 	// Update the box cache
-	bb := x.BoundingBox()
-	d.boxCache[x] = bb
+	xb := x.BoundingBox()
+	d.boxCache[x] = xb
 
 	// Update the reverse chunk map
-	br := bb.BoundingRect(d.proj)
+	xbr := xb.BoundingRect(d.proj)
 	revr := image.Rectangle{
-		Min: br.Min.Div(d.ChunkSize),
-		Max: br.Max.Sub(image.Pt(1, 1)).Div(d.ChunkSize),
+		Min: xbr.Min.Div(d.ChunkSize),
+		Max: xbr.Max.Sub(image.Pt(1, 1)).Div(d.ChunkSize),
 	}
 	d.chunksRev[x] = revr
 
@@ -167,14 +170,14 @@ func (d *DrawDAG) Add(x DrawBoxer) {
 		y := c.(DrawBoxer)
 		// Bounding rectangle overlap test
 		// No overlap, no edge.
-		if ybr := y.BoundingBox().BoundingRect(d.proj); !br.Overlaps(ybr) {
+		if ybr := y.BoundingBox().BoundingRect(d.proj); !xbr.Overlaps(ybr) {
 			continue
 		}
 		switch {
-		case drawOrderConstraint(y, x, πsign):
-			d.dag.addEdge(y, x)
 		case drawOrderConstraint(x, y, πsign):
 			d.dag.addEdge(x, y)
+		case drawOrderConstraint(y, x, πsign):
+			d.dag.addEdge(y, x)
 		}
 	}
 }
@@ -290,6 +293,11 @@ func (d *dag) removeEdge(u, v Drawer) {
 	delete(d.out[u], v)
 }
 */
+
+// addVertex ensures the vertex is present, even if there are no edges.
+func (d *dag) addVertex(v Drawer) {
+	d.all[v] = struct{}{}
+}
 
 // removeVertex removes all in and out edges associated with v in O(degree(v)).
 func (d *dag) removeVertex(v Drawer) {
