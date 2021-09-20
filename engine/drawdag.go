@@ -95,15 +95,13 @@ func (d *DrawDAG) Prepare(game *Game) error {
 	d.chunksRev = make(map[DrawBoxer]image.Rectangle)
 	d.game = game
 
-	// Descendants might not be prepared yet, so fill the cache with zero boxes
-	// and fill remaining data structures during update
-	// TODO: work out a how to prepare the descendants first
-	return PreorderWalk(d, func(c, _ interface{}) error {
-		if db, ok := c.(DrawBoxer); ok {
-			d.boxCache[db] = geom.Box{}
-		}
-		return nil
-	})
+	// Because Game.LoadAndPrepare calls Prepare in a post-order walk, all the
+	// descendants should be prepared, meaning BoundingBox (and Add) is likely
+	// to be a safe call.
+	for db := range game.Query(d, DrawBoxerType) {
+		d.Add(db.(DrawBoxer))
+	}
+	return nil
 }
 
 func (d *DrawDAG) Scan() []interface{} { return d.Components }
@@ -284,13 +282,11 @@ func (d *dag) addEdge(u, v Drawer) {
 	d.out[u][v] = struct{}{}
 }
 
-/*
 // removeEdge removes the edge u-v in O(1).
 func (d *dag) removeEdge(u, v Drawer) {
 	delete(d.in[v], u)
 	delete(d.out[u], v)
 }
-*/
 
 // addVertex ensures the vertex is present, even if there are no edges.
 func (d *dag) addVertex(v Drawer) {
@@ -300,15 +296,11 @@ func (d *dag) addVertex(v Drawer) {
 // removeVertex removes all in and out edges associated with v in O(degree(v)).
 func (d *dag) removeVertex(v Drawer) {
 	for u := range d.in[v] {
-		// u-v is no longer an edge
-		delete(d.out[u], v)
+		d.removeEdge(u, v)
 	}
 	for w := range d.out[v] {
-		// v-w is no longer an edge
-		delete(d.in[w], v)
+		d.removeEdge(v, w)
 	}
-	delete(d.in, v)
-	delete(d.out, v)
 	delete(d.all, v)
 }
 

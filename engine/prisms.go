@@ -31,7 +31,7 @@ func init() {
 	gob.Register(&Prism{})
 }
 
-// PrismMap is a generalised 3D tilemap/wallmap/etc.
+// PrismMap is a generalised 3D tilemap/wallmap/voxelmap etc.
 type PrismMap struct {
 	ID
 	Disables

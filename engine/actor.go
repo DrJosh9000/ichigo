@@ -38,7 +38,8 @@ func (a *Actor) BoundingBox() geom.Box {
 // given position (not necessarily a.Pos).
 func (a *Actor) CollidesAt(p geom.Int3) bool {
 	bounds := a.Bounds.Add(p)
-	for c := range a.game.Query(a.CollisionDomain, ColliderType) {
+	cd := a.game.Component(a.CollisionDomain)
+	for c := range a.game.Query(cd, ColliderType) {
 		if c.(Collider).CollidesWith(bounds) {
 			return true
 		}

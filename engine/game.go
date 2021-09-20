@@ -82,7 +82,7 @@ func (g *Game) Update() error {
 
 	// Update everything that is not disabled.
 	// TODO: do it in a fixed order? map essentially randomises iteration order
-	for u := range g.Query(g.Ident(), UpdaterType) {
+	for u := range g.Query(g, UpdaterType) {
 		// Skip g (note g satisfies Updater, so this would infinitely recurse)
 		if u == g {
 			continue
@@ -154,10 +154,10 @@ func (g *Game) Parent(c interface{}) interface{} {
 // Query looks for components having both a given ancestor and implementing
 // a given behaviour (see Behaviors in interface.go). This only returns sensible
 // values after LoadAndPrepare. Note that every component is its own ancestor.
-func (g *Game) Query(ancestorID string, behaviour reflect.Type) map[interface{}]struct{} {
+func (g *Game) Query(ancestor interface{}, behaviour reflect.Type) map[interface{}]struct{} {
 	g.dbmu.RLock()
 	defer g.dbmu.RUnlock()
-	return g.byAB[abKey{ancestorID, behaviour}]
+	return g.byAB[abKey{ancestor, behaviour}]
 }
 
 // Scan implements Scanner.
@@ -198,7 +198,7 @@ func preorderWalk(component, parent interface{}, visit func(component, parent in
 // value passed to visit when visiting component will be nil. The children will
 // be visited before the parent.
 func PostorderWalk(component interface{}, visit func(component, parent interface{}) error) error {
-	return preorderWalk(component, nil, visit)
+	return postorderWalk(component, nil, visit)
 }
 
 func postorderWalk(component, parent interface{}, visit func(component, parent interface{}) error) error {
@@ -223,11 +223,10 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	// Load all the Loaders.
 	startLoad := time.Now()
 	if err := PreorderWalk(g, func(c, _ interface{}) error {
-		l, ok := c.(Loader)
-		if !ok {
-			return nil
+		if l, ok := c.(Loader); ok {
+			return l.Load(assets)
 		}
-		return l.Load(assets)
+		return nil
 	}); err != nil {
 		return err
 	}
@@ -247,11 +246,15 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 
 	// Prepare all the Preppers
 	startPrep := time.Now()
-	for p := range g.Query(g.Ident(), PrepperType) {
-		if err := p.(Prepper).Prepare(g); err != nil {
-			return err
+	if err := PostorderWalk(g, func(c, _ interface{}) error {
+		if p, ok := c.(Prepper); ok {
+			return p.Prepare(g)
 		}
+		return nil
+	}); err != nil {
+		return err
 	}
+
 	log.Printf("finished preparing in %v", time.Since(startPrep))
 	return nil
 }
@@ -270,7 +273,7 @@ func (g *Game) Register(component, parent interface{}) error {
 	}
 	g.dbmu.Lock()
 	defer g.dbmu.Unlock()
-	// walk goes in the right order for registering.
+	// preorderWalk goes in the right order for registering.
 	return preorderWalk(component, parent, g.register)
 }
 
@@ -298,11 +301,7 @@ func (g *Game) register(component, parent interface{}) error {
 		}
 		// TODO: better than O(len(path)^2) time and memory?
 		for p := component; p != nil; p = g.par[p] {
-			id, ok := p.(Identifier)
-			if !ok || id.Ident() == "" {
-				continue
-			}
-			k := abKey{id.Ident(), b}
+			k := abKey{p, b}
 			if g.byAB[k] == nil {
 				g.byAB[k] = make(map[interface{}]struct{})
 			}
@@ -320,14 +319,12 @@ func (g *Game) Unregister(component interface{}) {
 		return
 	}
 	g.dbmu.Lock()
-	postorderWalk(component, nil, func(c, _ interface{}) error {
-		g.unregister(c)
-		return nil
-	})
+	// postorderWalk goes in the right order for unregistering.
+	postorderWalk(component, nil, g.unregister)
 	g.dbmu.Unlock()
 }
 
-func (g *Game) unregister(component interface{}) {
+func (g *Game) unregister(component, _ interface{}) error {
 	// unregister from g.byAB, using g.par to trace the path
 	ct := reflect.TypeOf(component)
 	for _, b := range Behaviours {
@@ -335,15 +332,9 @@ func (g *Game) unregister(component interface{}) {
 			continue
 		}
 		for p := component; p != nil; p = g.par[p] {
-			id, ok := p.(Identifier)
-			if !ok || id.Ident() == "" {
-				continue
+			if k := (abKey{p, b}); g.byAB[k] != nil {
+				delete(g.byAB[k], component)
 			}
-			k := abKey{id.Ident(), b}
-			if g.byAB[k] == nil {
-				continue
-			}
-			delete(g.byAB[k], component)
 		}
 	}
 
@@ -354,12 +345,13 @@ func (g *Game) unregister(component interface{}) {
 	if id, ok := component.(Identifier); ok && id.Ident() != "" {
 		delete(g.byID, id.Ident())
 	}
+	return nil
 }
 
 // --------- Helper stuff ---------
 
 type abKey struct {
-	ancestor  string
+	ancestor  interface{}
 	behaviour reflect.Type
 }
 

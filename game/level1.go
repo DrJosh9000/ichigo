@@ -17,7 +17,7 @@ func Level1() *engine.Scene {
 				CameraID: "game_camera",
 				Child: &engine.Billboard{
 					ID:  "bg_image",
-					Pos: geom.Pt3(-160, -120, -1),
+					Pos: geom.Pt3(-160, -20, -100),
 					Src: engine.ImageRef{Path: "assets/space.png"},
 				},
 				Factor: 0.5,
