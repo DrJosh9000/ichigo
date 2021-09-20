@@ -39,9 +39,3 @@ func (h *Hides) Hide() { *h = true }
 
 // Show sets h to false.
 func (h *Hides) Show() { *h = false }
-
-// ZPosition implements ZPositioner directly (as an int).
-type ZPosition int
-
-// ZPos returns itself.
-func (z ZPosition) ZPos() int { return int(z) }

@@ -44,7 +44,6 @@ type Tilemap struct {
 	Ersatz bool                 // disables collisions ("fake wall")
 	Offset image.Point          // world coordinates
 	Sheet  Sheet
-	ZPosition
 }
 
 // CollidesWith implements Collider.

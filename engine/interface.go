@@ -17,7 +17,10 @@ var (
 	BoundingBoxerType  = reflect.TypeOf((*BoundingBoxer)(nil)).Elem()
 	ColliderType       = reflect.TypeOf((*Collider)(nil)).Elem()
 	DisablerType       = reflect.TypeOf((*Disabler)(nil)).Elem()
+	DrawLayerType      = reflect.TypeOf((*DrawLayer)(nil)).Elem()
 	DrawerType         = reflect.TypeOf((*Drawer)(nil)).Elem()
+	DrawBoxerType      = reflect.TypeOf((*DrawBoxer)(nil)).Elem()
+	DrawOrdererType    = reflect.TypeOf((*DrawOrderer)(nil)).Elem()
 	HiderType          = reflect.TypeOf((*Hider)(nil)).Elem()
 	IdentifierType     = reflect.TypeOf((*Identifier)(nil)).Elem()
 	LoaderType         = reflect.TypeOf((*Loader)(nil)).Elem()
@@ -33,7 +36,10 @@ var (
 		BoundingBoxerType,
 		ColliderType,
 		DisablerType,
+		DrawLayerType,
 		DrawerType,
+		DrawBoxerType,
+		DrawOrdererType,
 		HiderType,
 		IdentifierType,
 		LoaderType,

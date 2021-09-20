@@ -1,7 +1,9 @@
 package engine
 
 import (
+	"fmt"
 	"image"
+	"strings"
 
 	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
@@ -17,6 +19,7 @@ type DrawDAG struct {
 	Hides
 
 	*dag
+	boxCache  map[DrawBoxer]geom.Box
 	chunks    map[image.Point]drawerSet     // chunk coord -> drawers with bounding rects intersecting chunk
 	chunksRev map[DrawBoxer]image.Rectangle // comopnent -> rectangle of chunk coords
 	parent    func(x interface{}) interface{}
@@ -88,15 +91,18 @@ func (d *DrawDAG) DrawAll(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 
 func (d *DrawDAG) Prepare(game *Game) error {
 	d.dag = newDAG()
+	d.boxCache = make(map[DrawBoxer]geom.Box)
 	d.chunks = make(map[image.Point]drawerSet)
 	d.chunksRev = make(map[DrawBoxer]image.Rectangle)
 	d.parent = game.Parent
 	d.proj = game.Projection
 
-	// Load all descendants into the DAG
+	// Descendants might not be prepared yet, so fill the cache with zero boxes
+	// and fill remaining data structures during update
+	// TODO: work out a system for dependent prepares........ sync.Once?
 	return PreorderWalk(d, func(c, _ interface{}) error {
 		if db, ok := c.(DrawBoxer); ok {
-			d.Add(db)
+			d.boxCache[db] = geom.Box{}
 		}
 		return nil
 	})
@@ -104,16 +110,39 @@ func (d *DrawDAG) Prepare(game *Game) error {
 
 func (d *DrawDAG) Scan() []interface{} { return d.Components }
 
+func (d *DrawDAG) Update() error {
+	// Re-evaluate bounding boxes for all descendants. If a box has changed,
+	// fix up the edges by removing and re-adding the vertex.
+	var readd []DrawBoxer
+	for db, bb := range d.boxCache {
+		nbb := db.BoundingBox()
+		if bb != nbb {
+			d.Remove(db)
+			readd = append(readd, db)
+		}
+	}
+	for _, db := range readd {
+		d.Add(db)
+	}
+	return nil
+}
+
 // Add adds a Drawer and any needed edges to the DAG and chunk map.
 func (d *DrawDAG) Add(x DrawBoxer) {
 	πsign := d.proj.Sign()
-	br := x.BoundingBox().BoundingRect(d.proj)
+
+	// Update the box cache
+	bb := x.BoundingBox()
+	d.boxCache[x] = bb
+
 	// Update the reverse chunk map
+	br := bb.BoundingRect(d.proj)
 	revr := image.Rectangle{
 		Min: br.Min.Div(d.ChunkSize),
 		Max: br.Max.Sub(image.Pt(1, 1)).Div(d.ChunkSize),
 	}
 	d.chunksRev[x] = revr
+
 	// Find possible edges between x and items in the overlapping cells.
 	// First, a set of all the items in those cells.
 	cand := make(drawerSet)
@@ -208,19 +237,42 @@ func drawOrderConstraint(u, v DrawBoxer, πsign image.Point) bool {
 
 type drawerSet map[Drawer]struct{}
 
+func (s drawerSet) String() string {
+	var sb strings.Builder
+	sb.WriteString("{ ")
+	for x := range s {
+		fmt.Fprintf(&sb, "%v ", x)
+	}
+	sb.WriteString("}")
+	return sb.String()
+}
+
 type dag struct {
+	all     drawerSet
 	in, out map[Drawer]drawerSet
 }
 
 func newDAG() *dag {
 	return &dag{
+		all: make(drawerSet),
 		in:  make(map[Drawer]drawerSet),
 		out: make(map[Drawer]drawerSet),
 	}
 }
 
+func (d *dag) String() string {
+	var sb strings.Builder
+	sb.WriteString("digraph {\n")
+	for v, e := range d.out {
+		fmt.Fprintf(&sb, "%v -> %v\n", v, e)
+	}
+	sb.WriteString(" }\n")
+	return sb.String()
+}
+
 // addEdge adds the edge u-v in O(1).
 func (d *dag) addEdge(u, v Drawer) {
+	d.all[u], d.all[v] = struct{}{}, struct{}{}
 	if d.in[v] == nil {
 		d.in[v] = make(drawerSet)
 	}
@@ -231,11 +283,13 @@ func (d *dag) addEdge(u, v Drawer) {
 	d.out[u][v] = struct{}{}
 }
 
+/*
 // removeEdge removes the edge u-v in O(1).
 func (d *dag) removeEdge(u, v Drawer) {
 	delete(d.in[v], u)
 	delete(d.out[u], v)
 }
+*/
 
 // removeVertex removes all in and out edges associated with v in O(degree(v)).
 func (d *dag) removeVertex(v Drawer) {
@@ -249,6 +303,7 @@ func (d *dag) removeVertex(v Drawer) {
 	}
 	delete(d.in, v)
 	delete(d.out, v)
+	delete(d.all, v)
 }
 
 // topIterate visits each vertex in topological order, in time O(|V| + |E|) and
@@ -258,7 +313,9 @@ func (d *dag) topIterate(visit func(Drawer)) {
 	// If indegree(v) = 0, enqueue. Total: O(|V|).
 	queue := make([]Drawer, 0, len(d.in))
 	indegree := make(map[Drawer]int)
-	for u, e := range d.in {
+	for u := range d.all {
+		// NB: zero indegree vertices may be missing from d.in
+		e := d.in[u]
 		if len(e) == 0 {
 			queue = append(queue, u)
 		} else {
