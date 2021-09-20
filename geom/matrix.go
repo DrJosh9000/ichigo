@@ -117,17 +117,17 @@ func (a RatMatrix3) Adjugate() RatMatrix3 {
 	return RatMatrix3{
 		0: [3]Rat{
 			0: a[1][1].Mul(a[2][2]).Sub(a[1][2].Mul(a[2][1])),
-			1: a[0][1].Mul(a[2][2]).Sub(a[0][2].Mul(a[2][1])).Neg(),
+			1: a[0][2].Mul(a[2][1]).Sub(a[0][1].Mul(a[2][2])),
 			2: a[0][1].Mul(a[1][2]).Sub(a[0][2].Mul(a[1][1])),
 		},
 		1: [3]Rat{
-			0: a[1][0].Mul(a[2][2]).Sub(a[1][2].Mul(a[2][0])).Neg(),
+			0: a[1][2].Mul(a[2][0]).Sub(a[1][0].Mul(a[2][2])),
 			1: a[0][0].Mul(a[2][2]).Sub(a[0][2].Mul(a[2][0])),
-			2: a[0][0].Mul(a[1][2]).Sub(a[0][2].Mul(a[1][0])).Neg(),
+			2: a[0][2].Mul(a[1][0]).Sub(a[0][0].Mul(a[1][2])),
 		},
 		2: [3]Rat{
 			0: a[1][0].Mul(a[2][1]).Sub(a[1][1].Mul(a[2][0])),
-			1: a[0][0].Mul(a[2][1]).Sub(a[0][1].Mul(a[2][0])).Neg(),
+			1: a[0][1].Mul(a[2][0]).Sub(a[0][0].Mul(a[2][1])),
 			2: a[0][0].Mul(a[1][1]).Sub(a[0][1].Mul(a[1][0])),
 		},
 	}

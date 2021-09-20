@@ -11,8 +11,8 @@ import (
 
 // DrawDAG is a DrawLayer that organises DrawBoxer descendants in a directed
 // acyclic graph (DAG), in order to draw them according to ordering constraints.
-// It combines a DAG with a spatial index used when adding new vertices
-// in order to reduce the number of tests between components.
+// It combines a DAG with a spatial index used when updating vertices to reduce
+// the number of tests between components.
 type DrawDAG struct {
 	ChunkSize  int
 	Components []interface{}
@@ -22,8 +22,7 @@ type DrawDAG struct {
 	boxCache  map[DrawBoxer]geom.Box
 	chunks    map[image.Point]drawerSet     // chunk coord -> drawers with bounding rects intersecting chunk
 	chunksRev map[DrawBoxer]image.Rectangle // comopnent -> rectangle of chunk coords
-	parent    func(x interface{}) interface{}
-	proj      geom.Projector
+	game      *Game
 }
 
 // Draw draws everything in the DAG in topological order.
@@ -55,7 +54,7 @@ func (d *DrawDAG) DrawAll(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 		// Walk up game tree to find the nearest state in cache.
 		var st state
 		stack := []interface{}{x}
-		for p := d.parent(x); ; p = d.parent(p) {
+		for p := d.game.Parent(x); ; p = d.game.Parent(p) {
 			if s, found := cache[p]; found {
 				st = s
 				break
@@ -94,12 +93,11 @@ func (d *DrawDAG) Prepare(game *Game) error {
 	d.boxCache = make(map[DrawBoxer]geom.Box)
 	d.chunks = make(map[image.Point]drawerSet)
 	d.chunksRev = make(map[DrawBoxer]image.Rectangle)
-	d.parent = game.Parent
-	d.proj = game.Projection
+	d.game = game
 
 	// Descendants might not be prepared yet, so fill the cache with zero boxes
 	// and fill remaining data structures during update
-	// TODO: work out a system for dependent prepares........ sync.Once?
+	// TODO: work out a how to prepare the descendants first
 	return PreorderWalk(d, func(c, _ interface{}) error {
 		if db, ok := c.(DrawBoxer); ok {
 			d.boxCache[db] = geom.Box{}
@@ -113,6 +111,7 @@ func (d *DrawDAG) Scan() []interface{} { return d.Components }
 func (d *DrawDAG) Update() error {
 	// Re-evaluate bounding boxes for all descendants. If a box has changed,
 	// fix up the edges by removing and re-adding the vertex.
+	// TODO: ensure this happens after updates for the descendants.
 	var readd []DrawBoxer
 	for db, bb := range d.boxCache {
 		nbb := db.BoundingBox()
@@ -129,8 +128,6 @@ func (d *DrawDAG) Update() error {
 
 // Add adds a Drawer and any needed edges to the DAG and chunk map.
 func (d *DrawDAG) Add(x DrawBoxer) {
-	πsign := d.proj.Sign()
-
 	// Ensure vertex is present
 	d.dag.addVertex(x)
 
@@ -139,7 +136,7 @@ func (d *DrawDAG) Add(x DrawBoxer) {
 	d.boxCache[x] = xb
 
 	// Update the reverse chunk map
-	xbr := xb.BoundingRect(d.proj)
+	xbr := xb.BoundingRect(d.game.Projection)
 	revr := image.Rectangle{
 		Min: xbr.Min.Div(d.ChunkSize),
 		Max: xbr.Max.Sub(image.Pt(1, 1)).Div(d.ChunkSize),
@@ -166,11 +163,12 @@ func (d *DrawDAG) Add(x DrawBoxer) {
 		}
 	}
 	// Add edges between x and elements of cand
+	πsign := d.game.Projection.Sign()
 	for c := range cand {
 		y := c.(DrawBoxer)
 		// Bounding rectangle overlap test
 		// No overlap, no edge.
-		if ybr := y.BoundingBox().BoundingRect(d.proj); !xbr.Overlaps(ybr) {
+		if ybr := y.BoundingBox().BoundingRect(d.game.Projection); !xbr.Overlaps(ybr) {
 			continue
 		}
 		switch {
