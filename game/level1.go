@@ -2,7 +2,6 @@ package game
 
 import (
 	"image"
-	"image/color"
 
 	"drjosh.dev/gurgle/engine"
 	"drjosh.dev/gurgle/geom"
@@ -14,11 +13,6 @@ func Level1() *engine.Scene {
 		ID:     "level_1",
 		Bounds: engine.Bounds(image.Rect(-32, -32, 320+32, 240+32)),
 		Components: []interface{}{
-			&engine.Fill{
-				ID:        "bg_fill",
-				Color:     color.Gray{100},
-				ZPosition: -1000,
-			},
 			&engine.Parallax{
 				CameraID: "game_camera",
 				Child: &engine.Billboard{

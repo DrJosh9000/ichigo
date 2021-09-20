@@ -13,10 +13,7 @@ import (
 
 	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 )
-
-const showDrawListSize = false
 
 var _ interface {
 	Disabler
@@ -42,15 +39,14 @@ type Game struct {
 	Disables
 	Hides
 	ScreenSize image.Point
-	Root       interface{} // typically a *Scene or SceneRef though
+	Roots      []DrawLayer
 	Projection geom.Projector
 	VoxelScale geom.Float3
 
-	dbmu     sync.RWMutex
-	byID     map[string]Identifier              // Named components by ID
-	byAB     map[abKey]map[interface{}]struct{} // Ancestor/behaviour index
-	drawList drawList                           // draw list :|
-	par      map[interface{}]interface{}        // par[x] is parent of x
+	dbmu sync.RWMutex
+	byID map[string]Identifier              // Named components by ID
+	byAB map[abKey]map[interface{}]struct{} // Ancestor/behaviour index
+	par  map[interface{}]interface{}        // par[x] is parent of x
 }
 
 // Draw draws everything.
@@ -59,64 +55,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		return
 	}
 
-	// Hiding a parent component should hide the child objects, and the
-	// transform applied to a child should be the cumulative transform of all
-	// parents as well.
-	// cache memoises the results for each component.
-	type state struct {
-		hidden bool
-		opts   ebiten.DrawImageOptions
-	}
-	cache := map[interface{}]state{
-		g: {hidden: false},
-	}
-	// Draw everything in g.drawList, where not hidden (itself or any parent)
-	for _, d := range g.drawList.list {
-		// Is d hidden itself?
-		if h, ok := d.(Hider); ok && h.Hidden() {
-			cache[d] = state{hidden: true}
-			continue // skip drawing
-		}
-		// Walk up g.par to find the nearest state in accum.
-		var st state
-		stack := []interface{}{d}
-		for p := g.par[d]; ; p = g.par[p] {
-			if s, found := cache[p]; found {
-				st = s
-				break
-			}
-			stack = append(stack, p)
-		}
-		// Unwind the stack, accumulating state along the way.
-		for len(stack) > 0 {
-			l1 := len(stack) - 1
-			p := stack[l1]
-			stack = stack[:l1]
-			if h, ok := p.(Hider); ok {
-				st.hidden = st.hidden || h.Hidden()
-			}
-			if st.hidden {
-				cache[p] = state{hidden: true}
-				continue
-			}
-			// p is not hidden, so compute its cumulative opts.
-			if tf, ok := p.(Transformer); ok {
-				st.opts = concatOpts(tf.Transform(), st.opts)
-			}
-			cache[p] = st
-		}
-
-		// Skip drawing if hidden.
-		if st.hidden {
-			continue
-		}
-		d.Draw(screen, &st.opts)
-	}
-
-	if showDrawListSize {
-		// Infodump about draw list
-		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("len(drawList.list) = %d", len(g.drawList.list)), 0, 30)
-		ebitenutil.DebugPrintAt(screen, fmt.Sprintf("len(drawList.rev) = %d", len(g.drawList.list)), 0, 45)
+	// Make all draw managers draw, in order.
+	opts := &ebiten.DrawImageOptions{}
+	for _, dm := range g.Roots {
+		dm.DrawAll(screen, opts)
 	}
 }
 
@@ -184,7 +126,7 @@ func (g *Game) Update() error {
 	}
 
 	// Sort the draw list (on every frame - this isn't as bad as it sounds)
-	g.drawList.topsort(g.Projection)
+	//g.drawList.topsort(g.Projection)
 	return nil
 }
 
@@ -219,7 +161,13 @@ func (g *Game) Query(ancestorID string, behaviour reflect.Type) map[interface{}]
 }
 
 // Scan implements Scanner.
-func (g *Game) Scan() []interface{} { return []interface{}{g.Root} }
+func (g *Game) Scan() []interface{} {
+	rs := make([]interface{}, 0, len(g.Roots))
+	for _, r := range g.Roots {
+		rs = append(rs, r)
+	}
+	return rs
+}
 
 // PreorderWalk calls visit with every component and its parent, reachable from
 // the  given component via Scan, for as long as visit returns nil. The parent
@@ -290,8 +238,6 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	g.dbmu.Lock()
 	g.byID = make(map[string]Identifier)
 	g.byAB = make(map[abKey]map[interface{}]struct{})
-	g.drawList.list = nil
-	g.drawList.rev = make(map[Drawer]int)
 	g.par = make(map[interface{}]interface{})
 	if err := PreorderWalk(g, g.register); err != nil {
 		return err
@@ -342,16 +288,6 @@ func (g *Game) register(component, parent interface{}) error {
 	// register in g.par
 	if parent != nil {
 		g.par[component] = parent
-	}
-
-	// register in g.drawList
-	if d, ok := component.(Drawer); ok {
-		if _, exists := g.drawList.rev[d]; exists {
-			// already registered
-			return fmt.Errorf("double registration of %v", d)
-		}
-		g.drawList.rev[d] = len(g.drawList.list)
-		g.drawList.list = append(g.drawList.list, d)
 	}
 
 	// register in g.byAB
@@ -413,14 +349,6 @@ func (g *Game) unregister(component interface{}) {
 
 	// unregister from g.par
 	delete(g.par, component)
-
-	// unregister from g.drawList
-	if d, ok := component.(Drawer); ok {
-		if i, found := g.drawList.rev[d]; found {
-			g.drawList.list[i] = tombstone{}
-			delete(g.drawList.rev, d)
-		}
-	}
 
 	// unregister from g.byID if needed
 	if id, ok := component.(Identifier); ok && id.Ident() != "" {

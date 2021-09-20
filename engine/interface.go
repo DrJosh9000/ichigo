@@ -67,11 +67,25 @@ type Disabler interface {
 	Enable()
 }
 
-// Drawer components can draw themselves. Draw is called often. Each component
-// must call Draw on any internal components not known to the engine (i.e. not
-// passed to Game.Register or returned from Scan).
+// DrawLayer is a component responsible for calling Draw on all Drawer
+// components beneath it, except those beneath another DrawLayer (it calls
+// DrawAll on those).
+type DrawLayer interface {
+	DrawAll(*ebiten.Image, *ebiten.DrawImageOptions)
+}
+
+// Drawer components can draw themselves. Draw is called often. Draw is not
+// requierd to call Draw on subcomponents, if they are known to the engine
+// (as part of a DrawManager).
 type Drawer interface {
 	Draw(*ebiten.Image, *ebiten.DrawImageOptions)
+}
+
+// DrawBoxer components can both draw and have a bounding box (used for draw
+// ordering).
+type DrawBoxer interface {
+	BoundingBoxer
+	Drawer
 }
 
 // DrawOrderer components have more specific ideas about draw ordering than

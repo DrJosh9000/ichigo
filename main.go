@@ -2,6 +2,7 @@ package main
 
 import (
 	"image"
+	"image/color"
 	_ "image/png"
 	"log"
 	"math"
@@ -61,20 +62,30 @@ func main() {
 			Y: 1,
 		},
 		VoxelScale: geom.Float3{
-			// Each voxel counts for this much Eucliden space.
+			// Each voxel counts for this much (Euclidean) space.
 			X: 1,
 			Y: 1,
 			Z: math.Sqrt(3),
 		},
-		Root: &engine.Scene{
-			ID: "root",
-			Components: []interface{}{
-				&engine.Camera{
-					ID:    "game_camera",
-					Child: lev1,
+		Roots: []engine.DrawLayer{
+			&engine.DrawDFS{
+				Components: []interface{}{
+					&engine.Fill{
+						ID:    "bg_fill",
+						Color: color.Gray{100},
+					},
+					&engine.DrawDAG{
+						ChunkSize: 16,
+						Components: []interface{}{
+							&engine.Camera{
+								ID:    "game_camera",
+								Child: lev1,
+							},
+						},
+					},
+					&engine.DebugToast{ID: "toast", Pos: image.Pt(0, 15)},
+					engine.PerfDisplay{},
 				},
-				&engine.DebugToast{ID: "toast", Pos: image.Pt(0, 15)},
-				engine.PerfDisplay{},
 			},
 		},
 	}

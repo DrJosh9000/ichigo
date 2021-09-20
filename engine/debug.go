@@ -40,19 +40,6 @@ func (d *DebugToast) Draw(screen *ebiten.Image, _ *ebiten.DrawImageOptions) {
 	ebitenutil.DebugPrintAt(screen, d.Text, d.Pos.X, d.Pos.Y)
 }
 
-// Draw last.
-func (DebugToast) DrawAfter(x Drawer) bool {
-	switch x.(type) {
-	case *DebugToast, PerfDisplay:
-		return false
-	}
-	return true
-}
-
-func (DebugToast) DrawBefore(x Drawer) bool {
-	return false
-}
-
 func (d *DebugToast) String() string {
 	return fmt.Sprintf("DebugToast@%v", d.Pos)
 }
@@ -77,19 +64,6 @@ type PerfDisplay struct {
 
 func (p PerfDisplay) Draw(screen *ebiten.Image, _ *ebiten.DrawImageOptions) {
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f  FPS: %0.2f", ebiten.CurrentTPS(), ebiten.CurrentFPS()))
-}
-
-// Draw last.
-func (PerfDisplay) DrawAfter(x Drawer) bool {
-	switch x.(type) {
-	case *DebugToast, PerfDisplay:
-		return false
-	}
-	return true
-}
-
-func (PerfDisplay) DrawBefore(Drawer) bool {
-	return false
 }
 
 func (PerfDisplay) String() string { return "PerfDisplay" }
