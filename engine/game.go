@@ -81,17 +81,20 @@ func (g *Game) Update() error {
 	}
 
 	// Update everything that is not disabled.
-	// TODO: do it in a fixed order? map essentially randomises iteration order
-	for u := range g.Query(g, UpdaterType) {
+	return PostorderWalk(g, func(c, _ interface{}) error {
 		// Skip g (note g satisfies Updater, so this would infinitely recurse)
-		if u == g {
-			continue
+		if c == g {
+			return nil
+		}
+		u, ok := c.(Updater)
+		if !ok {
+			return nil
 		}
 
 		// Is u disabled itself?
 		if d, ok := u.(Disabler); ok && d.Disabled() {
 			cache[u] = true
-			continue
+			return nil
 		}
 
 		// Walk up g.par to find the nearest state in accum.
@@ -117,17 +120,12 @@ func (g *Game) Update() error {
 
 		// Skip updating if disabled.
 		if st {
-			continue
+			return nil
 		}
 
-		if err := u.(Updater).Update(); err != nil {
-			return err
-		}
-	}
-
-	// Sort the draw list (on every frame - this isn't as bad as it sounds)
-	//g.drawList.topsort(g.Projection)
-	return nil
+		// Update
+		return u.Update()
+	})
 }
 
 // Ident returns "__GAME__".

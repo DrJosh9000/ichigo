@@ -19,7 +19,7 @@ type DrawDAG struct {
 	Hides
 
 	*dag
-	boxCache  map[DrawBoxer]geom.Box
+	boxCache  map[DrawBoxer]geom.Box        // used to find components that moved
 	chunks    map[image.Point]drawerSet     // chunk coord -> drawers with bounding rects intersecting chunk
 	chunksRev map[DrawBoxer]image.Rectangle // comopnent -> rectangle of chunk coords
 	game      *Game
@@ -45,6 +45,7 @@ func (d *DrawDAG) DrawAll(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 		},
 	}
 	// Draw everything in d.dag, where not hidden (itself or any parent)
+	// TODO: handle descendant DrawLayers
 	d.dag.topIterate(func(x Drawer) {
 		// Is d hidden itself?
 		if h, ok := x.(Hider); ok && h.Hidden() {
@@ -88,6 +89,7 @@ func (d *DrawDAG) DrawAll(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	})
 }
 
+// Prepare adds all subcomponents to the DAG.
 func (d *DrawDAG) Prepare(game *Game) error {
 	d.dag = newDAG()
 	d.boxCache = make(map[DrawBoxer]geom.Box)
@@ -109,7 +111,8 @@ func (d *DrawDAG) Scan() []interface{} { return d.Components }
 func (d *DrawDAG) Update() error {
 	// Re-evaluate bounding boxes for all descendants. If a box has changed,
 	// fix up the edges by removing and re-adding the vertex.
-	// TODO: ensure this happens after updates for the descendants.
+	// Thanks once again to postorder traversal, this happens after all
+	// descendant updates.
 	var readd []DrawBoxer
 	for db, bb := range d.boxCache {
 		nbb := db.BoundingBox()
