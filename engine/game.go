@@ -81,7 +81,7 @@ func (g *Game) updateRecursive(c interface{}) error {
 			}
 		}
 	}
-	if c == g {
+	if c == g { // prevent infinite recursion
 		return nil
 	}
 	if u, ok := c.(Updater); ok {
@@ -134,7 +134,8 @@ func (g *Game) PathUnregister(component interface{}) {
 	}
 }
 
-// Path returns a slice with the path of components to reach component from g.
+// Path returns a slice with the path of components to reach component from g
+// (including g and component).
 func (g *Game) Path(component interface{}) []interface{} {
 	stack := g.ReversePath(component)
 	for i, j := 0, len(stack)-1; i < j; i, j = i+1, j-1 {
