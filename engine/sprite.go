@@ -41,8 +41,8 @@ func (s *Sprite) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 }
 
 // Scan returns the Actor and the Sheet.
-func (s *Sprite) Scan() []interface{} {
-	return []interface{}{
+func (s *Sprite) Scan() Components {
+	return Components{
 		&s.Actor,
 		&s.Sheet,
 	}

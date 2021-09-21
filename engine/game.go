@@ -20,6 +20,7 @@ var _ interface {
 	Hider
 	Identifier
 	Updater
+	Registrar
 	Scanner
 } = &Game{}
 
@@ -154,7 +155,7 @@ func (g *Game) Query(ancestor interface{}, behaviour reflect.Type) map[interface
 }
 
 // Scan returns g.Root.
-func (g *Game) Scan() []interface{} { return []interface{}{g.Root} }
+func (g *Game) Scan() Components { return Components{g.Root} }
 
 // PreorderWalk calls visit with every component and its parent, reachable from
 // the  given component via Scan, for as long as visit returns nil. The parent
@@ -225,7 +226,7 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	g.byID = make(map[string]Identifier)
 	g.byAB = make(map[abKey]map[interface{}]struct{})
 	g.par = make(map[interface{}]interface{})
-	if err := PreorderWalk(g, g.register); err != nil {
+	if err := PreorderWalk(g, g.registerOne); err != nil {
 		return err
 	}
 	g.dbmu.Unlock()
@@ -261,10 +262,10 @@ func (g *Game) Register(component, parent interface{}) error {
 	g.dbmu.Lock()
 	defer g.dbmu.Unlock()
 	// preorderWalk goes in the right order for registering.
-	return preorderWalk(component, parent, g.register)
+	return preorderWalk(component, parent, g.registerOne)
 }
 
-func (g *Game) register(component, parent interface{}) error {
+func (g *Game) registerOne(component, parent interface{}) error {
 	// register in g.byID if needed
 	if i, ok := component.(Identifier); ok {
 		if id := i.Ident(); id != "" {
@@ -307,11 +308,11 @@ func (g *Game) Unregister(component interface{}) {
 	}
 	g.dbmu.Lock()
 	// postorderWalk goes in the right order for unregistering.
-	postorderWalk(component, nil, g.unregister)
+	postorderWalk(component, nil, g.unregisterOne)
 	g.dbmu.Unlock()
 }
 
-func (g *Game) unregister(component, _ interface{}) error {
+func (g *Game) unregisterOne(component, _ interface{}) error {
 	// unregister from g.byAB, using g.par to trace the path
 	ct := reflect.TypeOf(component)
 	for _, b := range Behaviours {

@@ -68,14 +68,14 @@ func main() {
 			Z: math.Sqrt(3),
 		},
 		Root: &engine.DrawDFS{
-			Components: []interface{}{
+			Components: engine.Components{
 				&engine.Fill{
 					ID:    "bg_fill",
 					Color: color.Gray{100},
 				},
 				&engine.DrawDAG{
 					ChunkSize: 16,
-					Components: []interface{}{
+					Components: engine.Components{
 						&engine.Camera{
 							ID:    "game_camera",
 							Child: lev1,

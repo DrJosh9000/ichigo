@@ -29,17 +29,15 @@ func init() {
 	gob.Register(&SceneRef{})
 }
 
-// Scene contains a bunch of components.
+// Scene gives an identity, bounds, and other properties to a collection of
+// components.
 type Scene struct {
 	ID
-	Bounds     // world coordinates
-	Components []interface{}
+	Bounds // world coordinates
+	Components
 	Disables
 	Hides
 }
-
-// Scan returns all immediate subcomponents (including the camera, if not nil).
-func (s *Scene) Scan() []interface{} { return s.Components }
 
 // SceneRef loads a gzipped, gob-encoded Scene from the asset FS.
 // After Load, Scene is usable.

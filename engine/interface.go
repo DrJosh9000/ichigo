@@ -25,6 +25,7 @@ var (
 	IdentifierType     = reflect.TypeOf((*Identifier)(nil)).Elem()
 	LoaderType         = reflect.TypeOf((*Loader)(nil)).Elem()
 	PrepperType        = reflect.TypeOf((*Prepper)(nil)).Elem()
+	RegistrarType      = reflect.TypeOf((*Registrar)(nil)).Elem()
 	SaverType          = reflect.TypeOf((*Saver)(nil)).Elem()
 	ScannerType        = reflect.TypeOf((*Scanner)(nil)).Elem()
 	TransformerType    = reflect.TypeOf((*Transformer)(nil)).Elem()
@@ -44,6 +45,7 @@ var (
 		IdentifierType,
 		LoaderType,
 		PrepperType,
+		RegistrarType,
 		SaverType,
 		ScannerType,
 		TransformerType,
@@ -128,6 +130,14 @@ type Prepper interface {
 	Prepare(game *Game) error
 }
 
+// Registrar components can register and unregister other components (usually
+// into internal data structures). Registrars are expected to automatically
+// register/unregister subcomponents of components (usually recursively).
+type Registrar interface {
+	Register(component, parent interface{}) error
+	Unregister(component interface{})
+}
+
 // Saver components can be saved to disk.
 type Saver interface {
 	Save() error
@@ -137,7 +147,7 @@ type Saver interface {
 // (such as when the game component database is constructed).
 // Scan should return a slice containing all immediate subcomponents.
 type Scanner interface {
-	Scan() []interface{}
+	Scan() Components
 }
 
 // Transformer components can provide draw options to apply to themselves and

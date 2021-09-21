@@ -14,6 +14,7 @@ var _ interface {
 	DrawManager
 	Hider
 	Prepper
+	Registrar
 	Scanner
 	Updater
 } = &DrawDAG{}
@@ -23,8 +24,8 @@ var _ interface {
 // It combines a DAG with a spatial index used when updating vertices to reduce
 // the number of tests between components.
 type DrawDAG struct {
-	ChunkSize  int
-	Components []interface{}
+	ChunkSize int
+	Components
 	Hides
 
 	*dag
@@ -110,14 +111,10 @@ func (d *DrawDAG) Prepare(game *Game) error {
 	d.game = game
 
 	// Because Game.LoadAndPrepare calls Prepare in a post-order walk, all the
-	// descendants should be prepared, meaning BoundingBox (hence Add) is likely
-	// to be a safe call.
-	d.addRecursive(d)
-	return nil
+	// descendants should be prepared, meaning BoundingBox (hence Register) is
+	// likely to be a safe call.
+	return d.Register(d, nil)
 }
-
-// Scan returns d.Components.
-func (d *DrawDAG) Scan() []interface{} { return d.Components }
 
 // Update checks for any changes to descendants, and updates its internal
 // data structures accordingly.
@@ -130,20 +127,38 @@ func (d *DrawDAG) Update() error {
 	for db, bb := range d.boxCache {
 		nbb := db.BoundingBox()
 		if bb != nbb {
-			d.Remove(db)
+			d.Unregister(db)
 			readd = append(readd, db)
 		}
 	}
 	for _, db := range readd {
-		d.Add(db)
+		d.Register(db, nil)
 	}
 	return nil
 }
 
-// Add adds a Drawer and any needed edges to the DAG and chunk map. If x is
-// intended to be a direct subcomponent of d, then the caller must append to
-// d.Components as well.
-func (d *DrawDAG) Add(x DrawBoxer) {
+// Register recursively registers compponent and all descendants that are
+// DrawBoxers into internal data structures (the DAG, etc) unless they are
+// descendants of a different DrawManager.
+func (d *DrawDAG) Register(component, _ interface{}) error {
+	if db, ok := component.(DrawBoxer); ok {
+		d.registerOne(db)
+	}
+	if _, ok := component.(DrawManager); ok && component != d {
+		return nil
+	}
+	if sc, ok := component.(Scanner); ok {
+		for _, x := range sc.Scan() {
+			if err := d.Register(x, nil); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// registerOne adds component and any needed edges to the DAG and chunk map.
+func (d *DrawDAG) registerOne(x DrawBoxer) {
 	// Ensure vertex is present
 	d.dag.addVertex(x)
 
@@ -196,24 +211,22 @@ func (d *DrawDAG) Add(x DrawBoxer) {
 	}
 }
 
-// addRecursive adds x and all descendants that are DrawBoxers unless they are
-// descendants of a different DrawManager.
-func (d *DrawDAG) addRecursive(x interface{}) {
-	if db, ok := x.(DrawBoxer); ok {
-		d.Add(db)
+// Unregister unregisters the component and all subcomponents.
+func (d *DrawDAG) Unregister(component interface{}) {
+	if db, ok := component.(DrawBoxer); ok {
+		d.unregisterOne(db)
 	}
-	if _, ok := x.(DrawManager); ok && x != d {
+	if _, ok := component.(DrawManager); ok && component != d {
 		return
 	}
-	if sc, ok := x.(Scanner); ok {
+	if sc, ok := component.(Scanner); ok {
 		for _, x := range sc.Scan() {
-			d.addRecursive(x)
+			d.Unregister(x)
 		}
 	}
 }
 
-// Remove removes a Drawer and all associated edges and metadata.
-func (d *DrawDAG) Remove(x DrawBoxer) {
+func (d *DrawDAG) unregisterOne(x DrawBoxer) {
 	// Remove from chunk map
 	revr := d.chunksRev[x]
 	for j := revr.Min.Y; j <= revr.Max.Y; j++ {

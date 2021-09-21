@@ -12,7 +12,7 @@ func Level1() *engine.Scene {
 	return &engine.Scene{
 		ID:     "level_1",
 		Bounds: engine.Bounds(image.Rect(-32, -32, 320+32, 240+32)),
-		Components: []interface{}{
+		Components: engine.Components{
 			&engine.Parallax{
 				CameraID: "game_camera",
 				Child: &engine.Billboard{

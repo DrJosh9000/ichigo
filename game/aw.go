@@ -125,7 +125,14 @@ func (aw *Awakeman) realUpdate() error {
 			}); err != nil {
 				return err
 			}
-			aw.game.Register(bubble, aw.game.Parent(aw))
+			par := aw.game.Parent(aw)
+			for p := interface{}(aw); p != nil; p = aw.game.Parent(p) {
+				if r, ok := p.(engine.Registrar); ok {
+					if err := r.Register(bubble, par); err != nil {
+						return err
+					}
+				}
+			}
 			if err := engine.PreorderWalk(bubble, func(c, _ interface{}) error {
 				if p, ok := c.(engine.Prepper); ok {
 					return p.Prepare(aw.game)
@@ -268,7 +275,9 @@ func (aw *Awakeman) Prepare(game *engine.Game) error {
 	return nil
 }
 
-func (aw *Awakeman) Scan() []interface{} { return []interface{}{&aw.Sprite} }
+func (aw *Awakeman) Scan() engine.Components {
+	return engine.Components{&aw.Sprite}
+}
 
 func (aw *Awakeman) String() string {
 	return fmt.Sprintf("Awakeman@%v", aw.Sprite.Actor.Pos)

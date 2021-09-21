@@ -61,8 +61,8 @@ func (w *Wall) CollidesWith(b geom.Box) bool {
 }
 
 // Scan returns the Sheet and all WallUnits.
-func (w *Wall) Scan() []interface{} {
-	c := make([]interface{}, 1, len(w.Units)+1)
+func (w *Wall) Scan() Components {
+	c := make(Components, 1, len(w.Units)+1)
 	c[0] = &w.Sheet
 	for _, unit := range w.Units {
 		c = append(c, unit)
@@ -103,7 +103,7 @@ func (u *WallUnit) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 }
 
 // Scan returns the Tile.
-func (u *WallUnit) Scan() []interface{} { return []interface{}{u.Tile} }
+func (u *WallUnit) Scan() Components { return Components{u.Tile} }
 
 func (u *WallUnit) Transform() (opts ebiten.DrawImageOptions) {
 	opts.GeoM.Translate(geom.CFloat(

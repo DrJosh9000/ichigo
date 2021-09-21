@@ -13,7 +13,7 @@ var _ interface {
 // through the game tree, without any extra sorting based on Z values or
 // consideration for DrawOrderer).
 type DrawDFS struct {
-	Components []interface{}
+	Components
 	Hides
 }
 
@@ -53,5 +53,3 @@ func (d *DrawDFS) draw(component interface{}, screen *ebiten.Image, opts ebiten.
 		}
 	}
 }
-
-func (d *DrawDFS) Scan() []interface{} { return d.Components }

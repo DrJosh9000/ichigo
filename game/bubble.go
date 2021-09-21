@@ -9,6 +9,12 @@ import (
 	"drjosh.dev/gurgle/geom"
 )
 
+var _ interface {
+	engine.Scanner
+	engine.Prepper
+	engine.Updater
+} = &Bubble{}
+
 type Bubble struct {
 	Life   int
 	Sprite engine.Sprite
@@ -49,8 +55,8 @@ func NewBubble(pos geom.Int3) *Bubble {
 	}
 }
 
-func (b *Bubble) Scan() []interface{} {
-	return []interface{}{&b.Sprite}
+func (b *Bubble) Scan() engine.Components {
+	return engine.Components{&b.Sprite}
 }
 
 func (b *Bubble) String() string {
