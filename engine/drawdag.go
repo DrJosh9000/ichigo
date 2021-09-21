@@ -110,16 +110,17 @@ func (d *DrawDAG) Prepare(game *Game) error {
 	d.game = game
 
 	// Because Game.LoadAndPrepare calls Prepare in a post-order walk, all the
-	// descendants should be prepared, meaning BoundingBox (and Add) is likely
+	// descendants should be prepared, meaning BoundingBox (hence Add) is likely
 	// to be a safe call.
-	for db := range game.Query(d, DrawBoxerType) {
-		d.Add(db.(DrawBoxer))
-	}
+	d.addRecursive(d)
 	return nil
 }
 
+// Scan returns d.Components.
 func (d *DrawDAG) Scan() []interface{} { return d.Components }
 
+// Update checks for any changes to descendants, and updates its internal
+// data structures accordingly.
 func (d *DrawDAG) Update() error {
 	// Re-evaluate bounding boxes for all descendants. If a box has changed,
 	// fix up the edges by removing and re-adding the vertex.
@@ -191,6 +192,22 @@ func (d *DrawDAG) Add(x DrawBoxer) {
 			d.dag.addEdge(x, y)
 		case drawOrderConstraint(y, x, πsign):
 			d.dag.addEdge(y, x)
+		}
+	}
+}
+
+// addRecursive adds x and all descendants that are DrawBoxers unless they are
+// descendants of a different DrawManager.
+func (d *DrawDAG) addRecursive(x interface{}) {
+	if db, ok := x.(DrawBoxer); ok {
+		d.Add(db)
+	}
+	if _, ok := x.(DrawManager); ok && x != d {
+		return
+	}
+	if sc, ok := x.(Scanner); ok {
+		for _, x := range sc.Scan() {
+			d.addRecursive(x)
 		}
 	}
 }
