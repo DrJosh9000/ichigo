@@ -139,7 +139,9 @@ func (d *DrawDAG) Update() error {
 	return nil
 }
 
-// Add adds a Drawer and any needed edges to the DAG and chunk map.
+// Add adds a Drawer and any needed edges to the DAG and chunk map. If x is
+// intended to be a direct subcomponent of d, then the caller must append to
+// d.Components as well.
 func (d *DrawDAG) Add(x DrawBoxer) {
 	// Ensure vertex is present
 	d.dag.addVertex(x)

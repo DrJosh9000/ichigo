@@ -13,20 +13,20 @@ import (
 var (
 	// TypeOf(pointer to interface).Elem() is "idiomatic" -
 	// see https://pkg.go.dev/reflect#example-TypeOf
-	BoundingRecterType = reflect.TypeOf((*BoundingRecter)(nil)).Elem()
 	BoundingBoxerType  = reflect.TypeOf((*BoundingBoxer)(nil)).Elem()
+	BoundingRecterType = reflect.TypeOf((*BoundingRecter)(nil)).Elem()
 	ColliderType       = reflect.TypeOf((*Collider)(nil)).Elem()
 	DisablerType       = reflect.TypeOf((*Disabler)(nil)).Elem()
-	DrawLayerType      = reflect.TypeOf((*DrawManager)(nil)).Elem()
-	DrawerType         = reflect.TypeOf((*Drawer)(nil)).Elem()
 	DrawBoxerType      = reflect.TypeOf((*DrawBoxer)(nil)).Elem()
+	DrawerType         = reflect.TypeOf((*Drawer)(nil)).Elem()
+	DrawManagerType    = reflect.TypeOf((*DrawManager)(nil)).Elem()
 	DrawOrdererType    = reflect.TypeOf((*DrawOrderer)(nil)).Elem()
 	HiderType          = reflect.TypeOf((*Hider)(nil)).Elem()
 	IdentifierType     = reflect.TypeOf((*Identifier)(nil)).Elem()
 	LoaderType         = reflect.TypeOf((*Loader)(nil)).Elem()
 	PrepperType        = reflect.TypeOf((*Prepper)(nil)).Elem()
-	ScannerType        = reflect.TypeOf((*Scanner)(nil)).Elem()
 	SaverType          = reflect.TypeOf((*Saver)(nil)).Elem()
+	ScannerType        = reflect.TypeOf((*Scanner)(nil)).Elem()
 	TransformerType    = reflect.TypeOf((*Transformer)(nil)).Elem()
 	UpdaterType        = reflect.TypeOf((*Updater)(nil)).Elem()
 
@@ -36,7 +36,7 @@ var (
 		BoundingBoxerType,
 		ColliderType,
 		DisablerType,
-		DrawLayerType,
+		DrawManagerType,
 		DrawerType,
 		DrawBoxerType,
 		DrawOrdererType,
