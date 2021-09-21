@@ -125,16 +125,16 @@ func (aw *Awakeman) realUpdate() error {
 			}); err != nil {
 				return err
 			}
+			// Add bubble to same parent as aw
 			par := aw.game.Parent(aw)
-			if err := aw.game.WalkDown(par, func(c interface{}) error {
+			for _, c := range aw.game.Path(par) {
 				if r, ok := c.(engine.Registrar); ok {
-					return r.Register(bubble, par)
+					if err := r.Register(bubble, par); err != nil {
+						return err
+					}
 				}
-				return nil
-			}); err != nil {
-				return err
 			}
-			if err := engine.PreorderWalk(bubble, func(c, _ interface{}) error {
+			if err := engine.PostorderWalk(bubble, func(c, _ interface{}) error {
 				if p, ok := c.(engine.Prepper); ok {
 					return p.Prepare(aw.game)
 				}

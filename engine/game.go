@@ -65,63 +65,29 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
 
 // Update updates everything.
 func (g *Game) Update() error {
-	if g.Disabled() {
+	return g.updateRecursive(g)
+}
+
+// updateRecursive updates everything in a post-order traversal. It terminates recursion
+// early if the component reports it is Disabled.
+func (g *Game) updateRecursive(c interface{}) error {
+	if d, ok := c.(Disabler); ok && d.Disabled() {
 		return nil
 	}
-
-	// Need to do a similar trick for Draw: disabling a parent object should
-	// disable the child objects.
-	// cache memoises the disabled state for each component.
-	cache := map[interface{}]bool{
-		g: false,
+	if sc, ok := c.(Scanner); ok {
+		for _, x := range sc.Scan() {
+			if err := g.updateRecursive(x); err != nil {
+				return err
+			}
+		}
 	}
-
-	// Update everything that is not disabled.
-	return PostorderWalk(g, func(c, _ interface{}) error {
-		// Skip g (note g satisfies Updater, so this would infinitely recurse)
-		if c == g {
-			return nil
-		}
-		u, ok := c.(Updater)
-		if !ok {
-			return nil
-		}
-
-		// Is u disabled itself?
-		if d, ok := u.(Disabler); ok && d.Disabled() {
-			cache[u] = true
-			return nil
-		}
-
-		// Walk up g.par to find the nearest state in accum.
-		var st bool
-		stack := []interface{}{u}
-		for p := g.par[u]; ; p = g.par[p] {
-			if s, found := cache[p]; found {
-				st = s
-				break
-			}
-			stack = append(stack, p)
-		}
-		// Unwind the stack, accumulating state along the way.
-		for len(stack) > 0 {
-			l1 := len(stack) - 1
-			p := stack[l1]
-			stack = stack[:l1]
-			if d, ok := p.(Disabler); ok {
-				st = st || d.Disabled()
-			}
-			cache[p] = st
-		}
-
-		// Skip updating if disabled.
-		if st {
-			return nil
-		}
-
-		// Update
+	if c == g {
+		return nil
+	}
+	if u, ok := c.(Updater); ok {
 		return u.Update()
-	})
+	}
+	return nil
 }
 
 // Ident returns "__GAME__".
@@ -145,30 +111,31 @@ func (g *Game) Parent(c interface{}) interface{} {
 	return g.par[c]
 }
 
-// WalkUp visits the component, its parent, its parent, ..., and then g.
-func (g *Game) WalkUp(component interface{}, visit func(interface{}) error) error {
-	for p := component; p != nil; p = g.Parent(p) {
-		if err := visit(p); err != nil {
-			return err
-		}
+func reverse(s []interface{}) {
+	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
+		s[i], s[j] = s[j], s[i]
 	}
-	return nil
 }
 
-// WalkDown visits g, the subcomponent of g, ..., and then the component.
-func (g *Game) WalkDown(component interface{}, visit func(interface{}) error) error {
+func (g *Game) Path(component interface{}) []interface{} {
 	var stack []interface{}
 	g.dbmu.RLock()
 	for p := component; p != nil; p = g.Parent(p) {
 		stack = append(stack, p)
 	}
 	g.dbmu.RUnlock()
-	for _, p := range stack {
-		if err := visit(p); err != nil {
-			return err
-		}
+	reverse(stack)
+	return stack
+}
+
+func (g *Game) ReversePath(component interface{}) []interface{} {
+	var stack []interface{}
+	g.dbmu.RLock()
+	for p := component; p != nil; p = g.Parent(p) {
+		stack = append(stack, p)
 	}
-	return nil
+	g.dbmu.RUnlock()
+	return stack
 }
 
 // Query looks for components having both a given ancestor and implementing

@@ -65,7 +65,7 @@ func (d *DrawDAG) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 		// Walk up game tree to find the nearest state in cache.
 		var st state
 		stack := []interface{}{x}
-		for p := d.game.Parent(x); ; p = d.game.Parent(p) {
+		for p := d.game.Parent(x); p != nil; p = d.game.Parent(p) {
 			if s, found := cache[p]; found {
 				st = s
 				break
@@ -236,6 +236,8 @@ func (d *DrawDAG) unregisterOne(x DrawBoxer) {
 	}
 	// Remove from reverse chunk map
 	delete(d.chunksRev, x)
+	// Remove from box cache
+	delete(d.boxCache, x)
 	// Remove from DAG
 	d.dag.removeVertex(x)
 }

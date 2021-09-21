@@ -40,7 +40,7 @@ func (h *Hides) Hide() { *h = true }
 // Show sets h to false.
 func (h *Hides) Show() { *h = false }
 
-// Components implements Scan directly (as a slice of interface{}).
+// Components implements Scan directly (as itself!)
 type Components []interface{}
 
 // Scan returns c.
