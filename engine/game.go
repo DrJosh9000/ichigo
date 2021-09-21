@@ -114,8 +114,9 @@ func (g *Game) Parent(c interface{}) interface{} {
 // PathRegister calls Register on every Registrar in the path between g and
 // parent (top-to-bottom, i.e. g first)
 func (g *Game) PathRegister(component, parent interface{}) error {
-	for _, p := range g.Path(parent) {
-		if r, ok := p.(Registrar); ok {
+	rp := g.ReversePath(parent)
+	for i := len(rp) - 1; i >= 0; i-- {
+		if r, ok := rp[i].(Registrar); ok {
 			if err := r.Register(component, parent); err != nil {
 				return err
 			}
@@ -125,7 +126,7 @@ func (g *Game) PathRegister(component, parent interface{}) error {
 }
 
 // PathUnregister calls Unregister on every Registrar in the path between g and
-// parent (bottom-to-top, i.e. parent first)
+// parent (bottom-to-top, i.e. parent first).
 func (g *Game) PathUnregister(component interface{}) {
 	for _, p := range g.ReversePath(component) {
 		if r, ok := p.(Registrar); ok {

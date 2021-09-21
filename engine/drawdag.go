@@ -73,10 +73,8 @@ func (d *DrawDAG) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 			stack = append(stack, p)
 		}
 		// Unwind the stack, accumulating state along the way.
-		for len(stack) > 0 {
-			l1 := len(stack) - 1
-			p := stack[l1]
-			stack = stack[:l1]
+		for i := len(stack) - 1; i >= 0; i-- {
+			p := stack[i]
 			if h, ok := p.(Hider); ok {
 				st.hidden = st.hidden || h.Hidden()
 			}
