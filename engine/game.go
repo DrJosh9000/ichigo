@@ -111,23 +111,40 @@ func (g *Game) Parent(c interface{}) interface{} {
 	return g.par[c]
 }
 
-func reverse(s []interface{}) {
-	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
-		s[i], s[j] = s[j], s[i]
+// PathRegister calls Register on every Registrar in the path between g and
+// parent (top-to-bottom, i.e. g first)
+func (g *Game) PathRegister(component, parent interface{}) error {
+	for _, p := range g.Path(parent) {
+		if r, ok := p.(Registrar); ok {
+			if err := r.Register(component, parent); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// PathUnregister calls Unregister on every Registrar in the path between g and
+// parent (bottom-to-top, i.e. parent first)
+func (g *Game) PathUnregister(component interface{}) {
+	for _, p := range g.ReversePath(component) {
+		if r, ok := p.(Registrar); ok {
+			r.Unregister(component)
+		}
 	}
 }
 
+// Path returns a slice with the path of components to reach component from g.
 func (g *Game) Path(component interface{}) []interface{} {
-	var stack []interface{}
-	g.dbmu.RLock()
-	for p := component; p != nil; p = g.Parent(p) {
-		stack = append(stack, p)
+	stack := g.ReversePath(component)
+	for i, j := 0, len(stack)-1; i < j; i, j = i+1, j-1 {
+		stack[i], stack[j] = stack[j], stack[i]
 	}
-	g.dbmu.RUnlock()
-	reverse(stack)
 	return stack
 }
 
+// ReversePath returns the same slice as Path, but reversed. (ReversePath is
+// faster than Path).
 func (g *Game) ReversePath(component interface{}) []interface{} {
 	var stack []interface{}
 	g.dbmu.RLock()

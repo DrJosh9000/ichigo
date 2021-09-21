@@ -71,11 +71,7 @@ func (b *Bubble) Prepare(g *engine.Game) error {
 func (b *Bubble) Update() error {
 	b.Life--
 	if b.Life <= 0 {
-		for _, c := range b.game.ReversePath(b) {
-			if r, ok := c.(engine.Registrar); ok {
-				r.Unregister(b)
-			}
-		}
+		b.game.PathUnregister(b)
 	}
 	if false {
 		// not using MoveX/MoveY/... because collisions are unnecessary -
