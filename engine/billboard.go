@@ -45,28 +45,6 @@ func (b *Billboard) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	screen.DrawImage(b.Src.Image(), opts)
 }
 
-// DrawAfter reports if b.Pos.Z >= x.Max.Z.
-func (b *Billboard) DrawAfter(x Drawer) bool {
-	switch x := x.(type) {
-	case BoundingBoxer:
-		return b.Pos.Z >= x.BoundingBox().Max.Z
-	case ZPositioner:
-		return b.Pos.Z > x.ZPos()
-	}
-	return false
-}
-
-// DrawBefore reports if b.Pos.Z < x.Min.Z.
-func (b *Billboard) DrawBefore(x Drawer) bool {
-	switch x := x.(type) {
-	case BoundingBoxer:
-		return b.Pos.Z < x.BoundingBox().Min.Z
-	case ZPositioner:
-		return b.Pos.Z < x.ZPos()
-	}
-	return false
-}
-
 // Prepare saves the reference to Game.
 func (b *Billboard) Prepare(g *Game) error {
 	b.game = g

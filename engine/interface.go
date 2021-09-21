@@ -51,14 +51,14 @@ var (
 	}
 )
 
-// BoundingRecter components have a bounding rectangle.
-type BoundingRecter interface {
-	BoundingRect() image.Rectangle
-}
-
 // BoundingBoxer components have a bounding box.
 type BoundingBoxer interface {
 	BoundingBox() geom.Box
+}
+
+// BoundingRecter components have a bounding rectangle.
+type BoundingRecter interface {
+	BoundingRect() image.Rectangle
 }
 
 // Collider components have tangible form.
@@ -73,11 +73,11 @@ type Disabler interface {
 	Enable()
 }
 
-// DrawManager is a component responsible for calling Draw on all Drawer
-// components beneath it, except those beneath another DrawManager (it might
-// call Draw on the DrawManager, but that's it).
-type DrawManager interface {
-	ManagesDrawingSubcomponents()
+// DrawBoxer components can both draw and have a bounding box (used for draw
+// ordering).
+type DrawBoxer interface {
+	BoundingBoxer
+	Drawer
 }
 
 // Drawer components can draw themselves. Draw is called often. Draw is not
@@ -87,11 +87,11 @@ type Drawer interface {
 	Draw(*ebiten.Image, *ebiten.DrawImageOptions)
 }
 
-// DrawBoxer components can both draw and have a bounding box (used for draw
-// ordering).
-type DrawBoxer interface {
-	BoundingBoxer
-	Drawer
+// DrawManager is a component responsible for calling Draw on all Drawer
+// components beneath it, except those beneath another DrawManager (it might
+// call Draw on the DrawManager, but that's it).
+type DrawManager interface {
+	ManagesDrawingSubcomponents()
 }
 
 // DrawOrderer components have more specific ideas about draw ordering than
@@ -128,16 +128,16 @@ type Prepper interface {
 	Prepare(game *Game) error
 }
 
+// Saver components can be saved to disk.
+type Saver interface {
+	Save() error
+}
+
 // Scanner components can be scanned. It is called when the game tree is walked
 // (such as when the game component database is constructed).
 // Scan should return a slice containing all immediate subcomponents.
 type Scanner interface {
 	Scan() []interface{}
-}
-
-// Saver components can be saved to disk.
-type Saver interface {
-	Save() error
 }
 
 // Transformer components can provide draw options to apply to themselves and
@@ -152,12 +152,4 @@ type Transformer interface {
 //  (i.e. not passed to Game.Register or returned from Scan).
 type Updater interface {
 	Update() error
-}
-
-// ZPositioner components opt into a simpler method of determining draw order
-// than DrawAfter/DrawBefore. Drawer implementations should handle the
-// ZPositioner case as though the component were a flat infinite plane given by
-// z = ZPos().
-type ZPositioner interface {
-	ZPos() int
 }
