@@ -67,25 +67,23 @@ func main() {
 			Y: 1,
 			Z: math.Sqrt(3),
 		},
-		Roots: []engine.DrawLayer{
-			&engine.DrawDFS{
-				Components: []interface{}{
-					&engine.Fill{
-						ID:    "bg_fill",
-						Color: color.Gray{100},
-					},
-					&engine.DrawDAG{
-						ChunkSize: 16,
-						Components: []interface{}{
-							&engine.Camera{
-								ID:    "game_camera",
-								Child: lev1,
-							},
+		Root: &engine.DrawDFS{
+			Components: []interface{}{
+				&engine.Fill{
+					ID:    "bg_fill",
+					Color: color.Gray{100},
+				},
+				&engine.DrawDAG{
+					ChunkSize: 16,
+					Components: []interface{}{
+						&engine.Camera{
+							ID:    "game_camera",
+							Child: lev1,
 						},
 					},
-					&engine.DebugToast{ID: "toast", Pos: image.Pt(0, 15)},
-					engine.PerfDisplay{},
 				},
+				&engine.DebugToast{ID: "toast", Pos: image.Pt(0, 15)},
+				engine.PerfDisplay{},
 			},
 		},
 	}

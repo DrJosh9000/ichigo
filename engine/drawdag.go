@@ -9,6 +9,15 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
+var _ interface {
+	Drawer
+	DrawManager
+	Hider
+	Prepper
+	Scanner
+	Updater
+} = &DrawDAG{}
+
 // DrawDAG is a DrawLayer that organises DrawBoxer descendants in a directed
 // acyclic graph (DAG), in order to draw them according to ordering constraints.
 // It combines a DAG with a spatial index used when updating vertices to reduce
@@ -26,7 +35,7 @@ type DrawDAG struct {
 }
 
 // Draw draws everything in the DAG in topological order.
-func (d *DrawDAG) DrawAll(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
+func (d *DrawDAG) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	if d.Hidden() {
 		return
 	}
@@ -88,6 +97,9 @@ func (d *DrawDAG) DrawAll(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 		x.Draw(screen, &st.opts)
 	})
 }
+
+// exists to satisfy interface
+func (DrawDAG) ManagesDrawingSubcomponents() {}
 
 // Prepare adds all subcomponents to the DAG.
 func (d *DrawDAG) Prepare(game *Game) error {

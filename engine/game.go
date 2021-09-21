@@ -39,7 +39,7 @@ type Game struct {
 	Disables
 	Hides
 	ScreenSize image.Point
-	Roots      []DrawLayer
+	Root       Drawer // usually a DrawManager
 	Projection geom.Projector
 	VoxelScale geom.Float3
 
@@ -54,12 +54,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if g.Hidden() {
 		return
 	}
-
-	// Make all draw managers draw, in order.
-	opts := &ebiten.DrawImageOptions{}
-	for _, dm := range g.Roots {
-		dm.DrawAll(screen, opts)
-	}
+	g.Root.Draw(screen, &ebiten.DrawImageOptions{})
 }
 
 // Layout returns the configured screen width/height.
@@ -158,14 +153,8 @@ func (g *Game) Query(ancestor interface{}, behaviour reflect.Type) map[interface
 	return g.byAB[abKey{ancestor, behaviour}]
 }
 
-// Scan implements Scanner.
-func (g *Game) Scan() []interface{} {
-	rs := make([]interface{}, 0, len(g.Roots))
-	for _, r := range g.Roots {
-		rs = append(rs, r)
-	}
-	return rs
-}
+// Scan returns g.Root.
+func (g *Game) Scan() []interface{} { return []interface{}{g.Root} }
 
 // PreorderWalk calls visit with every component and its parent, reachable from
 // the  given component via Scan, for as long as visit returns nil. The parent

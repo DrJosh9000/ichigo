@@ -17,7 +17,7 @@ var (
 	BoundingBoxerType  = reflect.TypeOf((*BoundingBoxer)(nil)).Elem()
 	ColliderType       = reflect.TypeOf((*Collider)(nil)).Elem()
 	DisablerType       = reflect.TypeOf((*Disabler)(nil)).Elem()
-	DrawLayerType      = reflect.TypeOf((*DrawLayer)(nil)).Elem()
+	DrawLayerType      = reflect.TypeOf((*DrawManager)(nil)).Elem()
 	DrawerType         = reflect.TypeOf((*Drawer)(nil)).Elem()
 	DrawBoxerType      = reflect.TypeOf((*DrawBoxer)(nil)).Elem()
 	DrawOrdererType    = reflect.TypeOf((*DrawOrderer)(nil)).Elem()
@@ -73,11 +73,11 @@ type Disabler interface {
 	Enable()
 }
 
-// DrawLayer is a component responsible for calling Draw on all Drawer
-// components beneath it, except those beneath another DrawLayer (it calls
-// DrawAll on those).
-type DrawLayer interface {
-	DrawAll(*ebiten.Image, *ebiten.DrawImageOptions)
+// DrawManager is a component responsible for calling Draw on all Drawer
+// components beneath it, except those beneath another DrawManager (it might
+// call Draw on the DrawManager, but that's it).
+type DrawManager interface {
+	ManagesDrawingSubcomponents()
 }
 
 // Drawer components can draw themselves. Draw is called often. Draw is not
