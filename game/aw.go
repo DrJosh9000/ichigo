@@ -126,12 +126,13 @@ func (aw *Awakeman) realUpdate() error {
 				return err
 			}
 			par := aw.game.Parent(aw)
-			for p := interface{}(aw); p != nil; p = aw.game.Parent(p) {
-				if r, ok := p.(engine.Registrar); ok {
-					if err := r.Register(bubble, par); err != nil {
-						return err
-					}
+			if err := aw.game.WalkDown(par, func(c interface{}) error {
+				if r, ok := c.(engine.Registrar); ok {
+					return r.Register(bubble, par)
 				}
+				return nil
+			}); err != nil {
+				return err
 			}
 			if err := engine.PreorderWalk(bubble, func(c, _ interface{}) error {
 				if p, ok := c.(engine.Prepper); ok {

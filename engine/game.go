@@ -145,6 +145,32 @@ func (g *Game) Parent(c interface{}) interface{} {
 	return g.par[c]
 }
 
+// WalkUp visits the component, its parent, its parent, ..., and then g.
+func (g *Game) WalkUp(component interface{}, visit func(interface{}) error) error {
+	for p := component; p != nil; p = g.Parent(p) {
+		if err := visit(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// WalkDown visits g, the subcomponent of g, ..., and then the component.
+func (g *Game) WalkDown(component interface{}, visit func(interface{}) error) error {
+	var stack []interface{}
+	g.dbmu.RLock()
+	for p := component; p != nil; p = g.Parent(p) {
+		stack = append(stack, p)
+	}
+	g.dbmu.RUnlock()
+	for _, p := range stack {
+		if err := visit(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // Query looks for components having both a given ancestor and implementing
 // a given behaviour (see Behaviors in interface.go). This only returns sensible
 // values after LoadAndPrepare. Note that every component is its own ancestor.

@@ -56,7 +56,7 @@ func (d *DrawDAG) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	}
 	// Draw everything in d.dag, where not hidden (itself or any parent)
 	// TODO: handle descendant DrawLayers
-	d.dag.topIterate(func(x Drawer) {
+	d.dag.topWalk(func(x Drawer) {
 		// Is d hidden itself?
 		if h, ok := x.(Hider); ok && h.Hidden() {
 			cache[x] = state{hidden: true}
@@ -351,10 +351,10 @@ func (d *dag) removeVertex(v Drawer) {
 	delete(d.all, v)
 }
 
-// topIterate visits each vertex in topological order, in time O(|V| + |E|) and
+// topWalk visits each vertex in topological order, in time O(|V| + |E|) and
 // O(|V|) temporary memory.
-func (d *dag) topIterate(visit func(Drawer)) {
-	// Count indegrees - indegree(v) = len(d.in[v]) for each v.
+func (d *dag) topWalk(visit func(Drawer)) {
+	// Count indegrees - indegree(v) = len(d.in[v]) for each vertex v.
 	// If indegree(v) = 0, enqueue. Total: O(|V|).
 	queue := make([]Drawer, 0, len(d.in))
 	indegree := make(map[Drawer]int)

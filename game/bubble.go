@@ -71,7 +71,12 @@ func (b *Bubble) Prepare(g *engine.Game) error {
 func (b *Bubble) Update() error {
 	b.Life--
 	if b.Life <= 0 {
-		b.game.Unregister(b)
+		if err := b.game.WalkUp(b, func(c interface{}) error {
+			b.game.Unregister(b)
+			return nil
+		}); err != nil {
+			return err
+		}
 	}
 	if false { // not using MoveX/MoveY/... because collisions are unnecessary -
 		// this is an effect particle, if it overlaps a solid, who cares
