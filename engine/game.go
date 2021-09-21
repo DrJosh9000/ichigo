@@ -114,6 +114,9 @@ func (g *Game) Parent(c interface{}) interface{} {
 // PathRegister calls Register on every Registrar in the path between g and
 // parent (top-to-bottom, i.e. g first)
 func (g *Game) PathRegister(component, parent interface{}) error {
+	// The only issue with this approach is... component gets registered in
+	// *every* drawmanager...
+	// TODO: Way of registering/unregistering from lowest DM only?
 	rp := g.ReversePath(parent)
 	for i := len(rp) - 1; i >= 0; i-- {
 		if r, ok := rp[i].(Registrar); ok {
