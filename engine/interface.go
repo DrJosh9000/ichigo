@@ -32,20 +32,20 @@ var (
 
 	// Behaviours lists all the behaviours that can be queried with Game.Query.
 	Behaviours = []reflect.Type{
-		BoundingRecterType,
 		BoundingBoxerType,
+		BoundingRecterType,
 		ColliderType,
 		DisablerType,
-		DrawManagerType,
-		DrawerType,
 		DrawBoxerType,
+		DrawerType,
+		DrawManagerType,
 		DrawOrdererType,
 		HiderType,
 		IdentifierType,
 		LoaderType,
 		PrepperType,
-		ScannerType,
 		SaverType,
+		ScannerType,
 		TransformerType,
 		UpdaterType,
 	}
