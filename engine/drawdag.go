@@ -139,6 +139,18 @@ func (d *DrawDAG) Update() error {
 // DrawBoxers into internal data structures (the DAG, etc) unless they are
 // descendants of a different DrawManager.
 func (d *DrawDAG) Register(component, _ interface{}) error {
+	// *Don't* register the component if it is inside a descendant DrawManager.
+	// These queries work because component should be registered in game before
+	// this call.
+	for dm := range d.game.Query(d, DrawManagerType) {
+		if dm == d {
+			continue
+		}
+		dbs := d.game.Query(dm, DrawBoxerType)
+		if _, found := dbs[component]; found {
+			return nil
+		}
+	}
 	if db, ok := component.(DrawBoxer); ok {
 		d.registerOne(db)
 	}
