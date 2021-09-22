@@ -85,8 +85,7 @@ func (c *Camera) Prepare(game *Game) error {
 	return nil
 }
 
-// Scan returns s.Child.
-//func (c *Camera) Scan() []interface{} { return []interface{}{c.Child} }
+// Scan visits c.Child.
 func (c *Camera) Scan(visit func(interface{}) error) error {
 	return visit(c.Child)
 }

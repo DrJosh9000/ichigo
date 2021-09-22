@@ -5,11 +5,10 @@ var _ interface {
 	Scanner
 } = &Container{}
 
-// Container contains many components.
+// Container contains many components, in order.
 type Container []interface{}
 
-// Scan returns c.
-//func (c Container) Scan() []interface{} { return c }
+// Scan visits every component in the container.
 func (c Container) Scan(visit func(interface{}) error) error {
 	for _, x := range c {
 		if err := visit(x); err != nil {

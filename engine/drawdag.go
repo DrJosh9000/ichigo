@@ -114,7 +114,7 @@ func (d *DrawDAG) Prepare(game *Game) error {
 	return d.Register(d, nil)
 }
 
-//func (d *DrawDAG) Scan() []interface{} { return []interface{}{d.Child} }
+// Scan visits d.Child.
 func (d *DrawDAG) Scan(visit func(interface{}) error) error {
 	return visit(d.Child)
 }

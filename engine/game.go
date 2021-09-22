@@ -170,8 +170,7 @@ func (g *Game) Query(ancestor interface{}, behaviour reflect.Type) map[interface
 	return g.byAB[abKey{ancestor, behaviour}]
 }
 
-// Scan returns g.Root.
-//func (g *Game) Scan() []interface{} { return []interface{}{g.Root} }
+// Scan visits g.Root.
 func (g *Game) Scan(visit func(interface{}) error) error {
 	return visit(g.Root)
 }

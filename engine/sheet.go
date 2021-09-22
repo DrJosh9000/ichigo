@@ -46,8 +46,7 @@ func (s *Sheet) Prepare(*Game) error {
 	return nil
 }
 
-// Scan returns the Src.
-//func (s *Sheet) Scan() []interface{} { return []interface{}{&s.Src} }
+// Scan visits &s.Src.
 func (s *Sheet) Scan(visit func(interface{}) error) error {
 	return visit(&s.Src)
 }

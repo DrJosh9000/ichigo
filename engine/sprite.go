@@ -40,13 +40,7 @@ func (s *Sprite) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	screen.DrawImage(s.Sheet.SubImage(s.anim.Cell()), opts)
 }
 
-// Scan returns the Actor and the Sheet.
-/*func (s *Sprite) Scan() []interface{} {
-	return []interface{}{
-		&s.Actor,
-		&s.Sheet,
-	}
-}*/
+// Scan visits &s.Actor and &s.Sheet.
 func (s *Sprite) Scan(visit func(interface{}) error) error {
 	if err := visit(&s.Actor); err != nil {
 		return err

@@ -38,7 +38,7 @@ type Scene struct {
 	Hides
 }
 
-//func (s *Scene) Scan() []interface{} { return []interface{}{s.Child} }
+// Scan visits s.Child.
 func (s *Scene) Scan(visit func(interface{}) error) error {
 	return visit(s.Child)
 }

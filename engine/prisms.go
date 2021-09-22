@@ -112,15 +112,7 @@ func (m *PrismMap) Prepare(g *Game) error {
 	return nil
 }
 
-// Scan returns the Sheet and all the Prisms.
-/*func (m *PrismMap) Scan() []interface{} {
-	c := make([]interface{}, 1, len(m.Map)+1)
-	c[0] = &m.Sheet
-	for _, prism := range m.Map {
-		c = append(c, prism)
-	}
-	return c
-}*/
+// Scan visits &m.Sheet and all Prisms.
 func (m *PrismMap) Scan(visit func(interface{}) error) error {
 	if err := visit(&m.Sheet); err != nil {
 		return err

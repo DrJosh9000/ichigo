@@ -38,8 +38,7 @@ func (p *Parallax) Prepare(game *Game) error {
 	return nil
 }
 
-// Scan returns the child component.
-//func (p *Parallax) Scan() []interface{} { return []interface{}{p.Child} }
+// Scan visits p.Child.
 func (p *Parallax) Scan(visit func(interface{}) error) error {
 	return visit(p.Child)
 }
