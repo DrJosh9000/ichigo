@@ -325,9 +325,7 @@ func (g *Game) registerOne(component, parent interface{}) error {
 	}
 
 	// register in g.par
-	if parent != nil {
-		g.par[component] = parent
-	}
+	g.par[component] = parent
 
 	// register in g.byAB
 	ct := reflect.TypeOf(component)
