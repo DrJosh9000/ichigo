@@ -100,8 +100,8 @@ func (t *Tilemap) Load(fs.FS) error {
 }
 
 // Scan returns a slice containing Src and all non-nil tiles.
-func (t *Tilemap) Scan() Components {
-	c := make(Components, 1, len(t.Map)+1)
+func (t *Tilemap) Scan() []interface{} {
+	c := make([]interface{}, 1, len(t.Map)+1)
 	c[0] = &t.Sheet
 	for _, tile := range t.Map {
 		c = append(c, tile)
@@ -152,4 +152,4 @@ type AnimatedTile struct {
 func (a *AnimatedTile) Cell() int { return a.anim.Cell() }
 
 // Scan returns a.anim.
-func (a *AnimatedTile) Scan() Components { return Components{a.anim} }
+func (a *AnimatedTile) Scan() []interface{} { return []interface{}{a.anim} }

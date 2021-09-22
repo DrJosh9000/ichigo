@@ -270,8 +270,8 @@ func (aw *Awakeman) Prepare(game *engine.Game) error {
 	return nil
 }
 
-func (aw *Awakeman) Scan() engine.Components {
-	return engine.Components{&aw.Sprite}
+func (aw *Awakeman) Scan() []interface{} {
+	return []interface{}{&aw.Sprite}
 }
 
 func (aw *Awakeman) String() string {

@@ -86,7 +86,7 @@ func (c *Camera) Prepare(game *Game) error {
 }
 
 // Scan returns s.Child.
-func (c *Camera) Scan() Components { return Components{c.Child} }
+func (c *Camera) Scan() []interface{} { return []interface{}{c.Child} }
 
 // Transform returns the camera transform.
 func (c *Camera) Transform() (opts ebiten.DrawImageOptions) {

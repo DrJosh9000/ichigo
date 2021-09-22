@@ -167,7 +167,7 @@ func (g *Game) Query(ancestor interface{}, behaviour reflect.Type) map[interface
 }
 
 // Scan returns g.Root.
-func (g *Game) Scan() Components { return Components{g.Root} }
+func (g *Game) Scan() []interface{} { return []interface{}{g.Root} }
 
 // PreorderWalk calls visit with every component and its parent, reachable from
 // the  given component via Scan, for as long as visit returns nil. The parent

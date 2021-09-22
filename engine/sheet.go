@@ -47,7 +47,7 @@ func (s *Sheet) Prepare(*Game) error {
 }
 
 // Scan returns the Src.
-func (s *Sheet) Scan() Components { return Components{&s.Src} }
+func (s *Sheet) Scan() []interface{} { return []interface{}{&s.Src} }
 
 // SubImage returns an *ebiten.Image corresponding to the given cell index.
 func (s *Sheet) SubImage(i int) *ebiten.Image {

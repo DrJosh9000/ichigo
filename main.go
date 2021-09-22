@@ -68,18 +68,16 @@ func main() {
 			Z: math.Sqrt(3),
 		},
 		Root: &engine.DrawDFS{
-			Components: engine.Components{
+			Child: &engine.Container{
 				&engine.Fill{
 					ID:    "bg_fill",
 					Color: color.Gray{100},
 				},
 				&engine.DrawDAG{
 					ChunkSize: 16,
-					Components: engine.Components{
-						&engine.Camera{
-							ID:    "game_camera",
-							Child: lev1,
-						},
+					Child: &engine.Camera{
+						ID:    "game_camera",
+						Child: lev1,
 					},
 				},
 				&engine.DebugToast{ID: "toast", Pos: image.Pt(0, 15)},

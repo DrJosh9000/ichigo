@@ -147,7 +147,7 @@ type Saver interface {
 // (such as when the game component database is constructed).
 // Scan should return a slice containing all immediate subcomponents.
 type Scanner interface {
-	Scan() Components
+	Scan() []interface{}
 }
 
 // Transformer components can provide draw options to apply to themselves and

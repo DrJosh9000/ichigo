@@ -21,7 +21,6 @@ type scener interface {
 	Disabler
 	Hider
 	Identifier
-	Registrar
 	Scanner
 }
 
@@ -30,30 +29,16 @@ func init() {
 	gob.Register(&SceneRef{})
 }
 
-// Scene gives an identity, bounds, and other properties to a collection of
-// components.
+// Scene is a component for adding an identity, bounds, and other properties.
 type Scene struct {
 	ID
 	Bounds // world coordinates
-	Components
+	Child  interface{}
 	Disables
 	Hides
 }
 
-func (s *Scene) Register(component, parent interface{}) error {
-	if parent == s {
-		s.Components = append(s.Components, component)
-	}
-	return nil
-}
-
-func (s *Scene) Unregister(component interface{}) {
-	for i, c := range s.Components {
-		if c == component {
-			s.Components[i] = nil
-		}
-	}
-}
+func (s *Scene) Scan() []interface{} { return []interface{}{s.Child} }
 
 // SceneRef loads a gzipped, gob-encoded Scene from the asset FS.
 // After Load, Scene is usable.

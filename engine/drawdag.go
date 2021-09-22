@@ -25,7 +25,7 @@ var _ interface {
 // the number of tests between components.
 type DrawDAG struct {
 	ChunkSize int
-	Components
+	Child     interface{}
 	Hides
 
 	*dag
@@ -113,6 +113,8 @@ func (d *DrawDAG) Prepare(game *Game) error {
 	// likely to be a safe call.
 	return d.Register(d, nil)
 }
+
+func (d *DrawDAG) Scan() []interface{} { return []interface{}{d.Child} }
 
 // Update checks for any changes to descendants, and updates its internal
 // data structures accordingly.
