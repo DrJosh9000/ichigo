@@ -227,6 +227,38 @@ func postorderWalk(component, parent interface{}, visit func(component, parent i
 	return visit(component, parent)
 }
 
+// Load loads a component and all subcomponents recursively.
+// Note that this method does not implement Loader.
+func (g *Game) Load(component interface{}, assets fs.FS) error {
+	if l, ok := component.(Loader); ok {
+		if err := l.Load(assets); err != nil {
+			return err
+		}
+	}
+	if sc, ok := component.(Scanner); ok {
+		return sc.Scan(func(x interface{}) error {
+			return g.Load(x, assets)
+		})
+	}
+	return nil
+}
+
+// Prepare prepares a component and all subcomponents recursively.
+// Note that this method does not implement Prepper.
+func (g *Game) Prepare(component interface{}) error {
+	// Postorder traversal, in case ancestors depend on descendants being
+	// ready to answer queries.
+	if sc, ok := component.(Scanner); ok {
+		if err := sc.Scan(g.Prepare); err != nil {
+			return err
+		}
+	}
+	if p, ok := component.(Prepper); ok {
+		return p.Prepare(g)
+	}
+	return nil
+}
+
 // LoadAndPrepare first calls Load on all Loaders. Once loading is complete, it
 // builds the component databases and then calls Prepare on every Preparer.
 // LoadAndPrepare must be called before any calls to Component or Query.
@@ -237,12 +269,7 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 
 	// Load all the Loaders.
 	startLoad := time.Now()
-	if err := PreorderWalk(g, func(c, _ interface{}) error {
-		if l, ok := c.(Loader); ok {
-			return l.Load(assets)
-		}
-		return nil
-	}); err != nil {
+	if err := g.Load(g.Root, assets); err != nil {
 		return err
 	}
 	log.Printf("finished loading in %v", time.Since(startLoad))
@@ -261,15 +288,9 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 
 	// Prepare all the Preppers
 	startPrep := time.Now()
-	if err := PostorderWalk(g, func(c, _ interface{}) error {
-		if p, ok := c.(Prepper); ok {
-			return p.Prepare(g)
-		}
-		return nil
-	}); err != nil {
+	if err := g.Prepare(g.Root); err != nil {
 		return err
 	}
-
 	log.Printf("finished preparing in %v", time.Since(startPrep))
 	return nil
 }

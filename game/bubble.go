@@ -73,16 +73,16 @@ func (b *Bubble) Update() error {
 	if b.Life <= 0 {
 		b.game.PathUnregister(b)
 	}
-	if false {
+	if true {
 		// not using MoveX/MoveY/... because collisions are unnecessary -
 		// this is an effect particle; if it overlaps a solid, who cares
 		b.Sprite.Actor.Pos = b.Sprite.Actor.Pos.Add(geom.Pt3(
 			//lint:ignore SA4000 one random minus another is not always zero...
-			rand.Intn(3)-1, rand.Intn(2)-1, rand.Intn(2)-rand.Intn(2),
+			rand.Intn(3)-1, -1, rand.Intn(2)-rand.Intn(2),
 		))
 	} else {
 		b.Sprite.Actor.MoveX(float64(rand.Intn(3)-1), nil)
-		b.Sprite.Actor.MoveY(float64(rand.Intn(2)-1), nil)
+		b.Sprite.Actor.MoveY(-1, nil)
 		//lint:ignore SA4000 one random minus another is not always zero...
 		b.Sprite.Actor.MoveZ(float64(rand.Intn(2)-rand.Intn(2)), nil)
 	}

@@ -117,23 +117,12 @@ func (aw *Awakeman) realUpdate() error {
 		if aw.bubbleTimer <= 0 {
 			aw.bubbleTimer = bubblePeriod
 			bubble := NewBubble(aw.Sprite.Actor.Pos.Add(geom.Pt3(-3, -20, -1)))
-			if err := engine.PreorderWalk(bubble, func(c, _ interface{}) error {
-				if p, ok := c.(engine.Loader); ok {
-					return p.Load(Assets)
-				}
-				return nil
-			}); err != nil {
+			if err := aw.game.Load(bubble, Assets); err != nil {
 				return err
 			}
 			// Add bubble to same parent as aw
-			par := aw.game.Parent(aw)
-			aw.game.PathRegister(bubble, par)
-			if err := engine.PostorderWalk(bubble, func(c, _ interface{}) error {
-				if p, ok := c.(engine.Prepper); ok {
-					return p.Prepare(aw.game)
-				}
-				return nil
-			}); err != nil {
+			aw.game.PathRegister(bubble, aw.game.Parent(aw))
+			if err := aw.game.Prepare(bubble); err != nil {
 				return err
 			}
 			bubble.Sprite.SetAnim(bubble.Sprite.Sheet.NewAnim("bubble"))
