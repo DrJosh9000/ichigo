@@ -163,11 +163,6 @@ func (d *DrawDAG) Register(component, _ interface{}) error {
 		return nil
 	}
 	if sc, ok := component.(Scanner); ok {
-		/*for _, x := range sc.Scan() {
-			if err := d.Register(x, nil); err != nil {
-				return err
-			}
-		}*/
 		scv := func(x interface{}) error {
 			return d.Register(x, nil)
 		}
@@ -239,9 +234,6 @@ func (d *DrawDAG) Unregister(component interface{}) {
 		return
 	}
 	if sc, ok := component.(Scanner); ok {
-		/*for _, x := range sc.Scan() {
-			d.Unregister(x)
-		}*/
 		scv := func(x interface{}) error {
 			d.Unregister(x)
 			return nil

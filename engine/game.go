@@ -75,12 +75,6 @@ func (g *Game) updateRecursive(c interface{}) error {
 		return nil
 	}
 	if sc, ok := c.(Scanner); ok {
-		/*for _, x := range sc.Scan() {
-			if err := g.updateRecursive(x); err != nil {
-				return err
-			}
-		}
-		*/
 		if err := sc.Scan(g.updateRecursive); err != nil {
 			return err
 		}
@@ -191,11 +185,6 @@ func preorderWalk(component, parent interface{}, visit func(component, parent in
 	if !ok {
 		return nil
 	}
-	/*for _, c := range sc.Scan() {
-		if err := preorderWalk(c, component, visit); err != nil {
-			return err
-		}
-	}*/
 	scv := func(c interface{}) error {
 		return preorderWalk(c, component, visit)
 	}
@@ -215,11 +204,6 @@ func postorderWalk(component, parent interface{}, visit func(component, parent i
 		scv := func(c interface{}) error {
 			return postorderWalk(c, component, visit)
 		}
-		/*for _, c := range sc.Scan() {
-			if err := postorderWalk(c, component, visit); err != nil {
-				return err
-			}
-		}*/
 		if err := sc.Scan(scv); err != nil {
 			return err
 		}
