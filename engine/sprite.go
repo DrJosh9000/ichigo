@@ -41,11 +41,17 @@ func (s *Sprite) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 }
 
 // Scan returns the Actor and the Sheet.
-func (s *Sprite) Scan() []interface{} {
+/*func (s *Sprite) Scan() []interface{} {
 	return []interface{}{
 		&s.Actor,
 		&s.Sheet,
 	}
+}*/
+func (s *Sprite) Scan(visit func(interface{}) error) error {
+	if err := visit(&s.Actor); err != nil {
+		return err
+	}
+	return visit(&s.Sheet)
 }
 
 // SetAnim sets the Anim to use for the sprite. If it is not the same as the

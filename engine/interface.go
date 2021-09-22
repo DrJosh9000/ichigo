@@ -144,10 +144,12 @@ type Saver interface {
 }
 
 // Scanner components can be scanned. It is called when the game tree is walked
-// (such as when the game component database is constructed).
-// Scan should return a slice containing all immediate subcomponents.
+// (such as when the game component database is constructed) and various times
+// afterward (such as during Update).
+// Scan should visit each immediate subcomponent, aborting early if an error is
+// returned from the visitor.
 type Scanner interface {
-	Scan() []interface{}
+	Scan(visit func(interface{}) error) error
 }
 
 // Transformer components can provide draw options to apply to themselves and

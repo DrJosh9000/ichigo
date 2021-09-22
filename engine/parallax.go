@@ -39,7 +39,10 @@ func (p *Parallax) Prepare(game *Game) error {
 }
 
 // Scan returns the child component.
-func (p *Parallax) Scan() []interface{} { return []interface{}{p.Child} }
+//func (p *Parallax) Scan() []interface{} { return []interface{}{p.Child} }
+func (p *Parallax) Scan(visit func(interface{}) error) error {
+	return visit(p.Child)
+}
 
 // Transform returns a GeoM translation of Factor * camera.Centre.
 func (p *Parallax) Transform() (opts ebiten.DrawImageOptions) {

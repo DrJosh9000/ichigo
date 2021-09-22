@@ -75,10 +75,14 @@ func (g *Game) updateRecursive(c interface{}) error {
 		return nil
 	}
 	if sc, ok := c.(Scanner); ok {
-		for _, x := range sc.Scan() {
+		/*for _, x := range sc.Scan() {
 			if err := g.updateRecursive(x); err != nil {
 				return err
 			}
+		}
+		*/
+		if err := sc.Scan(g.updateRecursive); err != nil {
+			return err
 		}
 	}
 	if c == g { // prevent infinite recursion
@@ -167,7 +171,10 @@ func (g *Game) Query(ancestor interface{}, behaviour reflect.Type) map[interface
 }
 
 // Scan returns g.Root.
-func (g *Game) Scan() []interface{} { return []interface{}{g.Root} }
+//func (g *Game) Scan() []interface{} { return []interface{}{g.Root} }
+func (g *Game) Scan(visit func(interface{}) error) error {
+	return visit(g.Root)
+}
 
 // PreorderWalk calls visit with every component and its parent, reachable from
 // the  given component via Scan, for as long as visit returns nil. The parent
@@ -185,12 +192,15 @@ func preorderWalk(component, parent interface{}, visit func(component, parent in
 	if !ok {
 		return nil
 	}
-	for _, c := range sc.Scan() {
+	/*for _, c := range sc.Scan() {
 		if err := preorderWalk(c, component, visit); err != nil {
 			return err
 		}
+	}*/
+	scv := func(c interface{}) error {
+		return preorderWalk(c, component, visit)
 	}
-	return nil
+	return sc.Scan(scv)
 }
 
 // PostorderWalk calls visit with every component and its parent, reachable from
@@ -203,10 +213,16 @@ func PostorderWalk(component interface{}, visit func(component, parent interface
 
 func postorderWalk(component, parent interface{}, visit func(component, parent interface{}) error) error {
 	if sc, ok := component.(Scanner); ok {
-		for _, c := range sc.Scan() {
+		scv := func(c interface{}) error {
+			return postorderWalk(c, component, visit)
+		}
+		/*for _, c := range sc.Scan() {
 			if err := postorderWalk(c, component, visit); err != nil {
 				return err
 			}
+		}*/
+		if err := sc.Scan(scv); err != nil {
+			return err
 		}
 	}
 	return visit(component, parent)

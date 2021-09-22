@@ -38,7 +38,10 @@ type Scene struct {
 	Hides
 }
 
-func (s *Scene) Scan() []interface{} { return []interface{}{s.Child} }
+//func (s *Scene) Scan() []interface{} { return []interface{}{s.Child} }
+func (s *Scene) Scan(visit func(interface{}) error) error {
+	return visit(s.Child)
+}
 
 // SceneRef loads a gzipped, gob-encoded Scene from the asset FS.
 // After Load, Scene is usable.

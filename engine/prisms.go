@@ -113,13 +113,24 @@ func (m *PrismMap) Prepare(g *Game) error {
 }
 
 // Scan returns the Sheet and all the Prisms.
-func (m *PrismMap) Scan() []interface{} {
+/*func (m *PrismMap) Scan() []interface{} {
 	c := make([]interface{}, 1, len(m.Map)+1)
 	c[0] = &m.Sheet
 	for _, prism := range m.Map {
 		c = append(c, prism)
 	}
 	return c
+}*/
+func (m *PrismMap) Scan(visit func(interface{}) error) error {
+	if err := visit(&m.Sheet); err != nil {
+		return err
+	}
+	for _, prism := range m.Map {
+		if err := visit(prism); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Transform retrurns a translation by the draw offset.

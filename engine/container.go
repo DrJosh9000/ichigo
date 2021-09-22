@@ -1,10 +1,23 @@
 package engine
 
+var _ interface {
+	Registrar
+	Scanner
+} = &Container{}
+
 // Container contains many components.
 type Container []interface{}
 
 // Scan returns c.
-func (c Container) Scan() []interface{} { return c }
+//func (c Container) Scan() []interface{} { return c }
+func (c Container) Scan(visit func(interface{}) error) error {
+	for _, x := range c {
+		if err := visit(x); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 // Register records component in the slice, if parent is the container.
 func (c *Container) Register(component, parent interface{}) error {

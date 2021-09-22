@@ -114,7 +114,10 @@ func (d *DrawDAG) Prepare(game *Game) error {
 	return d.Register(d, nil)
 }
 
-func (d *DrawDAG) Scan() []interface{} { return []interface{}{d.Child} }
+//func (d *DrawDAG) Scan() []interface{} { return []interface{}{d.Child} }
+func (d *DrawDAG) Scan(visit func(interface{}) error) error {
+	return visit(d.Child)
+}
 
 // Update checks for any changes to descendants, and updates its internal
 // data structures accordingly.
@@ -160,11 +163,15 @@ func (d *DrawDAG) Register(component, _ interface{}) error {
 		return nil
 	}
 	if sc, ok := component.(Scanner); ok {
-		for _, x := range sc.Scan() {
+		/*for _, x := range sc.Scan() {
 			if err := d.Register(x, nil); err != nil {
 				return err
 			}
+		}*/
+		scv := func(x interface{}) error {
+			return d.Register(x, nil)
 		}
+		return sc.Scan(scv)
 	}
 	return nil
 }
@@ -232,9 +239,14 @@ func (d *DrawDAG) Unregister(component interface{}) {
 		return
 	}
 	if sc, ok := component.(Scanner); ok {
-		for _, x := range sc.Scan() {
+		/*for _, x := range sc.Scan() {
 			d.Unregister(x)
+		}*/
+		scv := func(x interface{}) error {
+			d.Unregister(x)
+			return nil
 		}
+		sc.Scan(scv)
 	}
 }
 

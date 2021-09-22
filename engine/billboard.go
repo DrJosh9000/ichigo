@@ -52,7 +52,10 @@ func (b *Billboard) Prepare(g *Game) error {
 }
 
 // Scan returns a slice containing Src.
-func (b *Billboard) Scan() []interface{} { return []interface{}{&b.Src} }
+//func (b *Billboard) Scan() []interface{} { return []interface{}{&b.Src} }
+func (b *Billboard) Scan(visit func(interface{}) error) error {
+	return visit(&b.Src)
+}
 
 func (b *Billboard) String() string {
 	return fmt.Sprintf("Billboard@%v", b.Pos)
