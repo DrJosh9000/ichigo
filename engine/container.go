@@ -1,28 +1,55 @@
 package engine
 
+import (
+	"bytes"
+	"encoding/gob"
+)
+
 var _ interface {
 	Registrar
 	Scanner
+	gob.GobDecoder
+	gob.GobEncoder
 } = &Container{}
+
+func init() {
+	gob.Register(&Container{})
+}
 
 // Container contains many components, in order.
 type Container struct {
-	Items []interface{}
-
+	items   []interface{}
 	free    map[int]struct{}
 	reverse map[interface{}]int
 }
 
 func MakeContainer(items ...interface{}) *Container {
-	c := &Container{Items: items}
+	c := &Container{items: items}
 	c.Prepare(nil)
 	return c
 }
 
+func (c *Container) GobDecode(in []byte) error {
+	dec := gob.NewDecoder(bytes.NewReader(in))
+	if err := dec.Decode(&c.items); err != nil {
+		return err
+	}
+	c.free, c.reverse = nil, nil
+	return c.Prepare(nil)
+}
+
+func (c *Container) GobEncode() ([]byte, error) {
+	var buf bytes.Buffer
+	if err := gob.NewEncoder(&buf).Encode(c.items); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
 func (c *Container) Prepare(*Game) error {
 	if c.reverse == nil {
-		c.reverse = make(map[interface{}]int, len(c.Items))
-		for i, x := range c.Items {
+		c.reverse = make(map[interface{}]int, len(c.items))
+		for i, x := range c.items {
 			c.reverse[x] = i
 		}
 	}
@@ -34,7 +61,7 @@ func (c *Container) Prepare(*Game) error {
 
 // Scan visits every component in the container.
 func (c *Container) Scan(visit func(interface{}) error) error {
-	for _, x := range c.Items {
+	for _, x := range c.items {
 		if err := visit(x); err != nil {
 			return err
 		}
@@ -43,38 +70,38 @@ func (c *Container) Scan(visit func(interface{}) error) error {
 }
 
 // Len returns the number of items in the container.
-func (c *Container) Len() int { return len(c.Items) }
+func (c *Container) Len() int { return len(c.items) }
 
 // Swap swaps two items in the container.
 func (c *Container) Swap(i, j int) {
 	if i == j {
 		return
 	}
-	ifree := c.Items[i] == nil
-	jfree := c.Items[j] == nil
+	ifree := c.items[i] == nil
+	jfree := c.items[j] == nil
 	switch {
 	case ifree && jfree:
 		return
 	case ifree:
-		c.Items[i] = c.Items[j]
-		c.reverse[c.Items[i]] = i
+		c.items[i] = c.items[j]
+		c.reverse[c.items[i]] = i
 		c.free[j] = struct{}{}
 		delete(c.free, i)
 	case jfree:
-		c.Items[j] = c.Items[i]
-		c.reverse[c.Items[j]] = j
+		c.items[j] = c.items[i]
+		c.reverse[c.items[j]] = j
 		c.free[i] = struct{}{}
 		delete(c.free, j)
 	default:
-		c.Items[i], c.Items[j] = c.Items[j], c.Items[i]
-		c.reverse[c.Items[i]] = i
-		c.reverse[c.Items[j]] = j
+		c.items[i], c.items[j] = c.items[j], c.items[i]
+		c.reverse[c.items[i]] = i
+		c.reverse[c.items[j]] = j
 	}
 }
 
 func (c Container) String() string { return "Container" }
 
-// Register records component in the slice, if parent is this container. It
+// Register records component into the slice, if parent is this container. It
 // writes the component to an arbitrary free index in the slice, or appends if
 // there are none free.
 func (c *Container) Register(component, parent interface{}) error {
@@ -82,13 +109,13 @@ func (c *Container) Register(component, parent interface{}) error {
 		return nil
 	}
 	if len(c.free) == 0 {
-		c.reverse[component] = len(c.Items)
-		c.Items = append(c.Items, component)
+		c.reverse[component] = len(c.items)
+		c.items = append(c.items, component)
 		return nil
 	}
 	for i := range c.free {
 		c.reverse[component] = i
-		c.Items[i] = component
+		c.items[i] = component
 		delete(c.free, i)
 		return nil
 	}
@@ -100,24 +127,24 @@ func (c *Container) Register(component, parent interface{}) error {
 // is compacted.
 func (c *Container) Unregister(component interface{}) {
 	if i, found := c.reverse[component]; found {
-		c.Items[i] = nil
+		c.items[i] = nil
 		c.free[i] = struct{}{}
 		delete(c.reverse, i)
 	}
-	if len(c.free) > len(c.Items)/2 {
+	if len(c.free) > len(c.items)/2 {
 		c.compact()
 	}
 }
 
 func (c *Container) compact() {
 	i := 0
-	for _, x := range c.Items {
+	for _, x := range c.items {
 		if x != nil {
-			c.Items[i] = x
+			c.items[i] = x
 			c.reverse[x] = i
 			i++
 		}
 	}
-	c.Items = c.Items[:i]
+	c.items = c.items[:i]
 	c.free = make(map[int]struct{})
 }
