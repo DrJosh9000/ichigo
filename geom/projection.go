@@ -16,10 +16,28 @@ func Project(π Projector, p Int3) image.Point {
 	return π.Project(p.Z).Add(p.XY())
 }
 
-// Projection uses floats to define a projection.
+// ElevationProjection throws away Z.
+type ElevationProjection struct{}
+
+// Sign returns the zero point.
+func (ElevationProjection) Sign() image.Point { return image.Point{} }
+
+// Project returns the zero point.
+func (ElevationProjection) Project(int) image.Point { return image.Point{} }
+
+// SimpleProjection projects Z onto Y only.
+type SimpleProjection struct{}
+
+// Sign returns (0, 1).
+func (SimpleProjection) Sign() image.Point { return image.Pt(0, 1) }
+
+// Project returns (0, z).
+func (SimpleProjection) Project(z int) image.Point { return image.Pt(0, z) }
+
+// Projection uses two floats to define a custom projection.
 type Projection struct{ X, Y float64 }
 
-func (π Projection) Sign() (s image.Point) {
+func (π Projection) Sign() image.Point {
 	return image.Pt(int(FSign(π.X)), int(FSign(π.Y)))
 }
 
@@ -31,7 +49,7 @@ func (π Projection) Project(z int) image.Point {
 	)
 }
 
-// IntProjection holds an integer projection definition.
+// IntProjection uses two integers to define a custom projection.
 // It is designed for projecting Z onto X and Y with integer fractions as would
 // be used in e.g. a diametric projection (IntProjection{X:0, Y:2}).
 type IntProjection image.Point

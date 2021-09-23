@@ -56,11 +56,7 @@ func main() {
 		ScreenSize: image.Pt(320, 240), // Window interior is this many pixels.
 		// TODO: refactor Projection and VoxelScale into... Scene? Camera?
 		// We might want different projections and scales in different levels.
-		Projection: geom.IntProjection{
-			// Each 1 voxel step in Z is projected into 1 pixel in Y.
-			X: 0,
-			Y: 1,
-		},
+		Projection: geom.SimpleProjection{},
 		VoxelScale: geom.Float3{
 			// Each voxel counts for this much (Euclidean) space.
 			X: 1,
