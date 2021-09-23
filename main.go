@@ -17,10 +17,11 @@ import (
 )
 
 const (
-	enableCPUProfile = true
-	enableREPL       = true
-	hardcodedLevel1  = true
-	rewriteLevel1    = false
+	enableCPUProfile  = true
+	enableHeapProfile = true
+	enableREPL        = true
+	hardcodedLevel1   = true
+	rewriteLevel1     = false
 )
 
 func main() {
@@ -64,7 +65,7 @@ func main() {
 			Z: math.Sqrt(3),
 		},
 		Root: &engine.DrawDFS{
-			Child: &engine.Container{
+			Child: engine.MakeContainer(
 				&engine.Fill{
 					ID:    "bg_fill",
 					Color: color.Gray{100},
@@ -78,7 +79,7 @@ func main() {
 				},
 				&engine.DebugToast{ID: "toast", Pos: image.Pt(0, 15)},
 				engine.PerfDisplay{},
-			},
+			),
 		},
 	}
 	if err := g.LoadAndPrepare(game.Assets); err != nil {
@@ -91,5 +92,16 @@ func main() {
 
 	if err := ebiten.RunGame(g); err != nil {
 		log.Fatalf("Game error: %v", err)
+	}
+
+	if enableHeapProfile && runtime.GOOS != "js" {
+		f, err := os.Create("heapprofile.pprof")
+		if err != nil {
+			log.Fatal("could not create heap profile: ", err)
+		}
+		defer f.Close()
+		if err := pprof.WriteHeapProfile(f); err != nil {
+			log.Fatal("could not write heap profile: ", err)
+		}
 	}
 }
