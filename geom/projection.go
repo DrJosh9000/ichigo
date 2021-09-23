@@ -2,12 +2,13 @@ package geom
 
 import "image"
 
-// Projector is used by Box and others to accept arbitrary
+// Projector types can be used to project 3D coordinates into 2D. It only
+// supports projecting Z into a 2D offset (i.e. not a general projection).
 type Projector interface {
 	// Sign returns a {-1, 0, 1}-valued 2D vector pointing in the direction that
 	// positive Z values are projected to.
 	Sign() image.Point
-	// Project projects a Z coordinate into 2D offset.
+	// Project converts a Z coordinate to a 2D offset.
 	Project(int) image.Point
 }
 
