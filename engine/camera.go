@@ -90,6 +90,8 @@ func (c *Camera) Scan(visit func(interface{}) error) error {
 	return visit(c.Child)
 }
 
+func (c *Camera) String() string { return "Camera@" + c.Centre.String() }
+
 // Transform returns the camera transform.
 func (c *Camera) Transform() (opts ebiten.DrawImageOptions) {
 	opts.GeoM.Translate(geom.CFloat(c.Centre.Mul(-1)))

@@ -88,23 +88,26 @@ func (g *Game) cmdTree(dst io.Writer, argv []string) {
 			return
 		}
 	}
-	PreorderWalk(c, func(w, _ interface{}) error {
-		indent := ""
-		l := 0
-		for p := w; p != c; p = g.par[p] {
-			l++
-		}
-		if l > 0 {
-			indent = strings.Repeat("  ", l-1) + "↳ "
-		}
-		i, ok := w.(Identifier)
-		if ok {
-			fmt.Fprintf(dst, "%s%T %q\n", indent, w, i.Ident())
-		} else {
-			fmt.Fprintf(dst, "%s%T\n", indent, w)
-		}
-		return nil
-	})
+	g.printTreeRecursive(dst, 0, c)
+}
+
+func (g *Game) printTreeRecursive(dst io.Writer, depth int, c interface{}) {
+	indent := ""
+	if depth > 0 {
+		indent = strings.Repeat("  ", depth-1) + "↳ "
+	}
+	i, ok := c.(Identifier)
+	if ok {
+		fmt.Fprintf(dst, "%s%v %q\n", indent, c, i.Ident())
+	} else {
+		fmt.Fprintf(dst, "%s%v\n", indent, c)
+	}
+	if sc, ok := c.(Scanner); ok {
+		sc.Scan(func(x interface{}) error {
+			g.printTreeRecursive(dst, depth+1, x)
+			return nil
+		})
+	}
 }
 
 func (g *Game) cmdQuery(dst io.Writer, argv []string) {

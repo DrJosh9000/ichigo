@@ -120,6 +120,8 @@ func (d *DrawDAG) Scan(visit func(interface{}) error) error {
 	return visit(d.Child)
 }
 
+func (d *DrawDAG) String() string { return "DrawDAG" }
+
 // Update checks for any changes to descendants, and updates its internal
 // data structures accordingly.
 func (d *DrawDAG) Update() error {
@@ -325,7 +327,8 @@ func newDAG() *dag {
 	}
 }
 
-func (d *dag) String() string {
+// Dot returns a dot-syntax-like description of the graph.
+func (d *dag) Dot() string {
 	var sb strings.Builder
 	sb.WriteString("digraph {\n")
 	for v, e := range d.out {

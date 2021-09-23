@@ -127,3 +127,5 @@ func (a *Actor) Prepare(g *Game) error {
 	a.game = g
 	return nil
 }
+
+func (a *Actor) String() string { return "Actor@" + a.Pos.String() }

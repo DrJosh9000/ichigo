@@ -43,6 +43,8 @@ func (s *Scene) Scan(visit func(interface{}) error) error {
 	return visit(s.Child)
 }
 
+func (s *Scene) String() string { return "Scene" }
+
 // SceneRef loads a gzipped, gob-encoded Scene from the asset FS.
 // After Load, Scene is usable.
 // This is mostly useful for scenes that refer to other scenes, e.g.
@@ -83,3 +85,5 @@ func (r *SceneRef) Load(assets fs.FS) error {
 func (r *SceneRef) Save() error {
 	return SaveGobz(r.Scene, filepath.Base(r.Path))
 }
+
+func (r *SceneRef) String() string { return "SceneRef{" + r.Path + "}" }

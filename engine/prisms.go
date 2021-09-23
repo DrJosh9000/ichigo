@@ -125,6 +125,8 @@ func (m *PrismMap) Scan(visit func(interface{}) error) error {
 	return nil
 }
 
+func (m *PrismMap) String() string { return "PrismMap" }
+
 // Transform retrurns a translation by the draw offset.
 func (m *PrismMap) Transform() (opts ebiten.DrawImageOptions) {
 	opts.GeoM.Translate(geom.CFloat(m.DrawOffset))

@@ -169,46 +169,6 @@ func (g *Game) Scan(visit func(interface{}) error) error {
 	return visit(g.Root)
 }
 
-// PreorderWalk calls visit with every component and its parent, reachable from
-// the  given component via Scan, for as long as visit returns nil. The parent
-// value passed to visit when visiting component will be nil. The parent will be
-// visited before the children.
-func PreorderWalk(component interface{}, visit func(component, parent interface{}) error) error {
-	return preorderWalk(component, nil, visit)
-}
-
-func preorderWalk(component, parent interface{}, visit func(component, parent interface{}) error) error {
-	if err := visit(component, parent); err != nil {
-		return err
-	}
-	if sc, ok := component.(Scanner); ok {
-		return sc.Scan(func(c interface{}) error {
-			return preorderWalk(c, component, visit)
-		})
-	}
-	return nil
-}
-
-// PostorderWalk calls visit with every component and its parent, reachable from
-// the  given component via Scan, for as long as visit returns nil. The parent
-// value passed to visit when visiting component will be nil. The children will
-// be visited before the parent.
-func PostorderWalk(component interface{}, visit func(component, parent interface{}) error) error {
-	return postorderWalk(component, nil, visit)
-}
-
-func postorderWalk(component, parent interface{}, visit func(component, parent interface{}) error) error {
-	if sc, ok := component.(Scanner); ok {
-		scv := func(c interface{}) error {
-			return postorderWalk(c, component, visit)
-		}
-		if err := sc.Scan(scv); err != nil {
-			return err
-		}
-	}
-	return visit(component, parent)
-}
-
 // Load loads a component and all subcomponents recursively.
 // Note that this method does not implement Loader.
 func (g *Game) Load(component interface{}, assets fs.FS) error {
@@ -258,14 +218,9 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 
 	// Build the component databases
 	startBuild := time.Now()
-	g.dbmu.Lock()
-	g.byID = make(map[string]Identifier)
-	g.byAB = make(map[abKey]map[interface{}]struct{})
-	g.par = make(map[interface{}]interface{})
-	if err := PreorderWalk(g, g.registerOne); err != nil {
+	if err := g.build(); err != nil {
 		return err
 	}
-	g.dbmu.Unlock()
 	log.Printf("finished building db in %v", time.Since(startBuild))
 
 	// Prepare all the Preppers
@@ -275,6 +230,15 @@ func (g *Game) LoadAndPrepare(assets fs.FS) error {
 	}
 	log.Printf("finished preparing in %v", time.Since(startPrep))
 	return nil
+}
+
+func (g *Game) build() error {
+	g.dbmu.Lock()
+	defer g.dbmu.Unlock()
+	g.byID = make(map[string]Identifier)
+	g.byAB = make(map[abKey]map[interface{}]struct{})
+	g.par = make(map[interface{}]interface{})
+	return g.registerRecursive(g, nil)
 }
 
 // Register registers a component into the component database (as the
@@ -291,8 +255,19 @@ func (g *Game) Register(component, parent interface{}) error {
 	}
 	g.dbmu.Lock()
 	defer g.dbmu.Unlock()
-	// preorderWalk goes in the right order for registering.
-	return preorderWalk(component, parent, g.registerOne)
+	return g.registerRecursive(component, parent)
+}
+
+func (g *Game) registerRecursive(component, parent interface{}) error {
+	if err := g.registerOne(component, parent); err != nil {
+		return err
+	}
+	if sc, ok := component.(Scanner); ok {
+		return sc.Scan(func(x interface{}) error {
+			return g.registerRecursive(x, component)
+		})
+	}
+	return nil
 }
 
 func (g *Game) registerOne(component, parent interface{}) error {
@@ -335,12 +310,21 @@ func (g *Game) Unregister(component interface{}) {
 		return
 	}
 	g.dbmu.Lock()
-	// postorderWalk goes in the right order for unregistering.
-	postorderWalk(component, nil, g.unregisterOne)
+	g.unregisterRecursive(component)
 	g.dbmu.Unlock()
 }
 
-func (g *Game) unregisterOne(component, _ interface{}) error {
+func (g *Game) unregisterRecursive(component interface{}) {
+	if sc, ok := component.(Scanner); ok {
+		sc.Scan(func(x interface{}) error {
+			g.unregisterRecursive(x)
+			return nil
+		})
+	}
+	g.unregisterOne(component)
+}
+
+func (g *Game) unregisterOne(component interface{}) {
 	// unregister from g.byAB, using g.par to trace the path
 	ct := reflect.TypeOf(component)
 	for _, b := range Behaviours {
@@ -361,8 +345,9 @@ func (g *Game) unregisterOne(component, _ interface{}) error {
 	if id, ok := component.(Identifier); ok && id.Ident() != "" {
 		delete(g.byID, id.Ident())
 	}
-	return nil
 }
+
+func (g *Game) String() string { return "Game" }
 
 // --------- Helper stuff ---------
 

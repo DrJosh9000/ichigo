@@ -58,3 +58,5 @@ func (d *DrawDFS) draw(component interface{}, screen *ebiten.Image, opts ebiten.
 func (d *DrawDFS) Scan(visit func(interface{}) error) error {
 	return visit(d.Child)
 }
+
+func (d *DrawDFS) String() string { return "DrawDFS" }

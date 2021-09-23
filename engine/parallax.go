@@ -43,6 +43,8 @@ func (p *Parallax) Scan(visit func(interface{}) error) error {
 	return visit(p.Child)
 }
 
+func (p *Parallax) String() string { return "Parallax" }
+
 // Transform returns a GeoM translation of Factor * camera.Centre.
 func (p *Parallax) Transform() (opts ebiten.DrawImageOptions) {
 	x, y := geom.CFloat(p.camera.Centre)

@@ -57,3 +57,5 @@ func (s *Sheet) SubImage(i int) *ebiten.Image {
 	r := image.Rectangle{p, p.Add(s.CellSize)}
 	return s.Src.Image().SubImage(r).(*ebiten.Image)
 }
+
+func (s *Sheet) String() string { return "Sheet" }

@@ -18,6 +18,8 @@ func (c Container) Scan(visit func(interface{}) error) error {
 	return nil
 }
 
+func (c Container) String() string { return "Container" }
+
 // Register records component in the slice, if parent is the container.
 func (c *Container) Register(component, parent interface{}) error {
 	if parent == c {

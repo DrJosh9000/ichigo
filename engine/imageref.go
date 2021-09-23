@@ -57,3 +57,5 @@ func (r *ImageRef) Load(assets fs.FS) error {
 	imageCache[assetKey{assets, r.Path}] = r.image
 	return nil
 }
+
+func (r *ImageRef) String() string { return "ImageRef{" + r.Path + "}" }
