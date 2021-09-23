@@ -1,12 +1,20 @@
 package engine
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"encoding/gob"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 var _ interface {
 	Drawer
 	DrawManager
 	Scanner
 } = &DrawDFS{}
+
+func init() {
+	gob.Register(&DrawDFS{})
+}
 
 // DrawDFS is a DrawLayer that does not add any structure. Components are
 // drawn in the order in which they are encountered by a depth-first search

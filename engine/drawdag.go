@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"encoding/gob"
 	"fmt"
 	"image"
 	"log"
@@ -20,6 +21,10 @@ var _ interface {
 	Scanner
 	Updater
 } = &DrawDAG{}
+
+func init() {
+	gob.Register(&DrawDAG{})
+}
 
 // DrawDAG is a DrawLayer that organises DrawBoxer descendants in a directed
 // acyclic graph (DAG), in order to draw them according to ordering constraints.

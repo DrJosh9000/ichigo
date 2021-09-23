@@ -135,11 +135,13 @@ func (c *Container) Register(component, parent interface{}) error {
 // to nil. If the number of nil items is greater than half the slice, the slice
 // is compacted.
 func (c *Container) Unregister(component interface{}) {
-	if i, found := c.reverse[component]; found {
-		c.items[i] = nil
-		c.free[i] = struct{}{}
-		delete(c.reverse, i)
+	i, found := c.reverse[component]
+	if !found {
+		return
 	}
+	c.items[i] = nil
+	c.free[i] = struct{}{}
+	delete(c.reverse, i)
 	if len(c.free) > len(c.items)/2 {
 		c.compact()
 	}
