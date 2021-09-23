@@ -181,14 +181,12 @@ func preorderWalk(component, parent interface{}, visit func(component, parent in
 	if err := visit(component, parent); err != nil {
 		return err
 	}
-	sc, ok := component.(Scanner)
-	if !ok {
-		return nil
+	if sc, ok := component.(Scanner); ok {
+		return sc.Scan(func(c interface{}) error {
+			return preorderWalk(c, component, visit)
+		})
 	}
-	scv := func(c interface{}) error {
-		return preorderWalk(c, component, visit)
-	}
-	return sc.Scan(scv)
+	return nil
 }
 
 // PostorderWalk calls visit with every component and its parent, reachable from
