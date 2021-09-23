@@ -23,22 +23,25 @@ type Container struct {
 	reverse map[interface{}]int
 }
 
+// MakeContainer puts the items into a new Container.
 func MakeContainer(items ...interface{}) *Container {
 	c := &Container{items: items}
 	c.Prepare(nil)
 	return c
 }
 
+// GobDecode decodes a byte slice as though it were a slice of items.
 func (c *Container) GobDecode(in []byte) error {
-	dec := gob.NewDecoder(bytes.NewReader(in))
-	if err := dec.Decode(&c.items); err != nil {
+	if err := gob.NewDecoder(bytes.NewReader(in)).Decode(&c.items); err != nil {
 		return err
 	}
 	c.free, c.reverse = nil, nil
 	return c.Prepare(nil)
 }
 
+// GobEncode encodes c as the slice of items.
 func (c *Container) GobEncode() ([]byte, error) {
+	c.compact()
 	var buf bytes.Buffer
 	if err := gob.NewEncoder(&buf).Encode(c.items); err != nil {
 		return nil, err
@@ -46,6 +49,7 @@ func (c *Container) GobEncode() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+// Prepare ensures the helper data structures are present.
 func (c *Container) Prepare(*Game) error {
 	if c.reverse == nil {
 		c.reverse = make(map[interface{}]int, len(c.items))
@@ -59,20 +63,25 @@ func (c *Container) Prepare(*Game) error {
 	return nil
 }
 
-// Scan visits every component in the container.
+// Scan visits every non-nil component in the container.
 func (c *Container) Scan(visit func(interface{}) error) error {
 	for _, x := range c.items {
-		if err := visit(x); err != nil {
-			return err
+		if x != nil {
+			if err := visit(x); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
 }
 
-// Len returns the number of items in the container.
+// Element returns the item at index i, or nil for a free slot.
+func (c *Container) Element(i int) interface{} { return c.items[i] }
+
+// Len returns the number of items plus the number of free slots in the container.
 func (c *Container) Len() int { return len(c.items) }
 
-// Swap swaps two items in the container.
+// Swap swaps any two items, free slots, or a combination.
 func (c *Container) Swap(i, j int) {
 	if i == j {
 		return
@@ -136,6 +145,8 @@ func (c *Container) Unregister(component interface{}) {
 	}
 }
 
+// compact moves all the items to the front of the items slice, removing any
+// free slots, and empties the free map.
 func (c *Container) compact() {
 	i := 0
 	for _, x := range c.items {
