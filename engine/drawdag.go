@@ -3,6 +3,8 @@ package engine
 import (
 	"fmt"
 	"image"
+	"log"
+	"math"
 	"strings"
 
 	"drjosh.dev/gurgle/geom"
@@ -55,7 +57,6 @@ func (d *DrawDAG) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 		},
 	}
 	// Draw everything in d.dag, where not hidden (itself or any parent)
-	// TODO: handle descendant DrawLayers
 	d.dag.topWalk(func(x Drawer) {
 		// Is d hidden itself?
 		if h, ok := x.(Hider); ok && h.Hidden() {
@@ -370,7 +371,8 @@ func (d *dag) removeVertex(v Drawer) {
 }
 
 // topWalk visits each vertex in topological order, in time O(|V| + |E|) and
-// O(|V|) temporary memory.
+// O(|V|) temporary memory (for acyclic graphs) and a bit longer if it has to
+// break cycles.
 func (d *dag) topWalk(visit func(Drawer)) {
 	// Count indegrees - indegree(v) = len(d.in[v]) for each vertex v.
 	// If indegree(v) = 0, enqueue. Total: O(|V|).
@@ -386,19 +388,41 @@ func (d *dag) topWalk(visit func(Drawer)) {
 		}
 	}
 
-	// Visit every vertex (O(|V|)) and decrement indegrees for every out edge
-	// of each vertex visited (O(|E|)). Total: O(|V|+|E|).
-	for len(queue) > 0 {
-		u := queue[0]
-		visit(u)
-		queue = queue[1:]
+	for len(indegree) > 0 || len(queue) > 0 {
+		if len(queue) == 0 {
+			// Getting here means there are unprocessed vertices, because none
+			// have zero indegree, otherwise they would be in the queue.
+			// Arbitrarily break a cycle by enqueueing the least-indegree vertex
+			mind, minv := math.MaxInt, Drawer(nil)
+			for v, d := range indegree {
+				if d < mind {
+					mind, minv = d, v
+				}
+			}
+			log.Printf("breaking cycle in 'DAG' by enqueueing %v with indegree %d", minv, mind)
+			queue = append(queue, minv)
+			delete(indegree, minv)
+		}
 
-		// Decrement indegree for all out edges, and enqueue target if its
-		// indegree is now 0.
-		for v := range d.out[u] {
-			indegree[v]--
-			if indegree[v] == 0 {
-				queue = append(queue, v)
+		// Visit every vertex (O(|V|)) and decrement indegrees for every out edge
+		// of each vertex visited (O(|E|)). Total: O(|V|+|E|).
+		for len(queue) > 0 {
+			u := queue[0]
+			visit(u)
+			queue = queue[1:]
+
+			// Decrement indegree for all out edges, and enqueue target if its
+			// indegree is now 0.
+			for v := range d.out[u] {
+				if _, ready := indegree[v]; !ready {
+					// Vertex already drawn. This happens if there was a cycle.
+					continue
+				}
+				indegree[v]--
+				if indegree[v] == 0 {
+					queue = append(queue, v)
+					delete(indegree, v)
+				}
 			}
 		}
 	}
