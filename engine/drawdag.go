@@ -350,10 +350,10 @@ func (d dag) addVertex(v Drawer) {
 // removeVertex removes all in and out edges associated with v in O(degree(v)).
 func (d dag) removeVertex(v Drawer) {
 	for u := range d[v].in {
-		d.removeEdge(u, v)
+		delete(d[u].out, v)
 	}
 	for w := range d[v].out {
-		d.removeEdge(v, w)
+		delete(d[w].in, v)
 	}
 	delete(d, v)
 }
@@ -367,6 +367,7 @@ func (d dag) addEdge(u, v Drawer) {
 }
 
 // removeEdge removes the edge (u -> v) in O(1).
+//lint:ignore U1000 this exists for symmetry with addEdge
 func (d dag) removeEdge(u, v Drawer) {
 	delete(d[v].in, u)
 	delete(d[u].out, v)
