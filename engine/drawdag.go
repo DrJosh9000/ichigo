@@ -35,7 +35,7 @@ type DrawDAG struct {
 	Child     interface{}
 	Hides
 
-	*dag
+	dag
 	boxCache  map[DrawBoxer]geom.Box        // used to find components that moved
 	chunks    map[image.Point]drawerSet     // chunk coord -> drawers with bounding rects intersecting chunk
 	chunksRev map[DrawBoxer]image.Rectangle // comopnent -> rectangle of chunk coords
@@ -108,7 +108,7 @@ func (DrawDAG) ManagesDrawingSubcomponents() {}
 
 // Prepare adds all subcomponents to the DAG.
 func (d *DrawDAG) Prepare(game *Game) error {
-	d.dag = newDAG()
+	d.dag = make(dag)
 	d.boxCache = make(map[DrawBoxer]geom.Box)
 	d.chunks = make(map[image.Point]drawerSet)
 	d.chunksRev = make(map[DrawBoxer]image.Rectangle)
@@ -319,76 +319,70 @@ func (s drawerSet) String() string {
 	return sb.String()
 }
 
-type dag struct {
-	all     drawerSet
-	in, out map[Drawer]drawerSet
+type edges struct {
+	in, out drawerSet
 }
 
-func newDAG() *dag {
-	return &dag{
-		all: make(drawerSet),
-		in:  make(map[Drawer]drawerSet),
-		out: make(map[Drawer]drawerSet),
-	}
-}
+type dag map[Drawer]edges
 
 // Dot returns a dot-syntax-like description of the graph.
-func (d *dag) Dot() string {
+func (d dag) Dot() string {
 	var sb strings.Builder
 	sb.WriteString("digraph {\n")
-	for v, e := range d.out {
-		fmt.Fprintf(&sb, "%v -> %v\n", v, e)
+	for v, e := range d {
+		fmt.Fprintf(&sb, "%v -> %v\n", v, e.out)
 	}
 	sb.WriteString(" }\n")
 	return sb.String()
 }
 
 // addEdge adds the edge u-v in O(1).
-func (d *dag) addEdge(u, v Drawer) {
-	d.all[u], d.all[v] = struct{}{}, struct{}{}
-	if d.in[v] == nil {
-		d.in[v] = make(drawerSet)
-	}
-	if d.out[u] == nil {
-		d.out[u] = make(drawerSet)
-	}
-	d.in[v][u] = struct{}{}
-	d.out[u][v] = struct{}{}
+func (d dag) addEdge(u, v Drawer) {
+	d.addVertex(u)
+	d.addVertex(v)
+	d[v].in[u] = struct{}{}
+	d[u].out[v] = struct{}{}
 }
 
 // removeEdge removes the edge u-v in O(1).
-func (d *dag) removeEdge(u, v Drawer) {
-	delete(d.in[v], u)
-	delete(d.out[u], v)
+func (d dag) removeEdge(u, v Drawer) {
+	delete(d[v].in, u)
+	delete(d[u].out, v)
 }
 
 // addVertex ensures the vertex is present, even if there are no edges.
-func (d *dag) addVertex(v Drawer) {
-	d.all[v] = struct{}{}
+func (d dag) addVertex(v Drawer) {
+	if _, found := d[v]; found {
+		return
+	}
+	d[v] = edges{
+		in:  make(drawerSet),
+		out: make(drawerSet),
+	}
 }
 
 // removeVertex removes all in and out edges associated with v in O(degree(v)).
-func (d *dag) removeVertex(v Drawer) {
-	for u := range d.in[v] {
+func (d dag) removeVertex(v Drawer) {
+	for u := range d[v].in {
 		d.removeEdge(u, v)
 	}
-	for w := range d.out[v] {
+	for w := range d[v].out {
 		d.removeEdge(v, w)
 	}
-	delete(d.all, v)
+	delete(d, v)
 }
 
 // topWalk visits each vertex in topological order, in time O(|V| + |E|) and
 // O(|V|) temporary memory (for acyclic graphs) and a bit longer if it has to
 // break cycles.
-func (d *dag) topWalk(visit func(Drawer)) {
+func (d dag) topWalk(visit func(Drawer)) {
 	// Count indegrees - indegree(v) = len(d.in[v]) for each vertex v.
 	// If indegree(v) = 0, enqueue. Total: O(|V|).
-	queue := make([]Drawer, 0, len(d.in))
+	queue := make([]Drawer, 0, len(d))
 	indegree := make(map[Drawer]int)
-	for u := range d.all {
+	for u := range d {
 		// NB: zero indegree vertices may be missing from d.in
-		e := d.in[u]
+		e := d[u].in
 		if len(e) == 0 {
 			queue = append(queue, u)
 		} else {
@@ -421,7 +415,7 @@ func (d *dag) topWalk(visit func(Drawer)) {
 
 			// Decrement indegree for all out edges, and enqueue target if its
 			// indegree is now 0.
-			for v := range d.out[u] {
+			for v := range d[u].out {
 				if _, ready := indegree[v]; !ready {
 					// Vertex already drawn. This happens if there was a cycle.
 					continue
