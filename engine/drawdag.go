@@ -379,7 +379,7 @@ func (d dag) topWalk(visit func(Drawer)) {
 	// Count indegrees - indegree(v) = len(d[v].in) for each vertex v.
 	// If indegree(v) = 0, enqueue. Total: O(|V|).
 	queue := make([]Drawer, 0, len(d))
-	indegree := make(map[Drawer]int)
+	indegree := make(map[Drawer]int, len(d))
 	for v, e := range d {
 		if len(e.in) == 0 {
 			queue = append(queue, v)
