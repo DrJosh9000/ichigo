@@ -380,13 +380,11 @@ func (d dag) topWalk(visit func(Drawer)) {
 	// If indegree(v) = 0, enqueue. Total: O(|V|).
 	queue := make([]Drawer, 0, len(d))
 	indegree := make(map[Drawer]int)
-	for u := range d {
-		// NB: zero indegree vertices may be missing from d.in
-		e := d[u].in
-		if len(e) == 0 {
-			queue = append(queue, u)
+	for v, e := range d {
+		if len(e.in) == 0 {
+			queue = append(queue, v)
 		} else {
-			indegree[u] = len(e)
+			indegree[v] = len(e.in)
 		}
 	}
 
@@ -413,7 +411,7 @@ func (d dag) topWalk(visit func(Drawer)) {
 			visit(u)
 			queue = queue[1:]
 
-			// Decrement indegree for all out edges, and enqueue target if its
+			// Decrement indegree for all out-edges, and enqueue target if its
 			// indegree is now 0.
 			for v := range d[u].out {
 				if _, ready := indegree[v]; !ready {
