@@ -36,10 +36,9 @@ type DrawDAG struct {
 	Hides
 
 	dag
-	boxCache  map[DrawBoxer]geom.Box        // used to find components that moved
-	chunks    map[image.Point]drawerSet     // chunk coord -> drawers with bounding rects intersecting chunk
-	chunksRev map[DrawBoxer]image.Rectangle // comopnent -> rectangle of chunk coords
-	game      *Game
+	boxCache map[DrawBoxer]geom.Box    // used to find components that moved
+	chunks   map[image.Point]drawerSet // chunk coord -> drawers with bounding rects intersecting chunk
+	game     *Game
 }
 
 // Draw draws everything in the DAG in topological order.
@@ -111,7 +110,6 @@ func (d *DrawDAG) Prepare(game *Game) error {
 	d.dag = make(dag)
 	d.boxCache = make(map[DrawBoxer]geom.Box)
 	d.chunks = make(map[image.Point]drawerSet)
-	d.chunksRev = make(map[DrawBoxer]image.Rectangle)
 	d.game = game
 
 	// Because Game.LoadAndPrepare calls Prepare in a post-order walk, all the
@@ -132,18 +130,19 @@ func (d *DrawDAG) String() string { return "DrawDAG" }
 func (d *DrawDAG) Update() error {
 	// Re-evaluate bounding boxes for all descendants. If a box has changed,
 	// fix up the edges by removing and re-adding the vertex.
-	// Thanks once again to postorder traversal, this happens after all
-	// descendant updates.
+	// Thanks once again to postorder traversal in Game.Update, this happens
+	// after all descendant updates.
+	// TODO: more flexible update ordering system...
 	var readd []DrawBoxer
 	for db, bb := range d.boxCache {
 		nbb := db.BoundingBox()
 		if bb != nbb {
-			d.Unregister(db)
+			d.unregisterOne(db)
 			readd = append(readd, db)
 		}
 	}
 	for _, db := range readd {
-		d.Register(db, nil)
+		d.registerOne(db)
 	}
 	return nil
 }
@@ -190,34 +189,34 @@ func (d *DrawDAG) registerOne(x DrawBoxer) {
 
 	// Update the reverse chunk map
 	xbr := xb.BoundingRect(d.game.Projection)
-	revr := image.Rectangle{
-		Min: xbr.Min.Div(d.ChunkSize),
-		Max: xbr.Max.Sub(image.Pt(1, 1)).Div(d.ChunkSize),
-	}
-	d.chunksRev[x] = revr
+	min := xbr.Min.Div(d.ChunkSize)
+	max := xbr.Max.Sub(image.Pt(1, 1)).Div(d.ChunkSize)
 
-	// Find possible edges between x and items in the overlapping cells.
-	// First, a set of all the items in those cells.
+	// Find possible edges between x and items in the overlapping chunks.
+	// First, a set of all the items in those chunks.
 	cand := make(drawerSet)
 	var p image.Point
-	for p.Y = revr.Min.Y; p.Y <= revr.Max.Y; p.Y++ {
-		for p.X = revr.Min.X; p.X <= revr.Max.X; p.X++ {
-			cell := d.chunks[p]
-			if cell == nil {
-				cell = make(drawerSet)
-				d.chunks[p] = cell
+	for p.Y = min.Y; p.Y <= max.Y; p.Y++ {
+		for p.X = min.X; p.X <= max.X; p.X++ {
+			chunk := d.chunks[p]
+			if chunk == nil {
+				d.chunks[p] = drawerSet{x: {}}
+				continue
 			}
-			// Merge cell contents into cand
-			for c := range cell {
+			// Merge chunk contents into cand
+			for c := range chunk {
 				cand[c] = struct{}{}
 			}
-			// Add x to cell
-			cell[x] = struct{}{}
+			// Add x to chunk
+			chunk[x] = struct{}{}
 		}
 	}
 	// Add edges between x and elements of cand
 	πsign := d.game.Projection.Sign()
 	for c := range cand {
+		if x == c {
+			continue
+		}
 		y := c.(DrawBoxer)
 		// Bounding rectangle overlap test
 		// No overlap, no edge.
@@ -251,14 +250,14 @@ func (d *DrawDAG) Unregister(component interface{}) {
 
 func (d *DrawDAG) unregisterOne(x DrawBoxer) {
 	// Remove from chunk map
-	revr := d.chunksRev[x]
-	for j := revr.Min.Y; j <= revr.Max.Y; j++ {
-		for i := revr.Min.X; i <= revr.Max.X; i++ {
+	xbr := d.boxCache[x].BoundingRect(d.game.Projection)
+	min := xbr.Min.Div(d.ChunkSize)
+	max := xbr.Max.Sub(image.Pt(1, 1)).Div(d.ChunkSize)
+	for j := min.Y; j <= max.Y; j++ {
+		for i := min.X; i <= max.X; i++ {
 			delete(d.chunks[image.Pt(i, j)], x)
 		}
 	}
-	// Remove from reverse chunk map
-	delete(d.chunksRev, x)
 	// Remove from box cache
 	delete(d.boxCache, x)
 	// Remove from DAG
