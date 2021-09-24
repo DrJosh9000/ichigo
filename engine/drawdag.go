@@ -117,7 +117,7 @@ func (d *DrawDAG) Prepare(game *Game) error {
 	// Because Game.LoadAndPrepare calls Prepare in a post-order walk, all the
 	// descendants should be prepared, meaning BoundingBox (hence Register) is
 	// likely to be a safe call.
-	return d.Register(d, nil)
+	return d.Register(d.Child, nil)
 }
 
 // Scan visits d.Child.
@@ -164,17 +164,17 @@ func (d *DrawDAG) Register(component, _ interface{}) error {
 			return nil
 		}
 	}
+	// Register db, and then subcomponents recursively.
 	if db, ok := component.(DrawBoxer); ok {
 		d.registerOne(db)
 	}
-	if _, ok := component.(DrawManager); ok && component != d {
+	if _, ok := component.(DrawManager); ok {
 		return nil
 	}
 	if sc, ok := component.(Scanner); ok {
-		scv := func(x interface{}) error {
+		return sc.Scan(func(x interface{}) error {
 			return d.Register(x, nil)
-		}
-		return sc.Scan(scv)
+		})
 	}
 	return nil
 }
@@ -242,11 +242,10 @@ func (d *DrawDAG) Unregister(component interface{}) {
 		return
 	}
 	if sc, ok := component.(Scanner); ok {
-		scv := func(x interface{}) error {
+		sc.Scan(func(x interface{}) error {
 			d.Unregister(x)
 			return nil
-		}
-		sc.Scan(scv)
+		})
 	}
 }
 

@@ -54,11 +54,10 @@ func (d *DrawDFS) draw(component interface{}, screen *ebiten.Image, opts ebiten.
 	}
 	// Has subcomponents? recurse
 	if sc, ok := component.(Scanner); ok {
-		scv := func(x interface{}) error {
+		sc.Scan(func(x interface{}) error {
 			d.draw(x, screen, opts)
 			return nil
-		}
-		sc.Scan(scv)
+		})
 	}
 }
 
