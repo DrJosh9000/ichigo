@@ -347,7 +347,7 @@ func (d dag) addVertex(v Drawer) {
 	}
 }
 
-// removeVertex removes all in and out edges associated with v in O(degree(v)).
+// removeVertex removes v, and all edges associated with v, in O(degree(v)).
 func (d dag) removeVertex(v Drawer) {
 	for u := range d[v].in {
 		delete(d[u].out, v)
