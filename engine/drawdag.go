@@ -336,20 +336,6 @@ func (d dag) Dot() string {
 	return sb.String()
 }
 
-// addEdge adds the edge u-v in O(1).
-func (d dag) addEdge(u, v Drawer) {
-	d.addVertex(u)
-	d.addVertex(v)
-	d[v].in[u] = struct{}{}
-	d[u].out[v] = struct{}{}
-}
-
-// removeEdge removes the edge u-v in O(1).
-func (d dag) removeEdge(u, v Drawer) {
-	delete(d[v].in, u)
-	delete(d[u].out, v)
-}
-
 // addVertex ensures the vertex is present, even if there are no edges.
 func (d dag) addVertex(v Drawer) {
 	if _, found := d[v]; found {
@@ -370,6 +356,20 @@ func (d dag) removeVertex(v Drawer) {
 		d.removeEdge(v, w)
 	}
 	delete(d, v)
+}
+
+// addEdge adds the edge u-v in O(1).
+func (d dag) addEdge(u, v Drawer) {
+	d.addVertex(u)
+	d.addVertex(v)
+	d[v].in[u] = struct{}{}
+	d[u].out[v] = struct{}{}
+}
+
+// removeEdge removes the edge u-v in O(1).
+func (d dag) removeEdge(u, v Drawer) {
+	delete(d[v].in, u)
+	delete(d[u].out, v)
 }
 
 // topWalk visits each vertex in topological order, in time O(|V| + |E|) and
