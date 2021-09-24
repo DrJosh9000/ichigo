@@ -358,7 +358,7 @@ func (d dag) removeVertex(v Drawer) {
 	delete(d, v)
 }
 
-// addEdge adds the edge u-v in O(1).
+// addEdge adds the edge (u -> v) in O(1).
 func (d dag) addEdge(u, v Drawer) {
 	d.addVertex(u)
 	d.addVertex(v)
@@ -366,7 +366,7 @@ func (d dag) addEdge(u, v Drawer) {
 	d[u].out[v] = struct{}{}
 }
 
-// removeEdge removes the edge u-v in O(1).
+// removeEdge removes the edge (u -> v) in O(1).
 func (d dag) removeEdge(u, v Drawer) {
 	delete(d[v].in, u)
 	delete(d[u].out, v)
@@ -376,7 +376,7 @@ func (d dag) removeEdge(u, v Drawer) {
 // O(|V|) temporary memory (for acyclic graphs) and a bit longer if it has to
 // break cycles.
 func (d dag) topWalk(visit func(Drawer)) {
-	// Count indegrees - indegree(v) = len(d.in[v]) for each vertex v.
+	// Count indegrees - indegree(v) = len(d[v].in) for each vertex v.
 	// If indegree(v) = 0, enqueue. Total: O(|V|).
 	queue := make([]Drawer, 0, len(d))
 	indegree := make(map[Drawer]int)
