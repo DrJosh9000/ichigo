@@ -16,7 +16,7 @@ func init() {
 	gob.Register(&DrawDFS{})
 }
 
-// DrawDFS is a DrawLayer that does not add any structure. Components are
+// DrawDFS is a DrawManager that does not add any structure. Components are
 // drawn in the order in which they are encountered by a depth-first search
 // through the game tree, without any extra sorting based on Z values or
 // consideration for DrawOrderer).

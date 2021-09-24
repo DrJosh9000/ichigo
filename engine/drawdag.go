@@ -26,7 +26,7 @@ func init() {
 	gob.Register(&DrawDAG{})
 }
 
-// DrawDAG is a DrawLayer that organises DrawBoxer descendants in a directed
+// DrawDAG is a DrawManager that organises DrawBoxer descendants in a directed
 // acyclic graph (DAG), in order to draw them according to ordering constraints.
 // It combines a DAG with a spatial index used when updating vertices to reduce
 // the number of tests between components.
