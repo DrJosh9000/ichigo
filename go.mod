@@ -2,4 +2,7 @@ module drjosh.dev/gurgle
 
 go 1.16
 
-require github.com/hajimehoshi/ebiten/v2 v2.1.6
+require (
+	github.com/google/go-cmp v0.5.6 // indirect
+	github.com/hajimehoshi/ebiten/v2 v2.1.6
+)
