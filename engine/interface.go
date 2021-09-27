@@ -161,7 +161,7 @@ type Transformer interface {
 
 // Updater components can update themselves. Update is called repeatedly. Each
 // component must call Update on any internal components not known to the engine
-//  (i.e. not passed to Game.Register or returned from Scan).
+// (i.e. not passed to Game.Register or returned from Scan).
 type Updater interface {
 	Update() error
 }

@@ -79,10 +79,7 @@ func (g *Game) updateRecursive(c interface{}) error {
 			return err
 		}
 	}
-	if c == g { // prevent infinite recursion
-		return nil
-	}
-	if u, ok := c.(Updater); ok {
+	if u, ok := c.(Updater); ok && c != g {
 		return u.Update()
 	}
 	return nil
