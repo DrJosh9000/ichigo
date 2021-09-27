@@ -29,13 +29,14 @@ func (d *DrawDFS) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	if d.Hidden() {
 		return
 	}
-	d.draw(d.Child, screen, *opts)
+	d.drawRecursive(d.Child, screen, *opts)
 }
 
-// exists so DrawDFS is recognised as a DrawManager
+// ManagesDrawingSubcomponents is present so DrawDFS is recognised as a
+// DrawManager.
 func (DrawDFS) ManagesDrawingSubcomponents() {}
 
-func (d *DrawDFS) draw(component interface{}, screen *ebiten.Image, opts ebiten.DrawImageOptions) {
+func (d *DrawDFS) drawRecursive(component interface{}, screen *ebiten.Image, opts ebiten.DrawImageOptions) {
 	// Hidden? stop drawing
 	if h, ok := component.(Hider); ok && h.Hidden() {
 		return
@@ -48,14 +49,14 @@ func (d *DrawDFS) draw(component interface{}, screen *ebiten.Image, opts ebiten.
 	if dr, ok := component.(Drawer); ok {
 		dr.Draw(screen, &opts)
 	}
-	// Is it a DrawManager? return early (don't recurse)
+	// Is it a DrawManager? It manages drawing all its subcomponents.
 	if _, ok := component.(DrawManager); ok {
 		return
 	}
 	// Has subcomponents? recurse
 	if sc, ok := component.(Scanner); ok {
 		sc.Scan(func(x interface{}) error {
-			d.draw(x, screen, opts)
+			d.drawRecursive(x, screen, opts)
 			return nil
 		})
 	}
