@@ -32,7 +32,7 @@ func (d *DrawDFS) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	d.draw(d.Child, screen, *opts)
 }
 
-// exists to satisfy interface
+// exists so DrawDFS is recognised as a DrawManager
 func (DrawDFS) ManagesDrawingSubcomponents() {}
 
 func (d *DrawDFS) draw(component interface{}, screen *ebiten.Image, opts ebiten.DrawImageOptions) {
