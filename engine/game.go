@@ -34,13 +34,12 @@ func init() {
 }
 
 // Game implements the ebiten methods using a collection of components. One
-// component must be the designated root component - usually a scene of some
-// kind.
+// component must be the designated root component.
 type Game struct {
 	Disables
 	Hides
 	ScreenSize image.Point
-	Root       Drawer // usually a DrawManager
+	Root       Drawer
 	Projection geom.Projector
 	VoxelScale geom.Float3
 
