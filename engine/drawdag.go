@@ -102,7 +102,7 @@ func (d *DrawDAG) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	})
 }
 
-// exists to satisfy interface
+// exists so DrawDAG is recognised as a DrawManager
 func (DrawDAG) ManagesDrawingSubcomponents() {}
 
 // Prepare adds all subcomponents to the DAG.
