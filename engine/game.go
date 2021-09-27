@@ -68,8 +68,8 @@ func (g *Game) Update() error {
 	return g.updateRecursive(g)
 }
 
-// updateRecursive updates everything in a post-order traversal. It terminates recursion
-// early if the component reports it is Disabled.
+// updateRecursive updates everything in a post-order traversal. It terminates
+// the recursion early if the component reports it is Disabled.
 func (g *Game) updateRecursive(c interface{}) error {
 	if d, ok := c.(Disabler); ok && d.Disabled() {
 		return nil
