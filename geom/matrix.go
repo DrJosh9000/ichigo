@@ -5,6 +5,8 @@ import (
 	"image"
 )
 
+var errSingularMatrix = errors.New("matrix is singular")
+
 // IntMatrix3 implements a 3x3 integer matrix.
 type IntMatrix3 [3][3]int
 
@@ -138,7 +140,28 @@ func (a RatMatrix3) Inverse() (RatMatrix3, error) {
 	adj := a.Adjugate()
 	det := a[0][0].Mul(adj[0][0]).Add(a[0][1].Mul(adj[1][0])).Add(a[0][2].Mul(adj[2][0]))
 	if det.N == 0 {
-		return RatMatrix3{}, errors.New("matrix is singular")
+		return RatMatrix3{}, errSingularMatrix
 	}
 	return adj.Mul(det.Invert()), nil
+}
+
+// Concat returns the matrix equivalent to applying matrix a and then b.
+func (a RatMatrix3) Concat(b RatMatrix3) RatMatrix3 {
+	return RatMatrix3{
+		0: [3]Rat{
+			a[0][0].Mul(b[0][0]).Add(a[0][1].Mul(b[1][0])).Add(a[0][2].Mul(b[2][0])),
+			a[0][0].Mul(b[0][1]).Add(a[0][1].Mul(b[1][1])).Add(a[0][2].Mul(b[2][1])),
+			a[0][0].Mul(b[0][2]).Add(a[0][1].Mul(b[1][2])).Add(a[0][2].Mul(b[2][2])),
+		},
+		1: [3]Rat{
+			a[1][0].Mul(b[0][0]).Add(a[1][1].Mul(b[1][0])).Add(a[1][2].Mul(b[2][0])),
+			a[1][0].Mul(b[0][1]).Add(a[1][1].Mul(b[1][1])).Add(a[1][2].Mul(b[2][1])),
+			a[1][0].Mul(b[0][2]).Add(a[1][1].Mul(b[1][2])).Add(a[1][2].Mul(b[2][2])),
+		},
+		2: [3]Rat{
+			a[2][0].Mul(b[0][0]).Add(a[2][1].Mul(b[1][0])).Add(a[2][2].Mul(b[2][0])),
+			a[2][0].Mul(b[0][1]).Add(a[2][1].Mul(b[1][1])).Add(a[2][2].Mul(b[2][1])),
+			a[2][0].Mul(b[0][2]).Add(a[2][1].Mul(b[1][2])).Add(a[2][2].Mul(b[2][2])),
+		},
+	}
 }
