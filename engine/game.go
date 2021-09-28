@@ -33,6 +33,9 @@ func init() {
 	gob.Register(&Game{})
 }
 
+// ComponentSet is a set of components.
+type ComponentSet map[interface{}]struct{}
+
 // Game implements the ebiten methods using a collection of components. One
 // component must be the designated root component.
 type Game struct {
@@ -43,10 +46,11 @@ type Game struct {
 	Projection geom.Projector
 	VoxelScale geom.Float3
 
-	dbmu sync.RWMutex
-	byID map[string]Identifier              // Named components by ID
-	byAB map[abKey]map[interface{}]struct{} // Ancestor/behaviour index
-	par  map[interface{}]interface{}        // par[x] is parent of x
+	dbmu     sync.RWMutex
+	byID     map[string]Identifier        // Named components by ID
+	byAB     map[abKey]ComponentSet       // Ancestor/behaviour index
+	parent   map[interface{}]interface{}  // parent[x] is parent of x
+	children map[interface{}]ComponentSet // children[x] are chilren of x
 }
 
 // Draw draws everything.
@@ -102,7 +106,13 @@ func (g *Game) Component(id string) Identifier {
 func (g *Game) Parent(c interface{}) interface{} {
 	g.dbmu.RLock()
 	defer g.dbmu.RUnlock()
-	return g.par[c]
+	return g.parent[c]
+}
+
+func (g *Game) Children(c interface{}) ComponentSet {
+	g.dbmu.RLock()
+	defer g.dbmu.RUnlock()
+	return g.children[c]
 }
 
 // PathRegister calls Register on every Registrar in the path between g and
@@ -154,7 +164,7 @@ func (g *Game) ReversePath(component interface{}) []interface{} {
 // Query looks for components having both a given ancestor and implementing
 // a given behaviour (see Behaviors in interface.go). This only returns sensible
 // values after LoadAndPrepare. Note that every component is its own ancestor.
-func (g *Game) Query(ancestor interface{}, behaviour reflect.Type) map[interface{}]struct{} {
+func (g *Game) Query(ancestor interface{}, behaviour reflect.Type) ComponentSet {
 	g.dbmu.RLock()
 	defer g.dbmu.RUnlock()
 	return g.byAB[abKey{ancestor, behaviour}]
@@ -232,8 +242,9 @@ func (g *Game) build() error {
 	g.dbmu.Lock()
 	defer g.dbmu.Unlock()
 	g.byID = make(map[string]Identifier)
-	g.byAB = make(map[abKey]map[interface{}]struct{})
-	g.par = make(map[interface{}]interface{})
+	g.byAB = make(map[abKey]ComponentSet)
+	g.parent = make(map[interface{}]interface{})
+	g.children = make(map[interface{}]ComponentSet)
 	return g.registerRecursive(g, nil)
 }
 
@@ -277,8 +288,12 @@ func (g *Game) registerOne(component, parent interface{}) error {
 		}
 	}
 
-	// register in g.par
-	g.par[component] = parent
+	// register in g.parent and g.children
+	g.parent[component] = parent
+	if g.children[parent] == nil {
+		g.children[parent] = make(ComponentSet)
+	}
+	g.children[parent][component] = struct{}{}
 
 	// register in g.byAB
 	ct := reflect.TypeOf(component)
@@ -287,10 +302,10 @@ func (g *Game) registerOne(component, parent interface{}) error {
 			continue
 		}
 		// TODO: better than O(len(path)^2) time and memory?
-		for p := component; p != nil; p = g.par[p] {
+		for p := component; p != nil; p = g.parent[p] {
 			k := abKey{p, b}
 			if g.byAB[k] == nil {
-				g.byAB[k] = make(map[interface{}]struct{})
+				g.byAB[k] = make(ComponentSet)
 			}
 			g.byAB[k][component] = struct{}{}
 		}
@@ -327,15 +342,16 @@ func (g *Game) unregisterOne(component interface{}) {
 		if !ct.Implements(b) {
 			continue
 		}
-		for p := component; p != nil; p = g.par[p] {
+		for p := component; p != nil; p = g.parent[p] {
 			if k := (abKey{p, b}); g.byAB[k] != nil {
 				delete(g.byAB[k], component)
 			}
 		}
 	}
 
-	// unregister from g.par
-	delete(g.par, component)
+	// unregister from g.parent and g.children
+	delete(g.children[g.parent[component]], component)
+	delete(g.parent, component)
 
 	// unregister from g.byID if needed
 	if id, ok := component.(Identifier); ok && id.Ident() != "" {
