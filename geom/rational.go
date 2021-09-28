@@ -93,7 +93,7 @@ func abs(n int) int {
 
 func gcd(a, b int) int {
 	if a < b {
-		return gcd(b, a)
+		a, b = b, a
 	}
 	for b != 0 {
 		a, b = b, a%b
