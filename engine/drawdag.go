@@ -33,6 +33,7 @@ func init() {
 type DrawDAG struct {
 	ChunkSize int
 	Child     interface{}
+	Disables
 	Hides
 
 	dag
