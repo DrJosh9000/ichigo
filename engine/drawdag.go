@@ -154,15 +154,15 @@ func (d *DrawDAG) Update() error {
 // descendants of a different DrawManager.
 func (d *DrawDAG) Register(component, _ interface{}) error {
 	// *Don't* register the component if it is inside a descendant DrawManager.
-	// These queries work because component should be registered in game before
+	// Using Parent works because component should be registered in game before
 	// this call.
-	for dm := range d.game.Query(d, DrawManagerType) {
-		if dm == d {
-			continue
-		}
-		dbs := d.game.Query(dm, DrawBoxerType)
-		if _, found := dbs[component]; found {
-			return nil
+	for p := component; p != d && p != nil; p = d.game.Parent(p) {
+		if _, isDM := p.(DrawManager); isDM {
+			if p == d {
+				break
+			} else {
+				return nil
+			}
 		}
 	}
 	// Register db, and then subcomponents recursively.

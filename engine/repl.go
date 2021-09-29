@@ -128,6 +128,7 @@ func (g *Game) cmdQuery(dst io.Writer, argv []string) {
 	}
 	if behaviour == nil {
 		fmt.Fprintf(dst, "Unknown behaviour %q\n", argv[1])
+		return
 	}
 
 	var ancestor interface{} = g
@@ -135,23 +136,24 @@ func (g *Game) cmdQuery(dst io.Writer, argv []string) {
 		c := g.Component(argv[2])
 		if c == nil {
 			fmt.Fprintf(dst, "Component %q not found\n", argv[2])
+			return
 		}
 		ancestor = c
 	}
 
-	x := g.Query(ancestor, behaviour)
-	if len(x) == 0 {
-		fmt.Fprintln(dst, "No results")
-		return
-	}
-
-	for c := range x {
+	noResults := true
+	g.Query(ancestor, behaviour, func(c interface{}) error {
+		noResults = false
 		i, ok := c.(Identifier)
 		if ok {
 			fmt.Fprintf(dst, "%T %q\n", c, i.Ident())
 		} else {
 			fmt.Fprintf(dst, "%T\n", c)
 		}
+		return nil
+	})
+	if noResults {
+		fmt.Fprintln(dst, "No results")
 	}
 }
 

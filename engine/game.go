@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"log"
 	"reflect"
+	"strings"
 	"sync"
 	"time"
 
@@ -33,9 +34,6 @@ func init() {
 	gob.Register(&Game{})
 }
 
-// ComponentSet is a set of components.
-type ComponentSet map[interface{}]struct{}
-
 // Game implements the ebiten methods using a collection of components. One
 // component must be the designated root component.
 type Game struct {
@@ -48,7 +46,7 @@ type Game struct {
 
 	dbmu     sync.RWMutex
 	byID     map[string]Identifier        // Named components by ID
-	byAB     map[abKey]ComponentSet       // Ancestor/behaviour index
+	byAB     map[abKey]ComponentSet       // paths matching interface
 	parent   map[interface{}]interface{}  // parent[x] is parent of x
 	children map[interface{}]ComponentSet // children[x] are chilren of x
 }
@@ -101,14 +99,15 @@ func (g *Game) Component(id string) Identifier {
 }
 
 // Parent returns the parent of a given component, or nil if there is none.
-// This only returns sensible values for registered components (e.g. after
-// LoadAndPrepare).
+// This only returns sensible values for registered components.
 func (g *Game) Parent(c interface{}) interface{} {
 	g.dbmu.RLock()
 	defer g.dbmu.RUnlock()
 	return g.parent[c]
 }
 
+// Children returns the direct subcomponents of the given component, or nil if
+// there are none. This only returns sensible values for registered components.
 func (g *Game) Children(c interface{}) ComponentSet {
 	g.dbmu.RLock()
 	defer g.dbmu.RUnlock()
@@ -164,10 +163,24 @@ func (g *Game) ReversePath(component interface{}) []interface{} {
 // Query looks for components having both a given ancestor and implementing
 // a given behaviour (see Behaviors in interface.go). This only returns sensible
 // values after LoadAndPrepare. Note that every component is its own ancestor.
-func (g *Game) Query(ancestor interface{}, behaviour reflect.Type) ComponentSet {
+func (g *Game) Query(ancestor interface{}, behaviour reflect.Type, visit func(interface{}) error) error {
+	// NB: per the godoc, do not use RLock for recursive read locking.
 	g.dbmu.RLock()
 	defer g.dbmu.RUnlock()
-	return g.byAB[abKey{ancestor, behaviour}]
+	return g.queryRecursive(ancestor, behaviour, visit)
+}
+
+// Post-order visit p and descendants of p having behaviour b.
+func (g *Game) queryRecursive(p interface{}, b reflect.Type, v func(interface{}) error) error {
+	for x := range g.byAB[abKey{p, b}] {
+		if err := g.queryRecursive(x, b, v); err != nil {
+			return err
+		}
+	}
+	if reflect.TypeOf(p).Implements(b) {
+		return v(p)
+	}
+	return nil
 }
 
 // Scan visits g.Root.
@@ -301,13 +314,16 @@ func (g *Game) registerOne(component, parent interface{}) error {
 		if !ct.Implements(b) {
 			continue
 		}
-		// TODO: better than O(len(path)^2) time and memory?
-		for p := component; p != nil; p = g.parent[p] {
+		for c, p := component, g.parent[component]; p != nil; c, p = p, g.parent[p] {
 			k := abKey{p, b}
 			if g.byAB[k] == nil {
-				g.byAB[k] = make(ComponentSet)
+				g.byAB[k] = ComponentSet{c: {}}
+				continue
 			}
-			g.byAB[k][component] = struct{}{}
+			if _, exists := g.byAB[k][c]; exists {
+				break
+			}
+			g.byAB[k][c] = struct{}{}
 		}
 	}
 	return nil
@@ -336,15 +352,17 @@ func (g *Game) unregisterRecursive(component interface{}) {
 }
 
 func (g *Game) unregisterOne(component interface{}) {
-	// unregister from g.byAB, using g.par to trace the path
+	// unregister from g.byAB
 	ct := reflect.TypeOf(component)
 	for _, b := range Behaviours {
 		if !ct.Implements(b) {
 			continue
 		}
-		for p := component; p != nil; p = g.parent[p] {
-			if k := (abKey{p, b}); g.byAB[k] != nil {
-				delete(g.byAB[k], component)
+		for c, p := component, g.parent[component]; p != nil; c, p = p, g.parent[p] {
+			k := abKey{p, b}
+			delete(g.byAB[k], c)
+			if len(g.byAB[k]) > 0 {
+				break
 			}
 		}
 	}
@@ -363,9 +381,27 @@ func (g *Game) String() string { return "Game" }
 
 // --------- Helper stuff ---------
 
+// ComponentSet is a set of components.
+type ComponentSet map[interface{}]struct{}
+
+func (c ComponentSet) String() string {
+	var b strings.Builder
+	b.WriteString("{")
+	for x := range c {
+		fmt.Fprint(&b, " ", x)
+	}
+	b.WriteString(" }")
+	return b.String()
+}
+
+// abKey is the key type for game.byAB.
 type abKey struct {
-	ancestor  interface{}
+	parent    interface{}
 	behaviour reflect.Type
+}
+
+func (a abKey) String() string {
+	return fmt.Sprintf("(%v %s)", a.parent, a.behaviour.Name())
 }
 
 // concatOpts returns the combined options (as though a was applied and then b).

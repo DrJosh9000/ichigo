@@ -2,6 +2,8 @@ package engine
 
 import (
 	"encoding/gob"
+	"errors"
+	"log"
 
 	"drjosh.dev/gurgle/geom"
 )
@@ -11,6 +13,8 @@ var _ interface {
 	BoundingBoxer
 	Prepper
 } = &Actor{}
+
+var errCollision = errors.New("collision detected")
 
 func init() {
 	gob.Register(&Actor{})
@@ -39,12 +43,17 @@ func (a *Actor) BoundingBox() geom.Box {
 func (a *Actor) CollidesAt(p geom.Int3) bool {
 	bounds := a.Bounds.Add(p)
 	cd := a.game.Component(a.CollisionDomain)
-	for c := range a.game.Query(cd, ColliderType) {
-		if c.(Collider).CollidesWith(bounds) {
-			return true
-		}
+	if cd == nil {
+		log.Printf("collision domain %q not found in game", a.CollisionDomain)
+		return false
 	}
-	return false
+	return errCollision == a.game.Query(cd, ColliderType, func(c interface{}) error {
+		log.Printf("checking for collision with %v", c)
+		if c.(Collider).CollidesWith(bounds) {
+			return errCollision
+		}
+		return nil
+	})
 }
 
 // MoveX moves the actor x units in world space. It takes Game.VoxelScale into
