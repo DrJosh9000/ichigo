@@ -102,7 +102,7 @@ func (g *Game) printTreeRecursive(dst io.Writer, depth int, c interface{}) {
 	} else {
 		fmt.Fprintf(dst, "%s%v\n", indent, c)
 	}
-	for x := range g.children[c] {
+	for x := range g.Children(c) {
 		g.printTreeRecursive(dst, depth+1, x)
 	}
 }
