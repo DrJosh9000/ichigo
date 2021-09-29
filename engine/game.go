@@ -66,7 +66,6 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
 
 // Update updates everything.
 func (g *Game) Update() error {
-	//return g.updateRecursive(g)
 	return g.Query(g.Root, UpdaterType,
 		func(c interface{}) error {
 			if d, ok := c.(Disabler); ok && d.Disabled() {
@@ -109,11 +108,10 @@ func (g *Game) Children(c interface{}) ComponentSet {
 }
 
 // PathRegister calls Register on every Registrar in the path between g and
-// parent (top-to-bottom, i.e. g first)
+// parent (top-to-bottom, i.e. game first, component last).
 func (g *Game) PathRegister(component, parent interface{}) error {
-	rp := g.ReversePath(parent)
-	for i := len(rp) - 1; i >= 0; i-- {
-		if r, ok := rp[i].(Registrar); ok {
+	for _, p := range g.Path(parent) {
+		if r, ok := p.(Registrar); ok {
 			if err := r.Register(component, parent); err != nil {
 				return err
 			}
@@ -123,7 +121,7 @@ func (g *Game) PathRegister(component, parent interface{}) error {
 }
 
 // PathUnregister calls Unregister on every Registrar in the path between g and
-// parent (bottom-to-top, i.e. parent first).
+// parent (bottom-to-top, i.e. component first, game last).
 func (g *Game) PathUnregister(component interface{}) {
 	for _, p := range g.ReversePath(component) {
 		if r, ok := p.(Registrar); ok {
@@ -147,7 +145,7 @@ func (g *Game) Path(component interface{}) []interface{} {
 func (g *Game) ReversePath(component interface{}) []interface{} {
 	var stack []interface{}
 	g.dbmu.RLock()
-	for p := component; p != nil; p = g.Parent(p) {
+	for p := component; p != nil; p = g.parent[p] {
 		stack = append(stack, p)
 	}
 	g.dbmu.RUnlock()
@@ -230,6 +228,9 @@ func (g *Game) Prepare(component interface{}) error {
 // builds the component databases and then calls Prepare on every Preparer.
 // LoadAndPrepare must be called before any calls to Component or Query.
 func (g *Game) LoadAndPrepare(assets fs.FS) error {
+	if g.Projection == nil {
+		g.Projection = geom.ElevationProjection{}
+	}
 	if g.VoxelScale == (geom.Float3{}) {
 		g.VoxelScale = geom.Float3{X: 1, Y: 1, Z: 1}
 	}

@@ -70,12 +70,9 @@ func main() {
 					ID:    "bg_fill",
 					Color: color.Gray{100},
 				},
-				&engine.DrawDAG{
-					ChunkSize: 16,
-					Child: &engine.Camera{
-						ID:    "game_camera",
-						Child: lev1,
-					},
+				&engine.Camera{
+					ID:    "game_camera",
+					Child: lev1,
 				},
 				&engine.DebugToast{ID: "toast", Pos: image.Pt(0, 15)},
 				engine.PerfDisplay{},
