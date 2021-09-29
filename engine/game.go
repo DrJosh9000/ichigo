@@ -348,11 +348,8 @@ func (g *Game) Unregister(component interface{}) {
 }
 
 func (g *Game) unregisterRecursive(component interface{}) {
-	if sc, ok := component.(Scanner); ok {
-		sc.Scan(func(x interface{}) error {
-			g.unregisterRecursive(x)
-			return nil
-		})
+	for x := range g.children[component] {
+		g.unregisterRecursive(x)
 	}
 	g.unregisterOne(component)
 }

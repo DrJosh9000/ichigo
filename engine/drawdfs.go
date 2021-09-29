@@ -56,6 +56,7 @@ func (d *DrawDFS) drawRecursive(component interface{}, screen *ebiten.Image, opt
 		return
 	}
 	// Has subcomponents? recurse
+	// TODO: use g.Children or g.Query - but need to go in Scan order...
 	if sc, ok := component.(Scanner); ok {
 		sc.Scan(func(x interface{}) error {
 			d.drawRecursive(x, screen, opts)
