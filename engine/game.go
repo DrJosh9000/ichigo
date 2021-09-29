@@ -66,24 +66,18 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
 
 // Update updates everything.
 func (g *Game) Update() error {
-	return g.updateRecursive(g)
-}
-
-// updateRecursive updates everything in a post-order traversal. It terminates
-// the recursion early if the component reports it is Disabled.
-func (g *Game) updateRecursive(c interface{}) error {
-	if d, ok := c.(Disabler); ok && d.Disabled() {
-		return nil
-	}
-	if sc, ok := c.(Scanner); ok {
-		if err := sc.Scan(g.updateRecursive); err != nil {
-			return err
-		}
-	}
-	if u, ok := c.(Updater); ok && c != g {
-		return u.Update()
-	}
-	return nil
+	//return g.updateRecursive(g)
+	return g.Query(g.Root, UpdaterType,
+		func(c interface{}) error {
+			if d, ok := c.(Disabler); ok && d.Disabled() {
+				return Skip
+			}
+			return nil
+		},
+		func(c interface{}) error {
+			return c.(Updater).Update()
+		},
+	)
 }
 
 // Ident returns "__GAME__".
@@ -162,23 +156,37 @@ func (g *Game) ReversePath(component interface{}) []interface{} {
 
 // Query looks for components having both a given ancestor and implementing
 // a given behaviour (see Behaviors in interface.go). This only returns sensible
-// values after LoadAndPrepare. Note that every component is its own ancestor.
-func (g *Game) Query(ancestor interface{}, behaviour reflect.Type, visit func(interface{}) error) error {
-	// NB: per the godoc, do not use RLock for recursive read locking.
-	g.dbmu.RLock()
-	defer g.dbmu.RUnlock()
-	return g.queryRecursive(ancestor, behaviour, visit)
-}
-
-// Post-order visit p and descendants of p having behaviour b.
-func (g *Game) queryRecursive(p interface{}, b reflect.Type, v func(interface{}) error) error {
-	for x := range g.byAB[abKey{p, b}] {
-		if err := g.queryRecursive(x, b, v); err != nil {
+// values for registered components.
+//
+// Note that every component is its own ancestor.
+//
+// visitPre is visited before descendants, while visitPost is visited after
+// descendants. nil visitors are ignored.
+func (g *Game) Query(ancestor interface{}, behaviour reflect.Type, visitPre, visitPost func(interface{}) error) error {
+	pi := reflect.TypeOf(ancestor).Implements(behaviour)
+	if pi && visitPre != nil {
+		if err := visitPre(ancestor); err != nil {
 			return err
 		}
 	}
-	if reflect.TypeOf(p).Implements(b) {
-		return v(p)
+	// * Update uses Query.
+	// * Updaters can Register new components.
+	// * Register acquires g.dbmu.Lock.
+	// ==> Wrapping the whole thing in RLock would deadlock.
+	// Make the read lock as tight as possible.
+	g.dbmu.RLock()
+	q := g.byAB[abKey{ancestor, behaviour}]
+	g.dbmu.RUnlock()
+	for x := range q {
+		if err := g.Query(x, behaviour, visitPre, visitPost); err != nil {
+			if errors.Is(err, Skip) {
+				continue
+			}
+			return err
+		}
+	}
+	if pi && visitPost != nil {
+		return visitPost(ancestor)
 	}
 	return nil
 }
@@ -416,3 +424,12 @@ func concatOpts(a, b ebiten.DrawImageOptions) ebiten.DrawImageOptions {
 	}
 	return a
 }
+
+// Skip is an "error" value that can be returned from visitor callbacks. It
+// tells recursive methods of Game to skip processing the current item and its
+// descendants, but will otherwise continue processing.
+const Skip = skip("skip")
+
+type skip string
+
+func (s skip) Error() string { return string(s) }

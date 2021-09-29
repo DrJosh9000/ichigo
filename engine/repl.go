@@ -151,7 +151,7 @@ func (g *Game) cmdQuery(dst io.Writer, argv []string) {
 			fmt.Fprintf(dst, "%T\n", c)
 		}
 		return nil
-	})
+	}, nil)
 	if noResults {
 		fmt.Fprintln(dst, "No results")
 	}

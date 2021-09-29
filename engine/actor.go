@@ -44,11 +44,10 @@ func (a *Actor) CollidesAt(p geom.Int3) bool {
 	bounds := a.Bounds.Add(p)
 	cd := a.game.Component(a.CollisionDomain)
 	if cd == nil {
-		log.Printf("collision domain %q not found in game", a.CollisionDomain)
+		log.Printf("collision domain %q not found", a.CollisionDomain)
 		return false
 	}
-	return errCollision == a.game.Query(cd, ColliderType, func(c interface{}) error {
-		log.Printf("checking for collision with %v", c)
+	return errCollision == a.game.Query(cd, ColliderType, nil, func(c interface{}) error {
 		if c.(Collider).CollidesWith(bounds) {
 			return errCollision
 		}
