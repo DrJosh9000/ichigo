@@ -201,7 +201,7 @@ func (g *Game) Scan(visit VisitFunc) error {
 }
 
 // Load loads a component and all subcomponents recursively.
-// Note that this method does not implement Loader.
+// Note that this method does not implement Loader itself.
 func (g *Game) Load(component interface{}, assets fs.FS) error {
 	if l, ok := component.(Loader); ok {
 		if err := l.Load(assets); err != nil {
@@ -217,7 +217,7 @@ func (g *Game) Load(component interface{}, assets fs.FS) error {
 }
 
 // Prepare prepares a component and all subcomponents recursively.
-// Note that this method does not implement Prepper.
+// Note that this method does not implement Prepper itself.
 func (g *Game) Prepare(component interface{}) error {
 	// Postorder traversal, in case ancestors depend on descendants being
 	// ready to answer queries.
