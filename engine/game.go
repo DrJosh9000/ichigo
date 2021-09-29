@@ -39,9 +39,9 @@ func init() {
 type Game struct {
 	Disables
 	Hides
-	ScreenSize image.Point
-	Root       Drawer
 	Projection geom.Projector
+	Root       Drawer
+	ScreenSize image.Point
 	VoxelScale geom.Float3
 
 	dbmu     sync.RWMutex
