@@ -162,6 +162,10 @@ func (g *Game) ReversePath(component interface{}) []interface{} {
 //
 // visitPre is visited before descendants, while visitPost is visited after
 // descendants. nil visitors are ignored.
+//
+// Query returns the first error returned from either visitor callback, except
+// Skip when it is returned from a recursive call. Returning Skip from visitPre
+// will cause the descendents of the component to not be visited.
 func (g *Game) Query(ancestor interface{}, behaviour reflect.Type, visitPre, visitPost VisitFunc) error {
 	pi := reflect.TypeOf(ancestor).Implements(behaviour)
 	if pi && visitPre != nil {

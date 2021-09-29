@@ -153,31 +153,13 @@ func (d *DrawDAG) Update() error {
 // DrawBoxers into internal data structures (the DAG, etc) unless they are
 // descendants of a different DrawManager.
 func (d *DrawDAG) Register(component, _ interface{}) error {
-	// *Don't* register the component if it is inside a descendant DrawManager.
-	// Using Parent works because component should be registered in game before
-	// this call.
-	for p := component; p != d && p != nil; p = d.game.Parent(p) {
-		if _, isDM := p.(DrawManager); isDM {
-			if p == d {
-				break
-			} else {
-				return nil
-			}
+	return d.game.Query(component, DrawBoxerType, func(c interface{}) error {
+		d.registerOne(c.(DrawBoxer))
+		if _, isDM := c.(DrawManager); isDM && c != d {
+			return Skip
 		}
-	}
-	// Register db, and then subcomponents recursively.
-	if db, ok := component.(DrawBoxer); ok {
-		d.registerOne(db)
-	}
-	if _, ok := component.(DrawManager); ok {
 		return nil
-	}
-	if sc, ok := component.(Scanner); ok {
-		return sc.Scan(func(x interface{}) error {
-			return d.Register(x, nil)
-		})
-	}
-	return nil
+	}, nil)
 }
 
 // registerOne adds component and any needed edges to the DAG and chunk map.
@@ -236,18 +218,13 @@ func (d *DrawDAG) registerOne(x DrawBoxer) {
 
 // Unregister unregisters the component and all subcomponents.
 func (d *DrawDAG) Unregister(component interface{}) {
-	if db, ok := component.(DrawBoxer); ok {
-		d.unregisterOne(db)
-	}
-	if _, ok := component.(DrawManager); ok && component != d {
-		return
-	}
-	if sc, ok := component.(Scanner); ok {
-		sc.Scan(func(x interface{}) error {
-			d.Unregister(x)
-			return nil
-		})
-	}
+	d.game.Query(component, DrawBoxerType, func(c interface{}) error {
+		d.unregisterOne(c.(DrawBoxer))
+		if _, isDM := c.(DrawManager); isDM && c != d {
+			return Skip
+		}
+		return nil
+	}, nil)
 }
 
 func (d *DrawDAG) unregisterOne(x DrawBoxer) {
