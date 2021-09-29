@@ -221,15 +221,9 @@ func (g *Game) Load(component interface{}, assets fs.FS) error {
 func (g *Game) Prepare(component interface{}) error {
 	// Postorder traversal, in case ancestors depend on descendants being
 	// ready to answer queries.
-	if sc, ok := component.(Scanner); ok {
-		if err := sc.Scan(g.Prepare); err != nil {
-			return err
-		}
-	}
-	if p, ok := component.(Prepper); ok {
-		return p.Prepare(g)
-	}
-	return nil
+	return g.Query(component, PrepperType, nil, func(c interface{}) error {
+		return c.(Prepper).Prepare(g)
+	})
 }
 
 // LoadAndPrepare first calls Load on all Loaders. Once loading is complete, it
