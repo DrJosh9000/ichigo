@@ -55,7 +55,7 @@ func NewBubble(pos geom.Int3) *Bubble {
 	}
 }
 
-func (b *Bubble) Scan(visit func(interface{}) error) error {
+func (b *Bubble) Scan(visit engine.VisitFunc) error {
 	return visit(&b.Sprite)
 }
 

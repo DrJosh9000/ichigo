@@ -63,7 +63,7 @@ func (d *DrawDFS) drawRecursive(component interface{}, screen *ebiten.Image, opt
 }
 
 // Scan visits d.Child.
-func (d *DrawDFS) Scan(visit func(interface{}) error) error {
+func (d *DrawDFS) Scan(visit VisitFunc) error {
 	return visit(d.Child)
 }
 

@@ -39,7 +39,7 @@ func (p *Parallax) Prepare(game *Game) error {
 }
 
 // Scan visits p.Child.
-func (p *Parallax) Scan(visit func(interface{}) error) error {
+func (p *Parallax) Scan(visit VisitFunc) error {
 	return visit(p.Child)
 }
 

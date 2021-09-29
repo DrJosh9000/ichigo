@@ -121,7 +121,7 @@ func (d *DrawDAG) Prepare(game *Game) error {
 }
 
 // Scan visits d.Child.
-func (d *DrawDAG) Scan(visit func(interface{}) error) error {
+func (d *DrawDAG) Scan(visit VisitFunc) error {
 	return visit(d.Child)
 }
 

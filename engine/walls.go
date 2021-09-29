@@ -61,7 +61,7 @@ func (w *Wall) CollidesWith(b geom.Box) bool {
 }
 
 // Scan visits &w.Sheet and all WallUnits.
-func (w *Wall) Scan(visit func(interface{}) error) error {
+func (w *Wall) Scan(visit VisitFunc) error {
 	if err := visit(&w.Sheet); err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (u *WallUnit) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 }
 
 // Scan visits u.Tile.
-func (u *WallUnit) Scan(visit func(interface{}) error) error {
+func (u *WallUnit) Scan(visit VisitFunc) error {
 	return visit(u.Tile)
 }
 

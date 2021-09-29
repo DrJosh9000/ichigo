@@ -86,7 +86,7 @@ func (c *Camera) Prepare(game *Game) error {
 }
 
 // Scan visits c.Child.
-func (c *Camera) Scan(visit func(interface{}) error) error {
+func (c *Camera) Scan(visit VisitFunc) error {
 	return visit(c.Child)
 }
 

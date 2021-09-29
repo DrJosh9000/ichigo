@@ -100,7 +100,7 @@ func (t *Tilemap) Load(fs.FS) error {
 }
 
 // Scan visits &t.Sheet and all tiles.
-func (t *Tilemap) Scan(visit func(interface{}) error) error {
+func (t *Tilemap) Scan(visit VisitFunc) error {
 	if err := visit(&t.Sheet); err != nil {
 		return err
 	}
@@ -155,6 +155,6 @@ type AnimatedTile struct {
 func (a *AnimatedTile) Cell() int { return a.anim.Cell() }
 
 // Scan visits a.anim.
-func (a *AnimatedTile) Scan(visit func(interface{}) error) error {
+func (a *AnimatedTile) Scan(visit VisitFunc) error {
 	return visit(a.anim)
 }

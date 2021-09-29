@@ -162,7 +162,7 @@ func (g *Game) ReversePath(component interface{}) []interface{} {
 //
 // visitPre is visited before descendants, while visitPost is visited after
 // descendants. nil visitors are ignored.
-func (g *Game) Query(ancestor interface{}, behaviour reflect.Type, visitPre, visitPost func(interface{}) error) error {
+func (g *Game) Query(ancestor interface{}, behaviour reflect.Type, visitPre, visitPost VisitFunc) error {
 	pi := reflect.TypeOf(ancestor).Implements(behaviour)
 	if pi && visitPre != nil {
 		if err := visitPre(ancestor); err != nil {
@@ -192,7 +192,7 @@ func (g *Game) Query(ancestor interface{}, behaviour reflect.Type, visitPre, vis
 }
 
 // Scan visits g.Root.
-func (g *Game) Scan(visit func(interface{}) error) error {
+func (g *Game) Scan(visit VisitFunc) error {
 	return visit(g.Root)
 }
 
@@ -424,6 +424,12 @@ func concatOpts(a, b ebiten.DrawImageOptions) ebiten.DrawImageOptions {
 	}
 	return a
 }
+
+// VisitFunc callbacks are either provided or called by various Game functions.
+// For example, Query takes two VisitFuncs that are called for each result, and
+// Scan is given a VisitFunc that should be called with each component. For
+// recursive operations, return Skip for components that should be skipped.
+type VisitFunc func(interface{}) error
 
 // Skip is an "error" value that can be returned from visitor callbacks. It
 // tells recursive methods of Game to skip processing the current item and its

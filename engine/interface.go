@@ -149,7 +149,7 @@ type Saver interface {
 // Scan should visit each immediate subcomponent, aborting early if an error is
 // returned from the visitor.
 type Scanner interface {
-	Scan(visit func(interface{}) error) error
+	Scan(visit VisitFunc) error
 }
 
 // Transformer components can provide draw options to apply to themselves and

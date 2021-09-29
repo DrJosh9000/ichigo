@@ -113,7 +113,7 @@ func (m *PrismMap) Prepare(g *Game) error {
 }
 
 // Scan visits &m.Sheet and all Prisms.
-func (m *PrismMap) Scan(visit func(interface{}) error) error {
+func (m *PrismMap) Scan(visit VisitFunc) error {
 	if err := visit(&m.Sheet); err != nil {
 		return err
 	}

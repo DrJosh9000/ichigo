@@ -64,7 +64,7 @@ func (c *Container) Prepare(*Game) error {
 }
 
 // Scan visits every non-nil component in the container.
-func (c *Container) Scan(visit func(interface{}) error) error {
+func (c *Container) Scan(visit VisitFunc) error {
 	for _, x := range c.items {
 		if x != nil {
 			if err := visit(x); err != nil {

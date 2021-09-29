@@ -52,7 +52,7 @@ func (b *Billboard) Prepare(g *Game) error {
 }
 
 // Scan visits &b.Src.
-func (b *Billboard) Scan(visit func(interface{}) error) error {
+func (b *Billboard) Scan(visit VisitFunc) error {
 	return visit(&b.Src)
 }
 

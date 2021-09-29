@@ -41,7 +41,7 @@ func (s *Sprite) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 }
 
 // Scan visits &s.Actor and &s.Sheet.
-func (s *Sprite) Scan(visit func(interface{}) error) error {
+func (s *Sprite) Scan(visit VisitFunc) error {
 	if err := visit(&s.Actor); err != nil {
 		return err
 	}

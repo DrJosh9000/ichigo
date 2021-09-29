@@ -39,7 +39,7 @@ type Scene struct {
 }
 
 // Scan visits s.Child.
-func (s *Scene) Scan(visit func(interface{}) error) error {
+func (s *Scene) Scan(visit VisitFunc) error {
 	return visit(s.Child)
 }
 

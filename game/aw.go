@@ -259,7 +259,7 @@ func (aw *Awakeman) Prepare(game *engine.Game) error {
 	return nil
 }
 
-func (aw *Awakeman) Scan(visit func(interface{}) error) error {
+func (aw *Awakeman) Scan(visit engine.VisitFunc) error {
 	return visit(&aw.Sprite)
 }
 

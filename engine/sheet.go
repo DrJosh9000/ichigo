@@ -47,7 +47,7 @@ func (s *Sheet) Prepare(*Game) error {
 }
 
 // Scan visits &s.Src.
-func (s *Sheet) Scan(visit func(interface{}) error) error {
+func (s *Sheet) Scan(visit VisitFunc) error {
 	return visit(&s.Src)
 }
 
