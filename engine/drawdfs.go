@@ -25,6 +25,8 @@ func init() {
 type DrawDFS struct {
 	Child interface{}
 	Hides
+
+	game *Game
 }
 
 func (d *DrawDFS) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
@@ -56,13 +58,16 @@ func (d *DrawDFS) drawRecursive(component interface{}, screen *ebiten.Image, opt
 		return
 	}
 	// Has subcomponents? recurse
-	// TODO: use g.Children or g.Query - but need to go in Scan order...
-	if sc, ok := component.(Scanner); ok {
-		sc.Scan(func(x interface{}) error {
-			d.drawRecursive(x, screen, opts)
-			return nil
-		})
-	}
+	// TODO: use g.Query?
+	d.game.Children(component).Scan(func(x interface{}) error {
+		d.drawRecursive(x, screen, opts)
+		return nil
+	})
+}
+
+func (d *DrawDFS) Prepare(g *Game) error {
+	d.game = g
+	return nil
 }
 
 // Scan visits d.Child.
