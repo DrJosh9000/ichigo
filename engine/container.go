@@ -3,10 +3,11 @@ package engine
 import (
 	"bytes"
 	"encoding/gob"
+	"fmt"
 )
 
 var _ interface {
-	Registrar
+	Prepper
 	Scanner
 	gob.GobDecoder
 	gob.GobEncoder
@@ -16,10 +17,11 @@ func init() {
 	gob.Register(&Container{})
 }
 
-// Container contains many components, in order.
+// Container is a component that contains many other components, in order.
+// It can be used as both a component in its own right, or as a ordered set.
+// A nil *Container contains no items and modifications will panic (like a map).
 type Container struct {
 	items   []interface{}
-	free    map[int]struct{}
 	reverse map[interface{}]int
 }
 
@@ -35,7 +37,7 @@ func (c *Container) GobDecode(in []byte) error {
 	if err := gob.NewDecoder(bytes.NewReader(in)).Decode(&c.items); err != nil {
 		return err
 	}
-	c.free, c.reverse = nil, nil
+	c.reverse = nil
 	return c.Prepare(nil)
 }
 
@@ -57,14 +59,14 @@ func (c *Container) Prepare(*Game) error {
 			c.reverse[x] = i
 		}
 	}
-	if c.free == nil {
-		c.free = make(map[int]struct{})
-	}
 	return nil
 }
 
 // Scan visits every non-nil component in the container.
 func (c *Container) Scan(visit VisitFunc) error {
+	if c == nil {
+		return nil
+	}
 	for _, x := range c.items {
 		if x != nil {
 			if err := visit(x); err != nil {
@@ -75,6 +77,55 @@ func (c *Container) Scan(visit VisitFunc) error {
 	return nil
 }
 
+// Add adds an item to the end of the container, if not already present.
+func (c *Container) Add(component interface{}) {
+	if c.Contains(component) {
+		return
+	}
+	c.reverse[component] = len(c.items)
+	c.items = append(c.items, component)
+}
+
+// Remove replaces an item with nil. If the number of nil items is greater than
+// half the slice, the slice is compacted (indexes of items will change).
+func (c *Container) Remove(component interface{}) {
+	i, found := c.reverse[component]
+	if !found {
+		return
+	}
+	c.items[i] = nil
+	delete(c.reverse, i)
+	if len(c.reverse) < len(c.items)/2 {
+		c.compact()
+	}
+}
+
+// Contains reports if an item exists in the container.
+func (c *Container) Contains(component interface{}) bool {
+	if c == nil {
+		return false
+	}
+	_, found := c.reverse[component]
+	return found
+}
+
+// IndexOf reports if an item exists in the container and returns the index if
+// present.
+func (c *Container) IndexOf(component interface{}) (int, bool) {
+	if c == nil {
+		return 0, false
+	}
+	i, found := c.reverse[component]
+	return i, found
+}
+
+func (c *Container) ItemCount() int {
+	if c == nil {
+		return 0
+	}
+	return len(c.reverse)
+}
+
 // Element returns the item at index i, or nil for a free slot.
 func (c *Container) Element(i int) interface{} { return c.items[i] }
 
@@ -83,72 +134,21 @@ func (c *Container) Len() int { return len(c.items) }
 
 // Swap swaps any two items, free slots, or a combination.
 func (c *Container) Swap(i, j int) {
-	if i == j {
-		return
+	c.items[i], c.items[j] = c.items[j], c.items[i]
+	if c.items[i] != nil {
+		c.reverse[c.items[i]] = i
 	}
-	ifree := c.items[i] == nil
-	jfree := c.items[j] == nil
-	switch {
-	case ifree && jfree:
-		return
-	case ifree:
-		c.items[i] = c.items[j]
-		c.reverse[c.items[i]] = i
-		c.free[j] = struct{}{}
-		delete(c.free, i)
-	case jfree:
-		c.items[j] = c.items[i]
-		c.reverse[c.items[j]] = j
-		c.free[i] = struct{}{}
-		delete(c.free, j)
-	default:
-		c.items[i], c.items[j] = c.items[j], c.items[i]
-		c.reverse[c.items[i]] = i
+	if c.items[j] != nil {
 		c.reverse[c.items[j]] = j
 	}
 }
 
-func (c Container) String() string { return "Container" }
-
-// Register records component into the slice, if parent is this container. It
-// writes the component to an arbitrary free index in the slice, or appends if
-// there are none free.
-func (c *Container) Register(component, parent interface{}) error {
-	if parent != c {
-		return nil
-	}
-	if len(c.free) == 0 {
-		c.reverse[component] = len(c.items)
-		c.items = append(c.items, component)
-		return nil
-	}
-	for i := range c.free {
-		c.reverse[component] = i
-		c.items[i] = component
-		delete(c.free, i)
-		return nil
-	}
-	return nil
-}
-
-// Unregister searches the slice for the component, and removes it by setting
-// to nil. If the number of nil items is greater than half the slice, the slice
-// is compacted.
-func (c *Container) Unregister(component interface{}) {
-	i, found := c.reverse[component]
-	if !found {
-		return
-	}
-	c.items[i] = nil
-	c.free[i] = struct{}{}
-	delete(c.reverse, i)
-	if len(c.free) > len(c.items)/2 {
-		c.compact()
-	}
+func (c *Container) String() string {
+	return "Container" + fmt.Sprint(c.items)
 }
 
 // compact moves all the items to the front of the items slice, removing any
-// free slots, and empties the free map.
+// free slots, and resets the free counter.
 func (c *Container) compact() {
 	i := 0
 	for _, x := range c.items {
@@ -159,5 +159,4 @@ func (c *Container) compact() {
 		}
 	}
 	c.items = c.items[:i]
-	c.free = make(map[int]struct{})
 }

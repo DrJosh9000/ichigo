@@ -8,7 +8,6 @@ import (
 	"io/fs"
 	"log"
 	"reflect"
-	"strings"
 	"sync"
 	"time"
 
@@ -45,10 +44,10 @@ type Game struct {
 	VoxelScale geom.Float3
 
 	dbmu     sync.RWMutex
-	byID     map[string]Identifier        // Named components by ID
-	byAB     map[abKey]ComponentSet       // paths matching interface
-	parent   map[interface{}]interface{}  // parent[x] is parent of x
-	children map[interface{}]ComponentSet // children[x] are chilren of x
+	byID     map[string]Identifier       // Named components by ID
+	byAB     map[abKey]*Container        // paths matching interface
+	parent   map[interface{}]interface{} // parent[x] is parent of x
+	children map[interface{}]*Container  // children[x] are chilren of x
 }
 
 // Draw draws everything.
@@ -101,7 +100,7 @@ func (g *Game) Parent(c interface{}) interface{} {
 
 // Children returns the direct subcomponents of the given component, or nil if
 // there are none. This only returns sensible values for registered components.
-func (g *Game) Children(c interface{}) ComponentSet {
+func (g *Game) Children(c interface{}) *Container {
 	g.dbmu.RLock()
 	defer g.dbmu.RUnlock()
 	return g.children[c]
@@ -179,13 +178,16 @@ func (g *Game) Query(ancestor interface{}, behaviour reflect.Type, visitPre, vis
 	g.dbmu.RLock()
 	q := g.byAB[abKey{ancestor, behaviour}]
 	g.dbmu.RUnlock()
-	for x := range q {
+	if err := q.Scan(func(x interface{}) error {
 		if err := g.Query(x, behaviour, visitPre, visitPost); err != nil {
 			if errors.Is(err, Skip) {
-				continue
+				return nil
 			}
 			return err
 		}
+		return nil
+	}); err != nil {
+		return err
 	}
 	if pi && visitPost != nil {
 		return visitPost(ancestor)
@@ -262,9 +264,9 @@ func (g *Game) build() error {
 	g.dbmu.Lock()
 	defer g.dbmu.Unlock()
 	g.byID = make(map[string]Identifier)
-	g.byAB = make(map[abKey]ComponentSet)
+	g.byAB = make(map[abKey]*Container)
 	g.parent = make(map[interface{}]interface{})
-	g.children = make(map[interface{}]ComponentSet)
+	g.children = make(map[interface{}]*Container)
 	return g.registerRecursive(g, nil)
 }
 
@@ -311,9 +313,10 @@ func (g *Game) registerOne(component, parent interface{}) error {
 	// register in g.parent and g.children
 	g.parent[component] = parent
 	if g.children[parent] == nil {
-		g.children[parent] = make(ComponentSet)
+		g.children[parent] = MakeContainer(component)
+	} else {
+		g.children[parent].Add(component)
 	}
-	g.children[parent][component] = struct{}{}
 
 	// register in g.byAB
 	ct := reflect.TypeOf(component)
@@ -324,13 +327,13 @@ func (g *Game) registerOne(component, parent interface{}) error {
 		for c, p := component, g.parent[component]; p != nil; c, p = p, g.parent[p] {
 			k := abKey{p, b}
 			if g.byAB[k] == nil {
-				g.byAB[k] = ComponentSet{c: {}}
+				g.byAB[k] = MakeContainer(c)
 				continue
 			}
-			if _, exists := g.byAB[k][c]; exists {
+			if g.byAB[k].Contains(c) {
 				break
 			}
-			g.byAB[k][c] = struct{}{}
+			g.byAB[k].Add(c)
 		}
 	}
 	return nil
@@ -349,30 +352,33 @@ func (g *Game) Unregister(component interface{}) {
 }
 
 func (g *Game) unregisterRecursive(component interface{}) {
-	for x := range g.children[component] {
+	g.children[component].Scan(func(x interface{}) error {
 		g.unregisterRecursive(x)
-	}
+		return nil
+	})
 	g.unregisterOne(component)
 }
 
 func (g *Game) unregisterOne(component interface{}) {
+	parent := g.parent[component]
+
 	// unregister from g.byAB
 	ct := reflect.TypeOf(component)
 	for _, b := range Behaviours {
 		if !ct.Implements(b) {
 			continue
 		}
-		for c, p := component, g.parent[component]; p != nil; c, p = p, g.parent[p] {
+		for c, p := component, parent; p != nil; c, p = p, g.parent[p] {
 			k := abKey{p, b}
-			delete(g.byAB[k], c)
-			if len(g.byAB[k]) > 0 {
+			g.byAB[k].Remove(c)
+			if g.byAB[k].ItemCount() > 0 {
 				break
 			}
 		}
 	}
 
 	// unregister from g.parent and g.children
-	delete(g.children[g.parent[component]], component)
+	g.children[parent].Remove(component)
 	delete(g.parent, component)
 
 	// unregister from g.byID if needed
@@ -384,19 +390,6 @@ func (g *Game) unregisterOne(component interface{}) {
 func (g *Game) String() string { return "Game" }
 
 // --------- Helper stuff ---------
-
-// ComponentSet is a set of components.
-type ComponentSet map[interface{}]struct{}
-
-func (c ComponentSet) String() string {
-	var b strings.Builder
-	b.WriteString("{")
-	for x := range c {
-		fmt.Fprint(&b, " ", x)
-	}
-	b.WriteString(" }")
-	return b.String()
-}
 
 // abKey is the key type for game.byAB.
 type abKey struct {

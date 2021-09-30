@@ -102,9 +102,10 @@ func (g *Game) printTreeRecursive(dst io.Writer, depth int, c interface{}) {
 	} else {
 		fmt.Fprintf(dst, "%s%v\n", indent, c)
 	}
-	for x := range g.Children(c) {
+	g.Children(c).Scan(func(x interface{}) error {
 		g.printTreeRecursive(dst, depth+1, x)
-	}
+		return nil
+	})
 }
 
 func (g *Game) cmdQuery(dst io.Writer, argv []string) {
