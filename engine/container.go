@@ -51,13 +51,11 @@ func (c *Container) GobEncode() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// Prepare ensures the helper data structures are present.
+// Prepare ensures the helper data structures are present and valid.
 func (c *Container) Prepare(*Game) error {
-	if c.reverse == nil {
-		c.reverse = make(map[interface{}]int, len(c.items))
-		for i, x := range c.items {
-			c.reverse[x] = i
-		}
+	c.reverse = make(map[interface{}]int, len(c.items))
+	for i, x := range c.items {
+		c.reverse[x] = i
 	}
 	return nil
 }
@@ -130,7 +128,12 @@ func (c *Container) ItemCount() int {
 func (c *Container) Element(i int) interface{} { return c.items[i] }
 
 // Len returns the number of items plus the number of free slots in the container.
-func (c *Container) Len() int { return len(c.items) }
+func (c *Container) Len() int {
+	if c == nil {
+		return 0
+	}
+	return len(c.items)
+}
 
 // Swap swaps any two items, free slots, or a combination.
 func (c *Container) Swap(i, j int) {
@@ -144,6 +147,9 @@ func (c *Container) Swap(i, j int) {
 }
 
 func (c *Container) String() string {
+	if c == nil {
+		return "Container(nil)"
+	}
 	return "Container" + fmt.Sprint(c.items)
 }
 
