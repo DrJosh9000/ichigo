@@ -1,6 +1,8 @@
 //go:build example
 // +build example
 
+// This is an example game using the engine. Run it with:
+//    go run -tags example example.go
 package main
 
 import (
