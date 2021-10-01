@@ -30,53 +30,14 @@ type DrawDFS struct {
 }
 
 func (d *DrawDFS) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
-	if true {
-		d.drawRecursive(d, screen, *opts)
-	} else {
-		d.drawWithQuery(screen, opts)
-	}
+	d.drawRecursive(screen, *opts, d)
 }
 
 // ManagesDrawingSubcomponents is present so DrawDFS is recognised as a
 // DrawManager.
 func (DrawDFS) ManagesDrawingSubcomponents() {}
 
-// This doesn't work! This misses Hiders, Transformers that are not Drawers.
-func (d *DrawDFS) drawWithQuery(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
-	stack := []ebiten.DrawImageOptions{*opts}
-	d.game.Query(d, DrawerType,
-		// visitPre
-		func(x interface{}) error {
-			if h, ok := x.(Hider); ok && h.Hidden() {
-				return Skip
-			}
-			opts := stack[len(stack)-1]
-			if tf, ok := x.(Transformer); ok {
-				opts = concatOpts(tf.Transform(), opts)
-				stack = append(stack, opts)
-			}
-			if x == d {
-				return nil
-			}
-			if dr, ok := x.(Drawer); ok {
-				dr.Draw(screen, &opts)
-			}
-			if _, isDM := x.(DrawManager); isDM {
-				return Skip
-			}
-			return nil
-		},
-		// visitPost
-		func(x interface{}) error {
-			if _, ok := x.(Transformer); ok {
-				stack = stack[:len(stack)-1]
-			}
-			return nil
-		},
-	)
-}
-
-func (d *DrawDFS) drawRecursive(component interface{}, screen *ebiten.Image, opts ebiten.DrawImageOptions) {
+func (d *DrawDFS) drawRecursive(screen *ebiten.Image, opts ebiten.DrawImageOptions, component interface{}) {
 	// Hidden? stop drawing
 	if h, ok := component.(Hider); ok && h.Hidden() {
 		return
@@ -97,7 +58,7 @@ func (d *DrawDFS) drawRecursive(component interface{}, screen *ebiten.Image, opt
 	}
 	// Has subcomponents? recurse
 	d.game.Children(component).Scan(func(x interface{}) error {
-		d.drawRecursive(x, screen, opts)
+		d.drawRecursive(screen, opts, x)
 		return nil
 	})
 }
