@@ -3,8 +3,8 @@ package example
 import (
 	"image"
 
-	"drjosh.dev/gurgle/engine"
-	"drjosh.dev/gurgle/geom"
+	"github.com/DrJosh9000/ichigo/engine"
+	"github.com/DrJosh9000/ichigo/geom"
 )
 
 // Level1 creates the level_1 scene.

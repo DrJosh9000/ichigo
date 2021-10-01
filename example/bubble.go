@@ -5,8 +5,8 @@ import (
 	"image"
 	"math/rand"
 
-	"drjosh.dev/gurgle/engine"
-	"drjosh.dev/gurgle/geom"
+	"github.com/DrJosh9000/ichigo/engine"
+	"github.com/DrJosh9000/ichigo/geom"
 )
 
 var _ interface {

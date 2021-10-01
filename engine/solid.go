@@ -3,7 +3,7 @@ package engine
 import (
 	"encoding/gob"
 
-	"drjosh.dev/gurgle/geom"
+	"github.com/DrJosh9000/ichigo/geom"
 )
 
 var _ Collider = SolidRect{}

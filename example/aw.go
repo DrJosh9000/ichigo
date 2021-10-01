@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"math"
 
-	"drjosh.dev/gurgle/engine"
-	"drjosh.dev/gurgle/geom"
+	"github.com/DrJosh9000/ichigo/engine"
+	"github.com/DrJosh9000/ichigo/geom"
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"log"
 
-	"drjosh.dev/gurgle/geom"
+	"github.com/DrJosh9000/ichigo/geom"
 )
 
 // Ensure Actor satisfies interfaces.

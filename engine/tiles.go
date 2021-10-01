@@ -6,7 +6,7 @@ import (
 	"image"
 	"io/fs"
 
-	"drjosh.dev/gurgle/geom"
+	"github.com/DrJosh9000/ichigo/geom"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 

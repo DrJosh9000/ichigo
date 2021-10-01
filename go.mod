@@ -1,4 +1,4 @@
-module drjosh.dev/gurgle
+module github.com/DrJosh9000/ichigo
 
 go 1.16
 

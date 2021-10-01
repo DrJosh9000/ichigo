@@ -1,3 +1,3 @@
-# gurgle
+# ichigo 🍓
 
-Game development in progress.
+Game engine development in progress.

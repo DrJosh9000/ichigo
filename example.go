@@ -15,9 +15,9 @@ import (
 	"runtime"
 	"runtime/pprof"
 
-	"drjosh.dev/gurgle/engine"
-	"drjosh.dev/gurgle/example"
-	"drjosh.dev/gurgle/geom"
+	"github.com/DrJosh9000/ichigo/engine"
+	"github.com/DrJosh9000/ichigo/example"
+	"github.com/DrJosh9000/ichigo/geom"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
