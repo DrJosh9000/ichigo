@@ -1,4 +1,4 @@
-package game
+package example
 
 import (
 	"encoding/gob"

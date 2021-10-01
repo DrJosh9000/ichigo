@@ -1,7 +1,4 @@
-//go:build js
-// +build js
-
-package game
+package example
 
 // TODO: make an io/fs wrapper for ebitenutil.OpenFile ?
 

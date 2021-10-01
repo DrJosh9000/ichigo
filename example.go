@@ -1,3 +1,6 @@
+//go:build example
+// +build example
+
 package main
 
 import (
@@ -11,7 +14,7 @@ import (
 	"runtime/pprof"
 
 	"drjosh.dev/gurgle/engine"
-	"drjosh.dev/gurgle/game"
+	"drjosh.dev/gurgle/example"
 	"drjosh.dev/gurgle/geom"
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -45,9 +48,9 @@ func main() {
 	// Change to true to rewrite level1.gobz
 	lev1 := interface{}(&engine.SceneRef{Path: "assets/level1.gobz"})
 	if hardcodedLevel1 {
-		lev1 = game.Level1()
+		lev1 = example.Level1()
 		if rewriteLevel1 && runtime.GOOS != "js" {
-			if err := engine.SaveGobz(lev1, "game/assets/level1.gobz"); err != nil {
+			if err := engine.SaveGobz(lev1, "example/assets/level1.gobz"); err != nil {
 				log.Fatalf("Couldn't save level1.gobz: %v", err)
 			}
 		}
@@ -79,12 +82,12 @@ func main() {
 			),
 		},
 	}
-	if err := g.LoadAndPrepare(game.Assets); err != nil {
+	if err := g.LoadAndPrepare(example.Assets); err != nil {
 		log.Fatalf("Loading/preparing error: %v", err)
 	}
 
 	if enableREPL && runtime.GOOS != "js" {
-		go g.REPL(os.Stdin, os.Stdout, game.Assets)
+		go g.REPL(os.Stdin, os.Stdout, example.Assets)
 	}
 
 	if err := ebiten.RunGame(g); err != nil {
