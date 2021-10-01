@@ -48,6 +48,9 @@ func (s *Sprite) Scan(visit VisitFunc) error {
 	return visit(&s.Sheet)
 }
 
+// Anim returns the current Anim.
+func (s *Sprite) Anim() *Anim { return s.anim }
+
 // SetAnim sets the Anim to use for the sprite. If it is not the same as the
 // one currently set, it resets the new anim.
 func (s *Sprite) SetAnim(a *Anim) {
