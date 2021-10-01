@@ -27,7 +27,8 @@ func NewBubble(pos geom.Int3) *Bubble {
 		Life: 60,
 		Sprite: engine.Sprite{
 			Actor: engine.Actor{
-				Pos: pos,
+				CollisionDomain: "level_1",
+				Pos:             pos,
 				Bounds: geom.Box{
 					Min: geom.Pt3(-4, -4, -4),
 					Max: geom.Pt3(4, 4, 4),
