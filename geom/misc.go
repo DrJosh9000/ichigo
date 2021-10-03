@@ -39,3 +39,27 @@ func CFloat(p image.Point) (x, y float64) {
 func Dot(p, q image.Point) int {
 	return p.X*q.X + p.Y*q.Y
 }
+
+// ---------- Some other helpers ----------
+
+// FSign returns the sign of the float64 (-1, 0, or 1).
+func FSign(m float64) float64 {
+	if m == 0 {
+		return 0
+	}
+	if m < 0 {
+		return -1
+	}
+	return 1
+}
+
+// Sign returns the sign of the int (-1, 0, or 1).
+func Sign(m int) int {
+	if m == 0 {
+		return 0
+	}
+	if m < 0 {
+		return -1
+	}
+	return 1
+}
