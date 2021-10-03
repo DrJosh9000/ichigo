@@ -68,7 +68,7 @@ func (s *LinearSpline) Interpolate(x float64) float64 {
 type CubicSpline struct {
 	Points []Float2
 
-	// moments and intervals
+	// moments (second derivative at 1/6 scale) and intervals
 	m, h []float64
 
 	// slope of line before and after spline, for extrapolation
@@ -98,9 +98,12 @@ func (s *CubicSpline) Prepare() error {
 		s.h[i] = s.Points[i+1].X - s.Points[i].X
 	}
 	// Compute moments. m[0] and m[N-1] are chosen to be 0 (natural cubic spline).
+	// Also these "moments" aren't the true values of the second derivatives
+	// at the knots - they are calculated at 1/6th scale to avoid a multiply
+	// and divide by 6.)
 	// Given:
 	//    ɣ(i) = 2.0 * (h[i-1] + h[i])
-	//    b(i) = 6.0 * ((Points[i+1].Y-Points[i].Y)/h[i] - (Points[i].Y-Points[i-1].Y)/h[i-1])
+	//    b(i) = ((Points[i+1].Y-Points[i].Y)/h[i] - (Points[i].Y-Points[i-1].Y)/h[i-1])
 	// we solve for m[i] in the equations:
 	//    h[i-1]*m[i-1] + ɣ(i)*m[i] + h[i]*m[i+1] = b(i)
 	// for i = 1...N-2.
@@ -122,7 +125,7 @@ func (s *CubicSpline) Prepare() error {
 	for i := 1; i < N-1; i++ {
 		diag[i] = 2.0 * (s.h[i-1] + s.h[i])
 		upper[i] = s.h[i]
-		B[i] = 6.0 * ((s.Points[i+1].Y-s.Points[i].Y)/s.h[i] - (s.Points[i].Y-s.Points[i-1].Y)/s.h[i-1])
+		B[i] = (s.Points[i+1].Y-s.Points[i].Y)/s.h[i] - (s.Points[i].Y-s.Points[i-1].Y)/s.h[i-1]
 	}
 	// Forward elimination:
 	for i := 2; i < N-1; i++ {
@@ -133,11 +136,6 @@ func (s *CubicSpline) Prepare() error {
 	// Back substitution:
 	for i := N - 2; i > 0; i-- {
 		s.m[i] = (B[i] - s.h[i]*s.m[i+1]) / diag[i]
-	}
-	// Divide all the moments by 6, since all the terms with moments in them
-	// from this point onwards are divided by six.
-	for i := range s.m {
-		s.m[i] /= 6.0
 	}
 	// Pre- and post-slope:
 	s.preslope = -s.m[1]*s.h[0] + (s.Points[1].Y-s.Points[0].Y)/s.h[0]
