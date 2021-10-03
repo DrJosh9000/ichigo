@@ -31,7 +31,7 @@ func main() {
 		log.Fatalf("cubic.Prepare() = %v, want nil", err)
 	}
 	// Produce interpolated points in CSV-like form.
-	for x := -8.0; x < 8.0; x += 0.1 {
+	for x := -8.0; x < 8.0; x += 0.125 {
 		fmt.Printf("%f,%f,%f\n", x, linear.Interpolate(x), cubic.Interpolate(x))
 	}
 }
