@@ -100,7 +100,7 @@ func (s *CubicSpline) Prepare() error {
 	// Compute moments. m[0] and m[N-1] are chosen to be 0 (natural cubic spline).
 	// Also these "moments" aren't the true values of the second derivatives
 	// at the knots - they are calculated at 1/6th scale to avoid a multiply
-	// and divide by 6.)
+	// and divide by 6.
 	// Given:
 	//    ɣ(i) = 2.0 * (h[i-1] + h[i])
 	//    b(i) = ((Points[i+1].Y-Points[i].Y)/h[i] - (Points[i].Y-Points[i-1].Y)/h[i-1])
