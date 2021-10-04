@@ -76,7 +76,7 @@ type CubicSpline struct {
 
 	// Slope of line before and after spline, for extrapolation.
 	// If a natural cubic spline is being used, these are set by Prepare.
-	// If instead FixedPreslope or FixePostslope is true, these are read by
+	// If instead FixedPreslope or FixedPostslope are true, these are read by
 	// Prepare to determine the moments.
 	Preslope, Postslope float64
 
