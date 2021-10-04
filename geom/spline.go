@@ -208,7 +208,7 @@ func (s *CubicSpline) Prepare() error {
 		s.m[i] = (B[i] - s.h[i]*s.m[i+1]) / diag[i]
 	}
 	if s.FixedPreslope {
-		s.m[0] = (B[0] - s.h[0]*s.m[1]) / diag[1]
+		s.m[0] = (B[0] - s.h[0]*s.m[1]) / diag[0]
 	}
 	// Derive pre- and post-slope, if not fixed:
 	if !s.FixedPreslope {
