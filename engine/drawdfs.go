@@ -46,38 +46,42 @@ type DrawDFS struct {
 }
 
 func (d *DrawDFS) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
-	d.drawRecursive(screen, *opts, d)
+	stack := []ebiten.DrawImageOptions{*opts}
+	d.game.Query(d, DrawerType,
+		// visitPre
+		func(x interface{}) error {
+			if h, ok := x.(Hider); ok && h.Hidden() {
+				return Skip
+			}
+			opts := stack[len(stack)-1]
+			if tf, ok := x.(Transformer); ok {
+				opts = concatOpts(tf.Transform(), opts)
+				stack = append(stack, opts)
+			}
+			if x == d { // neither draw nor skip d itself
+				return nil
+			}
+			if dr, ok := x.(Drawer); ok {
+				dr.Draw(screen, &opts)
+			}
+			if _, isDM := x.(DrawManager); isDM {
+				return Skip
+			}
+			return nil
+		},
+		// visitPost
+		func(x interface{}) error {
+			if _, ok := x.(Transformer); ok {
+				stack = stack[:len(stack)-1]
+			}
+			return nil
+		},
+	)
 }
 
 // ManagesDrawingSubcomponents is present so DrawDFS is recognised as a
 // DrawManager.
 func (DrawDFS) ManagesDrawingSubcomponents() {}
-
-func (d *DrawDFS) drawRecursive(screen *ebiten.Image, opts ebiten.DrawImageOptions, component interface{}) {
-	// Hidden? stop drawing
-	if h, ok := component.(Hider); ok && h.Hidden() {
-		return
-	}
-	// Has a transform? apply to opts
-	if tf, ok := component.(Transformer); ok {
-		opts = concatOpts(tf.Transform(), opts)
-	}
-	if component != d {
-		// Does it draw itself? Draw
-		if dr, ok := component.(Drawer); ok {
-			dr.Draw(screen, &opts)
-		}
-		// Is it a DrawManager? It manages drawing all its subcomponents.
-		if _, ok := component.(DrawManager); ok {
-			return
-		}
-	}
-	// Has subcomponents? recurse
-	d.game.Children(component).Scan(func(x interface{}) error {
-		d.drawRecursive(screen, opts, x)
-		return nil
-	})
-}
 
 func (d *DrawDFS) Prepare(g *Game) error {
 	d.game = g

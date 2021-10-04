@@ -157,6 +157,9 @@ func (g *Game) cmdQuery(dst io.Writer, argv []string) {
 
 	noResults := true
 	g.Query(ancestor, behaviour, func(c interface{}) error {
+		if !reflect.TypeOf(c).Implements(behaviour) {
+			return nil
+		}
 		noResults = false
 		i, ok := c.(Identifier)
 		if ok {

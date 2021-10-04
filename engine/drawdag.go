@@ -170,7 +170,9 @@ func (d *DrawDAG) Update() error {
 // descendants of a different DrawManager.
 func (d *DrawDAG) Register(component, _ interface{}) error {
 	return d.game.Query(component, DrawBoxerType, func(c interface{}) error {
-		d.registerOne(c.(DrawBoxer))
+		if db, ok := c.(DrawBoxer); ok {
+			d.registerOne(db)
+		}
 		if _, isDM := c.(DrawManager); isDM && c != d {
 			return Skip
 		}
@@ -235,7 +237,9 @@ func (d *DrawDAG) registerOne(x DrawBoxer) {
 // Unregister unregisters the component and all subcomponents.
 func (d *DrawDAG) Unregister(component interface{}) {
 	d.game.Query(component, DrawBoxerType, func(c interface{}) error {
-		d.unregisterOne(c.(DrawBoxer))
+		if db, ok := c.(DrawBoxer); ok {
+			d.unregisterOne(db)
+		}
 		if _, isDM := c.(DrawManager); isDM && c != d {
 			return Skip
 		}

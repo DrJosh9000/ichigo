@@ -64,7 +64,7 @@ func (a *Actor) CollidesAt(p geom.Int3) bool {
 		return false
 	}
 	return errCollision == a.game.Query(cd, ColliderType, nil, func(c interface{}) error {
-		if c.(Collider).CollidesWith(bounds) {
+		if cl, ok := c.(Collider); ok && cl.CollidesWith(bounds) {
 			return errCollision
 		}
 		return nil

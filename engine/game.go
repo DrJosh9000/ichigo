@@ -84,12 +84,16 @@ func (g *Game) Update() error {
 	return g.Query(g.Root, UpdaterType,
 		func(c interface{}) error {
 			if d, ok := c.(Disabler); ok && d.Disabled() {
+				// Do not update this component or descendants.
 				return Skip
 			}
 			return nil
 		},
 		func(c interface{}) error {
-			return c.(Updater).Update()
+			if u, ok := c.(Updater); ok {
+				return u.Update()
+			}
+			return nil
 		},
 	)
 }
@@ -167,21 +171,29 @@ func (g *Game) ReversePath(component interface{}) []interface{} {
 	return stack
 }
 
-// Query looks for components having both a given ancestor and implementing
-// a given behaviour (see Behaviors in interface.go). This only returns sensible
-// values for registered components.
+// Query recursively searches for components having both a given ancestor and
+// implementing a given behaviour (see Behaviors in interface.go).
+// visitPre is called before descendants are visited, while visitPost is called
+// after descendants are visited. nil visitPre/visitPost are ignored.
 //
-// Note that every component is its own ancestor.
+// It is up to the visitPre and visitPost callbacks to handle components that
+// do not themselves implement the behaviour - more specifically, every ancestor
+// (up to the given one) of each component with the behaviour will be visited.
+// Visiting components in the tree that *don't* implement the behaviour is
+// important when behaviours of the parent need to influence the behaviours of
+// the children (e.g. a component can be a Hider and hiding all descendants, but
+// not necessarily be a Drawer itself).
 //
-// visitPre is visited before descendants, while visitPost is visited after
-// descendants. nil visitors are ignored.
+// Query only visits components that are registered.
+//
+// Note that every component is an ancestor of itself.
 //
 // Query returns the first error returned from either visitor callback, except
 // Skip when it is returned from a recursive call. Returning Skip from visitPre
-// will cause the descendents of the component to not be visited.
+// will cause the descendants of the component to be skipped (see the
+// implementation of Update for an example).
 func (g *Game) Query(ancestor interface{}, behaviour reflect.Type, visitPre, visitPost VisitFunc) error {
-	pi := reflect.TypeOf(ancestor).Implements(behaviour)
-	if pi && visitPre != nil {
+	if visitPre != nil {
 		if err := visitPre(ancestor); err != nil {
 			return err
 		}
@@ -205,7 +217,7 @@ func (g *Game) Query(ancestor interface{}, behaviour reflect.Type, visitPre, vis
 	}); err != nil {
 		return err
 	}
-	if pi && visitPost != nil {
+	if visitPost != nil {
 		return visitPost(ancestor)
 	}
 	return nil
@@ -219,6 +231,8 @@ func (g *Game) Scan(visit VisitFunc) error {
 // Load loads a component and all subcomponents recursively.
 // Note that this method does not implement Loader itself.
 func (g *Game) Load(component interface{}, assets fs.FS) error {
+	// Query cannot be used for this method because Load might cause
+	// subcomponents to spring into existence.
 	if l, ok := component.(Loader); ok {
 		if err := l.Load(assets); err != nil {
 			return err
@@ -238,7 +252,10 @@ func (g *Game) Prepare(component interface{}) error {
 	// Postorder traversal, in case ancestors depend on descendants being
 	// ready to answer queries.
 	return g.Query(component, PrepperType, nil, func(c interface{}) error {
-		return c.(Prepper).Prepare(g)
+		if p, ok := c.(Prepper); ok {
+			return p.Prepare(g)
+		}
+		return nil
 	})
 }
 
