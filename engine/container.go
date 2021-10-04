@@ -53,12 +53,15 @@ func (c *Container) GobDecode(in []byte) error {
 	if err := gob.NewDecoder(bytes.NewReader(in)).Decode(&c.items); err != nil {
 		return err
 	}
-	c.reverse = nil
 	return c.Prepare(nil)
 }
 
 // GobEncode encodes c as the slice of items.
+// When called on a nil *Container, GobEncode returns a nil slice.
 func (c *Container) GobEncode() ([]byte, error) {
+	if c == nil {
+		return nil, nil
+	}
 	c.compact()
 	var buf bytes.Buffer
 	if err := gob.NewEncoder(&buf).Encode(c.items); err != nil {
@@ -68,7 +71,11 @@ func (c *Container) GobEncode() ([]byte, error) {
 }
 
 // Prepare ensures the helper data structures are present and valid.
+// Prepare is safe to call on a nil *Container.
 func (c *Container) Prepare(*Game) error {
+	if c == nil {
+		return nil
+	}
 	c.reverse = make(map[interface{}]int, len(c.items))
 	for i, x := range c.items {
 		c.reverse[x] = i
@@ -77,6 +84,7 @@ func (c *Container) Prepare(*Game) error {
 }
 
 // Scan visits every non-nil component in the container.
+// Scan is safe to call on a nil *Container.
 func (c *Container) Scan(visit VisitFunc) error {
 	if c == nil {
 		return nil
@@ -92,6 +100,7 @@ func (c *Container) Scan(visit VisitFunc) error {
 }
 
 // Add adds an item to the end of the container, if not already present.
+// Add is _not_ safe to call on a nil *Container.
 func (c *Container) Add(component interface{}) {
 	if c.Contains(component) {
 		return
@@ -102,7 +111,11 @@ func (c *Container) Add(component interface{}) {
 
 // Remove replaces an item with nil. If the number of nil items is greater than
 // half the slice, the slice is compacted (indexes of items will change).
+// Remove is safe to call on a nil *Container.
 func (c *Container) Remove(component interface{}) {
+	if c == nil {
+		return
+	}
 	i, found := c.reverse[component]
 	if !found {
 		return
@@ -115,6 +128,7 @@ func (c *Container) Remove(component interface{}) {
 }
 
 // Contains reports if an item exists in the container.
+// Contains is safe to call on a nil *Container.
 func (c *Container) Contains(component interface{}) bool {
 	if c == nil {
 		return false
@@ -125,6 +139,7 @@ func (c *Container) Contains(component interface{}) bool {
 
 // IndexOf reports if an item exists in the container and returns the index if
 // present.
+// IndexOf is safe to call on a nil *Container.
 func (c *Container) IndexOf(component interface{}) (int, bool) {
 	if c == nil {
 		return 0, false
@@ -133,6 +148,8 @@ func (c *Container) IndexOf(component interface{}) (int, bool) {
 	return i, found
 }
 
+// ItemCount returns the number of (non-nil) items in the container.
+// ItemCount is safe to call on a nil *Container.
 func (c *Container) ItemCount() int {
 	if c == nil {
 		return 0
@@ -141,9 +158,11 @@ func (c *Container) ItemCount() int {
 }
 
 // Element returns the item at index i, or nil for a free slot.
+// Element is _not_ safe to call on a nil *Container.
 func (c *Container) Element(i int) interface{} { return c.items[i] }
 
-// Len returns the number of items plus the number of free slots in the container.
+// Len returns the number of items plus the number of nil slots in the container.
+// Len is safe to call on a nil *Container.
 func (c *Container) Len() int {
 	if c == nil {
 		return 0
@@ -152,6 +171,7 @@ func (c *Container) Len() int {
 }
 
 // Swap swaps any two items, free slots, or a combination.
+// Swap is _not_ safe to call on a nil *Container.
 func (c *Container) Swap(i, j int) {
 	c.items[i], c.items[j] = c.items[j], c.items[i]
 	if c.items[i] != nil {
