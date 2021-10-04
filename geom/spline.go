@@ -241,9 +241,6 @@ func (s *CubicSpline) Prepare() error {
 // last segments of the spline.
 func (s *CubicSpline) Interpolate(x float64) float64 {
 	N := len(s.Points)
-	if N == 1 {
-		return s.Points[0].Y
-	}
 	if x < s.Points[0].X {
 		// Comes before the start of the spline, extrapolate
 		return s.Points[0].Y + (x-s.Points[0].X)*s.Preslope
