@@ -34,10 +34,8 @@ func init() {
 
 // DrawDFS is a DrawManager that does not add any structure. Components are
 // drawn in the order in which they are encountered by a depth-first search
-// through the game tree using Scan, without any extra sorting based on Z values
-// or consideration for DrawOrderer. Also, children registered in Game but not
-// registered by subcomponents (such that they are visited with Scan) won't be
-// drawn.
+// through the game tree using Query, without any extra sorting based on Z
+// values or consideration for DrawOrderer.
 type DrawDFS struct {
 	Child interface{}
 	Hides
