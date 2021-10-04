@@ -26,12 +26,17 @@ func main() {
 	if err := linear.Prepare(); err != nil {
 		log.Fatalf("linear.Prepare() = %v, want nil", err)
 	}
-	cubic := &geom.CubicSpline{Points: points}
+	cubic := &geom.CubicSpline{Points: points,
+		FixedPreslope:  true,
+		FixedPostslope: false,
+		Preslope:       -5,
+		//Postslope:      -4,
+	}
 	if err := cubic.Prepare(); err != nil {
 		log.Fatalf("cubic.Prepare() = %v, want nil", err)
 	}
 	// Produce interpolated points in CSV-like form.
-	for x := -8.0; x < 8.0; x += 0.125 {
+	for x := -8.0; x < 8.0; x += 0.0625 {
 		fmt.Printf("%f,%f,%f\n", x, linear.Interpolate(x), cubic.Interpolate(x))
 	}
 }
