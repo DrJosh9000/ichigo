@@ -98,9 +98,10 @@ func (c *Container) Scan(visit VisitFunc) error {
 }
 
 // Add adds an item to the end of the container, if not already present.
+// Adding nil, or a component already present in the container, does nothing.
 // Add is _not_ safe to call on a nil *Container.
 func (c *Container) Add(component interface{}) {
-	if c.Contains(component) {
+	if component == nil || c.Contains(component) {
 		return
 	}
 	c.reverse[component] = len(c.items)
@@ -109,6 +110,7 @@ func (c *Container) Add(component interface{}) {
 
 // Remove replaces an item with nil. If the number of nil items is greater than
 // half the slice, the slice is compacted (indexes of items will change).
+// Removing an item not in the Container does nothing.
 // Remove is safe to call on a nil *Container.
 func (c *Container) Remove(component interface{}) {
 	if c == nil {
@@ -188,15 +190,16 @@ func (c *Container) String() string {
 }
 
 // compact moves all the items to the front of the items slice, removing any
-// free slots, and resets the free counter.
+// free slots. The underlying array remains the same size.
 func (c *Container) compact() {
 	i := 0
 	for _, x := range c.items {
-		if x != nil {
-			c.items[i] = x
-			c.reverse[x] = i
-			i++
+		if x == nil {
+			continue
 		}
+		c.items[i] = x
+		c.reverse[x] = i
+		i++
 	}
 	c.items = c.items[:i]
 }
