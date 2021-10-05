@@ -23,7 +23,6 @@ import (
 )
 
 var _ interface {
-	Prepper
 	Scanner
 	gob.GobDecoder
 	gob.GobEncoder
@@ -44,8 +43,18 @@ type Container struct {
 // MakeContainer puts the items into a new Container.
 func MakeContainer(items ...interface{}) *Container {
 	c := &Container{items: items}
-	c.Prepare(nil)
+	c.rebuildReverse()
 	return c
+}
+
+func (c *Container) rebuildReverse() {
+	if c == nil {
+		return
+	}
+	c.reverse = make(map[interface{}]int, len(c.items))
+	for i, x := range c.items {
+		c.reverse[x] = i
+	}
 }
 
 // GobDecode decodes a byte slice as though it were a slice of items.
@@ -53,7 +62,8 @@ func (c *Container) GobDecode(in []byte) error {
 	if err := gob.NewDecoder(bytes.NewReader(in)).Decode(&c.items); err != nil {
 		return err
 	}
-	return c.Prepare(nil)
+	c.rebuildReverse()
+	return nil
 }
 
 // GobEncode encodes c as the slice of items.
@@ -70,19 +80,6 @@ func (c *Container) GobEncode() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// Prepare ensures the helper data structures are present and valid.
-// Prepare is safe to call on a nil *Container.
-func (c *Container) Prepare(*Game) error {
-	if c == nil {
-		return nil
-	}
-	c.reverse = make(map[interface{}]int, len(c.items))
-	for i, x := range c.items {
-		c.reverse[x] = i
-	}
-	return nil
-}
-
 // Scan visits every non-nil component in the container.
 // Scan is safe to call on a nil *Container.
 func (c *Container) Scan(visit VisitFunc) error {
@@ -90,10 +87,11 @@ func (c *Container) Scan(visit VisitFunc) error {
 		return nil
 	}
 	for _, x := range c.items {
-		if x != nil {
-			if err := visit(x); err != nil {
-				return err
-			}
+		if x == nil {
+			continue
+		}
+		if err := visit(x); err != nil {
+			return err
 		}
 	}
 	return nil

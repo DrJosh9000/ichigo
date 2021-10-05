@@ -22,13 +22,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-func TestContainerLiteral(t *testing.T) {
-	c := &Container{}
-	if err := c.Prepare(nil); err != nil {
-		t.Errorf("c.Prepare() = %v, want nil", err)
-	}
-}
-
 func TestMakeContainer(t *testing.T) {
 	c := MakeContainer(69, 420)
 	if want := []interface{}{69, 420}; !cmp.Equal(c.items, want) {
