@@ -79,7 +79,9 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
 	return g.ScreenSize.X, g.ScreenSize.Y
 }
 
-// Update updates everything.
+// Update updates everything. Subcomponents are updated before parent
+// components. Disabled components, and components with a disabled ancestor, are
+// not updated.
 func (g *Game) Update() error {
 	return g.Query(g.Root, UpdaterType,
 		func(c interface{}) error {
@@ -190,8 +192,8 @@ func (g *Game) ReversePath(component interface{}) []interface{} {
 //
 // Query returns the first error returned from either visitor callback, except
 // Skip when it is returned from a recursive call. Returning Skip from visitPre
-// will cause the descendants of the component to be skipped (see the
-// implementation of Update for an example).
+// will cause visitPost and the descendants of the component to be skipped (see
+// the implementation of Update for an example of how to use this).
 func (g *Game) Query(ancestor interface{}, behaviour reflect.Type, visitPre, visitPost VisitFunc) error {
 	if visitPre != nil {
 		if err := visitPre(ancestor); err != nil {
