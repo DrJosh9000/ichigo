@@ -40,6 +40,8 @@ func init() {
 type Camera struct {
 	ID
 	Child interface{}
+	Disables
+	Hides
 
 	// Camera controls
 	// These directly manipulate the camera. If you want to restrict the camera

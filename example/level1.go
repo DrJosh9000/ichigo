@@ -18,6 +18,7 @@ package example
 
 import (
 	"image"
+	"time"
 
 	"github.com/DrJosh9000/ichigo/engine"
 	"github.com/DrJosh9000/ichigo/geom"
@@ -29,6 +30,9 @@ func Level1() *engine.Scene {
 		ID:     "level_1",
 		Bounds: engine.Bounds(image.Rect(-32, -32, 320+32, 240+32)),
 		Child: engine.MakeContainer(
+			engine.DummyLoad{
+				Duration: 2 * time.Second,
+			},
 			&engine.Parallax{
 				CameraID: "game_camera",
 				Child: &engine.Billboard{

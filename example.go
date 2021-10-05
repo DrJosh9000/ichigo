@@ -91,9 +91,15 @@ func main() {
 					ID:    "bg_fill",
 					Color: color.Gray{100},
 				},
-				&engine.Camera{
-					ID:    "game_camera",
-					Child: lev1,
+				&engine.LoadingSwitch{
+					During: &engine.Billboard{
+						ID:  "loading_screen",
+						Src: engine.ImageRef{Path: "assets/loading.png"},
+					},
+					After: &engine.Camera{
+						ID:    "game_camera",
+						Child: lev1,
+					},
 				},
 				&engine.DebugToast{ID: "toast", Pos: image.Pt(0, 15)},
 				engine.PerfDisplay{},
