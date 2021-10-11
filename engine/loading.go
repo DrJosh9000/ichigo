@@ -22,19 +22,25 @@ import (
 	"time"
 )
 
+// LoadingSwitch switches between two subcomponents. While After is being
+// loaded asynchronously, During is shown. Once loading is complete, During
+// is hidden and After is shown.
 type LoadingSwitch struct {
-	During Hider
-	After  Hider
+	During, After interface {
+		Disabler
+		Hider
+	}
 
 	assets fs.FS
 }
 
-// Scan only scans s.During, thus, only s.During is loaded by Game directly.
+// Scan only scans s.During. Only s.During is loaded automatically - s.After is
+// loaded asynchronously from Prepare below.
 func (s *LoadingSwitch) Scan(visit VisitFunc) error {
 	return visit(s.During)
 }
 
-// Load stores a copy of assets to use later.
+// Load stores a copy of assets to pass to s.After.Load later.
 func (s *LoadingSwitch) Load(assets fs.FS) error {
 	s.assets = assets
 	return nil
@@ -43,30 +49,37 @@ func (s *LoadingSwitch) Load(assets fs.FS) error {
 // Prepare loads, registers, and prepares.After in a separate goroutine. Once
 // ready, LoadingSwitch hides s.During and shows s.After.
 func (s *LoadingSwitch) Prepare(game *Game) error {
-	go func() {
-		startLoad := time.Now()
-		if err := game.Load(s.After, s.assets); err != nil {
-			log.Printf("Couldn't load: %v", err)
-			return
-		}
-		log.Printf("LoadingSwitch: finished loading in %v", time.Since(startLoad))
-
-		startBuild := time.Now()
-		if err := game.Register(s.After, s); err != nil {
-			log.Printf("Couldn't register: %v", err)
-			return
-		}
-		log.Printf("LoadingSwitch: finished registering in %v", time.Since(startBuild))
-		startPrep := time.Now()
-		if err := game.Prepare(s.After); err != nil {
-			log.Printf("Couldn't prepare: %v", err)
-			return
-		}
-		log.Printf("LoadingSwitch: finished preparing in %v", time.Since(startPrep))
-
-		// TODO: better scene transitions
-		s.During.Hide()
-		s.After.Show()
-	}()
+	go s.loadAfter(game)
 	return nil
+}
+
+func (s *LoadingSwitch) loadAfter(game *Game) {
+	startLoad := time.Now()
+	if err := game.Load(s.After, s.assets); err != nil {
+		log.Printf("Couldn't load: %v", err)
+		return
+	}
+	log.Printf("LoadingSwitch: finished loading in %v", time.Since(startLoad))
+
+	s.After.Disable()
+	s.After.Hide()
+
+	startBuild := time.Now()
+	if err := game.Register(s.After, s); err != nil {
+		log.Printf("Couldn't register: %v", err)
+		return
+	}
+	log.Printf("LoadingSwitch: finished registering in %v", time.Since(startBuild))
+	startPrep := time.Now()
+	if err := game.Prepare(s.After); err != nil {
+		log.Printf("Couldn't prepare: %v", err)
+		return
+	}
+	log.Printf("LoadingSwitch: finished preparing in %v", time.Since(startPrep))
+
+	// TODO: better scene transitions
+	s.During.Disable()
+	s.During.Hide()
+	s.After.Enable()
+	s.After.Show()
 }

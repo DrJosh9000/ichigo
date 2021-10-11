@@ -43,6 +43,8 @@ type DrawDFS struct {
 	game *Game
 }
 
+// Draw draws all descendant components (that are not managed by some other
+// DrawManager) in a pre-order traversal.
 func (d *DrawDFS) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	stack := []ebiten.DrawImageOptions{*opts}
 	d.game.Query(d, DrawerType,
@@ -81,6 +83,7 @@ func (d *DrawDFS) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 // DrawManager.
 func (DrawDFS) ManagesDrawingSubcomponents() {}
 
+// Prepare saves a reference to g.
 func (d *DrawDFS) Prepare(g *Game) error {
 	d.game = g
 	return nil

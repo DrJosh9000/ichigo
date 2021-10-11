@@ -28,11 +28,13 @@ func init() {
 	gob.Register(&SolidRect{})
 }
 
+// SolidRect is a minimal implementation of a Collider defined by a single Box.
 type SolidRect struct {
 	ID
 	geom.Box
 }
 
+// CollidesWith reports if r overlaps with s.Box.
 func (s SolidRect) CollidesWith(r geom.Box) bool {
 	return s.Box.Overlaps(r)
 }

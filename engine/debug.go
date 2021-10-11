@@ -52,6 +52,7 @@ type DebugToast struct {
 	Text  string
 }
 
+// Draw uses DebugPrintAt to draw d.Text at the position d.Pos.
 func (d *DebugToast) Draw(screen *ebiten.Image, _ *ebiten.DrawImageOptions) {
 	ebitenutil.DebugPrintAt(screen, d.Text, d.Pos.X, d.Pos.Y)
 }
@@ -60,12 +61,14 @@ func (d *DebugToast) String() string {
 	return fmt.Sprintf("DebugToast@%v", d.Pos)
 }
 
+// Toast sets the text to appear for 2 seconds.
 func (d *DebugToast) Toast(text string) {
 	d.Text = text
 	d.Timer = 120
 	d.Hides = false
 }
 
+// Update hides the toast text once the timer is exhausted.
 func (d *DebugToast) Update() error {
 	if d.Hides = d.Timer <= 0; !d.Hides {
 		d.Timer--
@@ -78,6 +81,7 @@ type PerfDisplay struct {
 	Hides
 }
 
+// Draw uses DebugPrint to print the TPS and FPS in the top-left.
 func (p PerfDisplay) Draw(screen *ebiten.Image, _ *ebiten.DrawImageOptions) {
 	ebitenutil.DebugPrint(screen, fmt.Sprintf("TPS: %0.2f  FPS: %0.2f", ebiten.CurrentTPS(), ebiten.CurrentFPS()))
 }

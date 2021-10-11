@@ -21,6 +21,7 @@ import (
 	"math"
 )
 
+// Cardinal directions, as used in the return from PolygonExtrema.
 const (
 	East = iota
 	North

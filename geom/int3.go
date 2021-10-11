@@ -26,7 +26,7 @@ type Int3 struct {
 	X, Y, Z int
 }
 
-// Pt3(x, y, z) is shorthand for Int3{x, y, z}.
+// Pt3 returns Int3{x, y, z}.
 func Pt3(x, y, z int) Int3 {
 	return Int3{x, y, z}
 }

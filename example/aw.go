@@ -65,6 +65,8 @@ type Awakeman struct {
 // Ident returns "awakeman". There should be only one!
 func (aw *Awakeman) Ident() string { return "awakeman" }
 
+// Update updates Awakeman, including capturing input, applying gravity and
+// movement, and repositioning the camera.
 func (aw *Awakeman) Update() error {
 	// TODO: better cheat for noclip
 	if inpututil.IsKeyJustPressed(ebiten.KeyN) {
@@ -257,6 +259,7 @@ func (aw *Awakeman) realUpdate() error {
 	return nil
 }
 
+// Prepare captures necessary references to other game components.
 func (aw *Awakeman) Prepare(game *engine.Game) error {
 	aw.game = game
 	cam, ok := game.Component(aw.CameraID).(*engine.Camera)
@@ -275,6 +278,7 @@ func (aw *Awakeman) Prepare(game *engine.Game) error {
 	return nil
 }
 
+// Scan visits &aw.Sprite.
 func (aw *Awakeman) Scan(visit engine.VisitFunc) error {
 	return visit(&aw.Sprite)
 }

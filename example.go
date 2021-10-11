@@ -81,20 +81,20 @@ func main() {
 		Projection: geom.SimpleProjection{},
 		VoxelScale: geom.Float3{
 			// Each voxel counts for this much (Euclidean) space.
-			X: 1,
-			Y: 1,
-			Z: math.Sqrt(3),
+			X: 1, Y: 1, Z: math.Sqrt(3),
 		},
 		Root: &engine.DrawDFS{
 			Child: engine.MakeContainer(
 				&engine.Fill{
-					ID:    "bg_fill",
-					Color: color.Gray{100},
+					ID:     "bg_fill",
+					Colour: color.Gray{100},
 				},
 				&engine.LoadingSwitch{
-					During: &engine.Billboard{
-						ID:  "loading_screen",
-						Src: engine.ImageRef{Path: "assets/loading.png"},
+					During: &engine.Scene{
+						ID: "loading_scene",
+						Child: &engine.Billboard{
+							Src: engine.ImageRef{Path: "assets/loading.png"},
+						},
 					},
 					After: &engine.Camera{
 						ID:    "game_camera",

@@ -159,6 +159,7 @@ type Tile interface {
 // StaticTile returns a fixed tile index.
 type StaticTile int
 
+// Cell returns s as an int.
 func (s StaticTile) Cell() int { return int(s) }
 
 // AnimatedTile uses an Anim to choose a tile index.
@@ -168,6 +169,7 @@ type AnimatedTile struct {
 	anim *Anim
 }
 
+// Cell returns the value of Cell provided by the animation.
 func (a *AnimatedTile) Cell() int { return a.anim.Cell() }
 
 // Scan visits a.anim.

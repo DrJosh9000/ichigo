@@ -40,6 +40,11 @@ func Dot(p, q image.Point) int {
 	return p.X*q.X + p.Y*q.Y
 }
 
+// CSign applies Sign componentwise to the Point.
+func CSign(p image.Point) image.Point {
+	return image.Point{X: Sign(p.X), Y: Sign(p.Y)}
+}
+
 // ---------- Some other helpers ----------
 
 // FSign returns the sign of the float64 (-1, 0, or 1).

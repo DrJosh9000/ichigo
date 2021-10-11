@@ -31,6 +31,7 @@ var _ interface {
 	engine.Updater
 } = &Bubble{}
 
+// Bubble implements a single bubble within a simple particle system.
 type Bubble struct {
 	Life   int
 	Sprite engine.Sprite
@@ -38,6 +39,8 @@ type Bubble struct {
 	game *engine.Game
 }
 
+// NewBubble creates a bubble. Before it can be used, the return value needs to
+// be loaded, registered, and prepared.
 func NewBubble(pos geom.Int3) *Bubble {
 	return &Bubble{
 		Life: 60,
@@ -72,6 +75,7 @@ func NewBubble(pos geom.Int3) *Bubble {
 	}
 }
 
+// Scan visits &b.sprite.
 func (b *Bubble) Scan(visit engine.VisitFunc) error {
 	return visit(&b.Sprite)
 }
@@ -80,11 +84,14 @@ func (b *Bubble) String() string {
 	return fmt.Sprintf("Bubble@%v", b.Sprite.Actor.Pos)
 }
 
+// Prepare saves a reference to g.
 func (b *Bubble) Prepare(g *engine.Game) error {
 	b.game = g
 	return nil
 }
 
+// Update moves the bubble randomly, and handles unregistering the bubble when
+// it has "popped".
 func (b *Bubble) Update() error {
 	b.Life--
 	if b.Life <= 0 {

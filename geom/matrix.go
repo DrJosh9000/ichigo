@@ -98,7 +98,7 @@ func (a IntMatrix2x3) Apply(v Int3) image.Point {
 // RatMatrix3 implements a 3x3 matrix with rational number entries.
 type RatMatrix3 [3][3]Rat
 
-// IdentityRatMatrix3x4 is the identity matrix for RatMatrix3x4.
+// IdentityRatMatrix3 is the identity matrix for RatMatrix3.
 var IdentityRatMatrix3 = RatMatrix3{
 	0: [3]Rat{0: {1, 1}},
 	1: [3]Rat{1: {1, 1}},

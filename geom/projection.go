@@ -54,6 +54,7 @@ func (SimpleProjection) Project(z int) image.Point { return image.Pt(0, z) }
 // Projection uses two floats to define a custom projection.
 type Projection struct{ X, Y float64 }
 
+// Sign returns the componentwise sign of π.
 func (π Projection) Sign() image.Point {
 	return image.Pt(int(FSign(π.X)), int(FSign(π.Y)))
 }
@@ -71,7 +72,8 @@ func (π Projection) Project(z int) image.Point {
 // be used in e.g. a diametric projection (IntProjection{X:0, Y:2}).
 type IntProjection image.Point
 
-func (π IntProjection) Sign() image.Point { return image.Point(π) }
+// Sign returns CSign(π).
+func (π IntProjection) Sign() image.Point { return CSign(image.Point(π)) }
 
 // Project returns (z/π.X, z/π.Y), unless π.X or π.Y are 0, in which case that
 // component is zero

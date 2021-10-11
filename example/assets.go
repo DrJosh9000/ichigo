@@ -20,5 +20,6 @@ package example
 
 import "embed"
 
+// Assets is the embedded assets FS.
 //go:embed assets
 var Assets embed.FS

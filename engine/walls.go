@@ -126,6 +126,7 @@ func (u *WallUnit) Scan(visit VisitFunc) error {
 	return visit(u.Tile)
 }
 
+// Transform returns a translation by the position and offset.
 func (u *WallUnit) Transform() (opts ebiten.DrawImageOptions) {
 	opts.GeoM.Translate(geom.CFloat(
 		geom.CMul(u.pos, u.wall.UnitSize).Add(u.wall.UnitOffset),

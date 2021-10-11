@@ -39,12 +39,13 @@ func init() {
 // Fill fills the screen with a colour.
 type Fill struct {
 	ID
-	Color color.Color
+	Colour color.Color
 	Hides
 }
 
+// Draw fills the screen with the colour.
 func (f *Fill) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
-	screen.Fill(opts.ColorM.Apply(f.Color))
+	screen.Fill(opts.ColorM.Apply(f.Colour))
 }
 
 func (f *Fill) String() string { return "Fill" }

@@ -51,7 +51,7 @@ func (s *LinearSpline) Prepare() error {
 	return nil
 }
 
-// Interpolate, given x, returns y where (x,y) is a point on the spline.
+// Interpolate returns y where (x,y) is a point on the spline.
 // If x is outside the spline, it extrapolates from either the first or
 // last segments of the spline.
 func (s *LinearSpline) Interpolate(x float64) float64 {
@@ -236,9 +236,9 @@ func (s *CubicSpline) Prepare() error {
 	return nil
 }
 
-// Interpolate, given x, returns y where (x,y) is a point on the spline.
-// If x is outside the spline, it extrapolates from either the first or
-// last segments of the spline.
+// Interpolate returns y where (x,y) is a point on the spline.
+// If x is outside the spline, it extrapolates from the first or last point
+// together with s.Preslope or s.Postslope.
 func (s *CubicSpline) Interpolate(x float64) float64 {
 	N := len(s.Points)
 	if x < s.Points[0].X {
