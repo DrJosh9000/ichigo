@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    
+    - name: Install xorg-dev
+      run: sudo apt install xorg-dev
 
     - name: Set up Go
       uses: actions/setup-go@v2
