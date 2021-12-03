@@ -119,7 +119,7 @@ func (aw *Awakeman) realUpdate() error {
 		ε              = 0.2
 		restitution    = -0.3
 		gravity        = 0.25
-		airResistance  = -0.005 // ⇒ terminal velocity = 10
+		airResistance  = -0.005
 		jumpVelocity   = -3.3
 		sqrt2          = 1.414213562373095
 		runVelocity    = sqrt2

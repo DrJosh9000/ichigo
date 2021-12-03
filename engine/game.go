@@ -455,6 +455,16 @@ func concatOpts(a, b ebiten.DrawImageOptions) ebiten.DrawImageOptions {
 // recursive operations, return Skip for components that should be skipped.
 type VisitFunc func(interface{}) error
 
+// Many calls a VisitFunc for multiple args, and returns on first non-nil error.
+func (v VisitFunc) Many(x ...interface{}) error {
+	for _, c := range x {
+		if err := v(c); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // Skip is an "error" value that can be returned from visitor callbacks. It
 // tells recursive methods of Game to skip processing the current item and its
 // descendants, but will otherwise continue processing.

@@ -58,10 +58,7 @@ func (s *Sprite) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 
 // Scan visits &s.Actor and &s.Sheet.
 func (s *Sprite) Scan(visit VisitFunc) error {
-	if err := visit(&s.Actor); err != nil {
-		return err
-	}
-	return visit(&s.Sheet)
+	return visit.Many(&s.Actor, &s.Sheet)
 }
 
 // Anim returns the current Anim.
