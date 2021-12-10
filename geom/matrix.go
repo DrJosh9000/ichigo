@@ -181,3 +181,112 @@ func (a RatMatrix3) Concat(b RatMatrix3) RatMatrix3 {
 		},
 	}
 }
+
+// Matrix3x4 implements a 3x4 matrix with floating-point values.
+type Matrix3x4 [3][4]float64
+
+// IdentityMatrix3x4 is the identity matrix for Matrix3x4.
+var IdentityMatrix3x4 = Matrix3x4{
+	0: [4]float64{0: 1},
+	1: [4]float64{1: 1},
+	2: [4]float64{2: 1},
+}
+
+// Apply applies the matrix to the vector v.
+func (a Matrix3x4) Apply(v Float3) Float3 {
+	return Float3{
+		X: a[0][0]*v.X + a[0][1]*v.Y + a[0][2]*v.Z + a[0][3],
+		Y: a[1][0]*v.X + a[1][1]*v.Y + a[1][2]*v.Z + a[1][3],
+		Z: a[2][0]*v.X + a[2][1]*v.Y + a[2][2]*v.Z + a[2][3],
+	}
+}
+
+// Mul multiplies the whole matrix by a scalar.
+func (a Matrix3x4) Mul(r float64) Matrix3x4 {
+	a[0][0] *= r
+	a[0][1] *= r
+	a[0][2] *= r
+	a[0][3] *= r
+	a[1][0] *= r
+	a[1][1] *= r
+	a[1][2] *= r
+	a[1][3] *= r
+	a[2][0] *= r
+	a[2][1] *= r
+	a[2][2] *= r
+	a[2][3] *= r
+	return a
+}
+
+// Translation returns the translation component of the matrix (last column)
+// i.e. what you get if you Apply the matrix to the zero vector.
+func (a Matrix3x4) Translation() Float3 {
+	return Float3{X: a[0][3], Y: a[1][3], Z: a[2][3]}
+}
+
+// Adjugate returns the adjugate of the 3x3 submatrix.
+func (a Matrix3x4) Adjugate() Matrix3x4 {
+	return Matrix3x4{
+		0: [4]float64{
+			0: a[1][1]*a[2][2] - a[1][2]*a[2][1],
+			1: a[0][2]*a[2][1] - a[0][1]*a[2][2],
+			2: a[0][1]*a[1][2] - a[0][2]*a[1][1],
+		},
+		1: [4]float64{
+			0: a[1][2]*a[2][0] - a[1][0]*a[2][2],
+			1: a[0][0]*a[2][2] - a[0][2]*a[2][0],
+			2: a[0][2]*a[1][0] - a[0][0]*a[1][2],
+		},
+		2: [4]float64{
+			0: a[1][0]*a[2][1] - a[1][1]*a[2][0],
+			1: a[0][1]*a[2][0] - a[0][0]*a[2][1],
+			2: a[0][0]*a[1][1] - a[0][1]*a[1][0],
+		},
+	}
+}
+
+// Inverse returns the inverse of the matrix.
+func (a Matrix3x4) Inverse() (Matrix3x4, error) {
+	adj := a.Adjugate()
+	det := a[0][0]*adj[0][0] + a[0][1]*adj[1][0] + a[0][2]*adj[2][0]
+	if det == 0 {
+		return Matrix3x4{}, errSingularMatrix
+	}
+	inv := adj.Mul(1 / det) // the inverse of the 3x3 submatrix.
+	// The affine transformation T consists of a square 3x3 submatrix A and
+	// a translation vector b. We now have A^{-1} (inv).
+	//                    T(x) = Ax + b
+	//             ⇒  T(x) - b = Ax
+	//    ⇒  A^{-1}(T(x) - b)) = x
+	// ⇒  A^{-1}T(x) - A^{-1}b = x  (by linearity of A^{-1})
+	//             ∴ T^{-1}(y) = A^{-1}y - A^{-1}b.
+	ainvb := inv.Apply(a.Translation())
+	a[0][3] -= ainvb.X
+	a[1][3] -= ainvb.Y
+	a[2][3] -= ainvb.Z
+	return inv, nil
+}
+
+// Concat returns the matrix equivalent to applying matrix a and then b.
+func (a Matrix3x4) Concat(b Matrix3x4) Matrix3x4 {
+	return Matrix3x4{
+		0: [4]float64{
+			a[0][0]*b[0][0] + a[0][1]*b[1][0] + a[0][2]*b[2][0],
+			a[0][0]*b[0][1] + a[0][1]*b[1][1] + a[0][2]*b[2][1],
+			a[0][0]*b[0][2] + a[0][1]*b[1][2] + a[0][2]*b[2][2],
+			a[0][0]*b[0][3] + a[0][1]*b[1][3] + a[0][3]*b[2][3],
+		},
+		1: [4]float64{
+			a[1][0]*b[0][0] + a[1][1]*b[1][0] + a[1][2]*b[2][0],
+			a[1][0]*b[0][1] + a[1][1]*b[1][1] + a[1][2]*b[2][1],
+			a[1][0]*b[0][2] + a[1][1]*b[1][2] + a[1][2]*b[2][2],
+			a[1][0]*b[0][3] + a[1][1]*b[1][3] + a[1][3]*b[2][3],
+		},
+		2: [4]float64{
+			a[2][0]*b[0][0] + a[2][1]*b[1][0] + a[2][2]*b[2][0],
+			a[2][0]*b[0][1] + a[2][1]*b[1][1] + a[2][2]*b[2][1],
+			a[2][0]*b[0][2] + a[2][1]*b[1][2] + a[2][2]*b[2][2],
+			a[2][0]*b[0][3] + a[2][1]*b[1][3] + a[2][3]*b[2][3],
+		},
+	}
+}
