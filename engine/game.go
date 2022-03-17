@@ -122,7 +122,7 @@ func (g *Game) Parent(c any) any {
 
 // Children returns the direct subcomponents of the given component, or nil if
 // there are none. This only returns sensible values for registered components.
-func (g *Game) Children(c any) *Container[any] {
+func (g *Game) Children(c any) *Container {
 	g.dbmu.RLock()
 	defer g.dbmu.RUnlock()
 	return g.children[c]
