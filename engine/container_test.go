@@ -24,10 +24,10 @@ import (
 
 func TestMakeContainer(t *testing.T) {
 	c := MakeContainer(69, 420)
-	if want := []interface{}{69, 420}; !cmp.Equal(c.items, want) {
+	if want := []any{69, 420}; !cmp.Equal(c.items, want) {
 		t.Errorf("c.items = %v, want %v", c.items, want)
 	}
-	if want := map[interface{}]int{69: 0, 420: 1}; !cmp.Equal(c.reverse, want) {
+	if want := map[any]int{69: 0, 420: 1}; !cmp.Equal(c.reverse, want) {
 		t.Errorf("c.reverse = %v, want %v", c.reverse, want)
 	}
 }

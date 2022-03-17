@@ -37,7 +37,7 @@ func init() {
 // through the game tree using Query, without any extra sorting based on Z
 // values or consideration for DrawOrderer.
 type DrawDFS struct {
-	Child interface{}
+	Child any
 	Hides
 
 	game *Game
@@ -49,7 +49,7 @@ func (d *DrawDFS) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 	stack := []ebiten.DrawImageOptions{*opts}
 	d.game.Query(d, DrawerType,
 		// visitPre
-		func(x interface{}) error {
+		func(x any) error {
 			if h, ok := x.(Hider); ok && h.Hidden() {
 				return Skip
 			}
@@ -70,7 +70,7 @@ func (d *DrawDFS) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 			return nil
 		},
 		// visitPost
-		func(x interface{}) error {
+		func(x any) error {
 			if _, ok := x.(Transformer); ok {
 				stack = stack[:len(stack)-1]
 			}

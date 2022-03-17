@@ -60,10 +60,10 @@ type Game struct {
 	VoxelScale geom.Float3
 
 	dbmu     sync.RWMutex
-	byID     map[string]Identifier       // Named components by ID
-	byAB     map[abKey]*Container        // paths matching interface
-	parent   map[interface{}]interface{} // parent[x] is parent of x
-	children map[interface{}]*Container  // children[x] are chilren of x
+	byID     map[string]Identifier  // Named components by ID
+	byAB     map[abKey]*Container   // paths matching interface
+	parent   map[any]any 	        // parent[x] is parent of x
+	children map[any]*Container     // children[x] are children of x
 }
 
 // Draw draws everything.
@@ -84,14 +84,14 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (w, h int) {
 // not updated.
 func (g *Game) Update() error {
 	return g.Query(g.Root, UpdaterType,
-		func(c interface{}) error {
+		func(c any) error {
 			if d, ok := c.(Disabler); ok && d.Disabled() {
 				// Do not update this component or descendants.
 				return Skip
 			}
 			return nil
 		},
-		func(c interface{}) error {
+		func(c any) error {
 			if u, ok := c.(Updater); ok {
 				return u.Update()
 			}
@@ -114,7 +114,7 @@ func (g *Game) Component(id string) Identifier {
 
 // Parent returns the parent of a given component, or nil if there is none.
 // This only returns sensible values for registered components.
-func (g *Game) Parent(c interface{}) interface{} {
+func (g *Game) Parent(c any) any {
 	g.dbmu.RLock()
 	defer g.dbmu.RUnlock()
 	return g.parent[c]
@@ -122,7 +122,7 @@ func (g *Game) Parent(c interface{}) interface{} {
 
 // Children returns the direct subcomponents of the given component, or nil if
 // there are none. This only returns sensible values for registered components.
-func (g *Game) Children(c interface{}) *Container {
+func (g *Game) Children(c any) *Container[any] {
 	g.dbmu.RLock()
 	defer g.dbmu.RUnlock()
 	return g.children[c]
@@ -130,7 +130,7 @@ func (g *Game) Children(c interface{}) *Container {
 
 // PathRegister calls Register on every Registrar in the path between g and
 // parent (top-to-bottom, i.e. game first, component last).
-func (g *Game) PathRegister(component, parent interface{}) error {
+func (g *Game) PathRegister(component, parent any) error {
 	for _, p := range g.Path(parent) {
 		if r, ok := p.(Registrar); ok {
 			if err := r.Register(component, parent); err != nil {
@@ -143,7 +143,7 @@ func (g *Game) PathRegister(component, parent interface{}) error {
 
 // PathUnregister calls Unregister on every Registrar in the path between g and
 // parent (bottom-to-top, i.e. component first, game last).
-func (g *Game) PathUnregister(component interface{}) {
+func (g *Game) PathUnregister(component any) {
 	for _, p := range g.ReversePath(component) {
 		if r, ok := p.(Registrar); ok {
 			r.Unregister(component)
@@ -153,7 +153,7 @@ func (g *Game) PathUnregister(component interface{}) {
 
 // Path returns a slice with the path of components to reach component from g
 // (including g and component).
-func (g *Game) Path(component interface{}) []interface{} {
+func (g *Game) Path(component any) []any {
 	stack := g.ReversePath(component)
 	for i, j := 0, len(stack)-1; i < j; i, j = i+1, j-1 {
 		stack[i], stack[j] = stack[j], stack[i]
@@ -163,8 +163,8 @@ func (g *Game) Path(component interface{}) []interface{} {
 
 // ReversePath returns the same slice as Path, but reversed. (ReversePath is
 // faster than Path).
-func (g *Game) ReversePath(component interface{}) []interface{} {
-	var stack []interface{}
+func (g *Game) ReversePath(component any) []any {
+	var stack []any
 	g.dbmu.RLock()
 	for p := component; p != nil; p = g.parent[p] {
 		stack = append(stack, p)
@@ -194,7 +194,7 @@ func (g *Game) ReversePath(component interface{}) []interface{} {
 // Skip when it is returned from a recursive call. Returning Skip from visitPre
 // will cause visitPost and the descendants of the component to be skipped (see
 // the implementation of Update for an example of how to use this).
-func (g *Game) Query(ancestor interface{}, behaviour reflect.Type, visitPre, visitPost VisitFunc) error {
+func (g *Game) Query(ancestor any, behaviour reflect.Type, visitPre, visitPost VisitFunc) error {
 	if visitPre != nil {
 		if err := visitPre(ancestor); err != nil {
 			return err
@@ -208,7 +208,7 @@ func (g *Game) Query(ancestor interface{}, behaviour reflect.Type, visitPre, vis
 	g.dbmu.RLock()
 	q := g.byAB[abKey{ancestor, behaviour}]
 	g.dbmu.RUnlock()
-	if err := q.Scan(func(x interface{}) error {
+	if err := q.Scan(func(x any) error {
 		if err := g.Query(x, behaviour, visitPre, visitPost); err != nil {
 			if errors.Is(err, Skip) {
 				return nil
@@ -232,7 +232,7 @@ func (g *Game) Scan(visit VisitFunc) error {
 
 // Load loads a component and all subcomponents recursively.
 // Note that this method does not implement Loader itself.
-func (g *Game) Load(component interface{}, assets fs.FS) error {
+func (g *Game) Load(component any, assets fs.FS) error {
 	// Query cannot be used for this method because Load might cause
 	// subcomponents to spring into existence.
 	if l, ok := component.(Loader); ok {
@@ -241,7 +241,7 @@ func (g *Game) Load(component interface{}, assets fs.FS) error {
 		}
 	}
 	if sc, ok := component.(Scanner); ok {
-		return sc.Scan(func(x interface{}) error {
+		return sc.Scan(func(x any) error {
 			return g.Load(x, assets)
 		})
 	}
@@ -250,10 +250,10 @@ func (g *Game) Load(component interface{}, assets fs.FS) error {
 
 // Prepare prepares a component and all subcomponents recursively.
 // Note that this method does not implement Prepper itself.
-func (g *Game) Prepare(component interface{}) error {
+func (g *Game) Prepare(component any) error {
 	// Postorder traversal, in case ancestors depend on descendants being
 	// ready to answer queries.
-	return g.Query(component, PrepperType, nil, func(c interface{}) error {
+	return g.Query(component, PrepperType, nil, func(c any) error {
 		if p, ok := c.(Prepper); ok {
 			return p.Prepare(g)
 		}
@@ -300,8 +300,8 @@ func (g *Game) build() error {
 	defer g.dbmu.Unlock()
 	g.byID = make(map[string]Identifier)
 	g.byAB = make(map[abKey]*Container)
-	g.parent = make(map[interface{}]interface{})
-	g.children = make(map[interface{}]*Container)
+	g.parent = make(map[any]any)
+	g.children = make(map[any]*Container)
 	return g.registerRecursive(g, nil)
 }
 
@@ -310,7 +310,7 @@ func (g *Game) build() error {
 // Registering multiple components with the same ID is also an error.
 // Registering a component will recursively register all children found via
 // Scan.
-func (g *Game) Register(component, parent interface{}) error {
+func (g *Game) Register(component, parent any) error {
 	if component == nil {
 		return errNilComponent
 	}
@@ -322,19 +322,19 @@ func (g *Game) Register(component, parent interface{}) error {
 	return g.registerRecursive(component, parent)
 }
 
-func (g *Game) registerRecursive(component, parent interface{}) error {
+func (g *Game) registerRecursive(component, parent any) error {
 	if err := g.registerOne(component, parent); err != nil {
 		return err
 	}
 	if sc, ok := component.(Scanner); ok {
-		return sc.Scan(func(x interface{}) error {
+		return sc.Scan(func(x any) error {
 			return g.registerRecursive(x, component)
 		})
 	}
 	return nil
 }
 
-func (g *Game) registerOne(component, parent interface{}) error {
+func (g *Game) registerOne(component, parent any) error {
 	// register in g.byID if needed
 	if i, ok := component.(Identifier); ok {
 		if id := i.Ident(); id != "" {
@@ -377,7 +377,7 @@ func (g *Game) registerOne(component, parent interface{}) error {
 // Unregister removes the component from the component database.
 // Passing a nil component has no effect. Unregistering a component will
 // recursively unregister child components found via Scan.
-func (g *Game) Unregister(component interface{}) {
+func (g *Game) Unregister(component any) {
 	if component == nil {
 		return
 	}
@@ -386,15 +386,15 @@ func (g *Game) Unregister(component interface{}) {
 	g.dbmu.Unlock()
 }
 
-func (g *Game) unregisterRecursive(component interface{}) {
-	g.children[component].Scan(func(x interface{}) error {
+func (g *Game) unregisterRecursive(component any) {
+	g.children[component].Scan(func(x any) error {
 		g.unregisterRecursive(x)
 		return nil
 	})
 	g.unregisterOne(component)
 }
 
-func (g *Game) unregisterOne(component interface{}) {
+func (g *Game) unregisterOne(component any) {
 	parent := g.parent[component]
 
 	// unregister from g.byAB
@@ -428,7 +428,7 @@ func (g *Game) String() string { return "Game" }
 
 // abKey is the key type for game.byAB.
 type abKey struct {
-	parent    interface{}
+	parent    any
 	behaviour reflect.Type
 }
 
@@ -453,10 +453,10 @@ func concatOpts(a, b ebiten.DrawImageOptions) ebiten.DrawImageOptions {
 // For example, Query takes two VisitFuncs that are called for each result, and
 // Scan is given a VisitFunc that should be called with each component. For
 // recursive operations, return Skip for components that should be skipped.
-type VisitFunc func(interface{}) error
+type VisitFunc func(any) error
 
 // Many calls a VisitFunc for multiple args, and returns on first non-nil error.
-func (v VisitFunc) Many(x ...interface{}) error {
+func (v VisitFunc) Many(x ...any) error {
 	for _, c := range x {
 		if err := v(c); err != nil {
 			return err

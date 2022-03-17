@@ -150,8 +150,8 @@ type Prepper interface {
 // into internal data structures). Registrars are expected to automatically
 // register/unregister subcomponents of components (usually recursively).
 type Registrar interface {
-	Register(component, parent interface{}) error
-	Unregister(component interface{})
+	Register(component, parent any) error
+	Unregister(component any)
 }
 
 // Saver components can be saved to disk.

@@ -48,7 +48,7 @@ func init() {
 // the number of tests between components.
 type DrawDAG struct {
 	ChunkSize int
-	Child     interface{}
+	Child     any
 	Disables
 	Hides
 
@@ -71,7 +71,7 @@ func (d *DrawDAG) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 		hidden bool
 		opts   ebiten.DrawImageOptions
 	}
-	cache := map[interface{}]state{
+	cache := map[any]state{
 		d: {
 			hidden: false,
 			opts:   *opts,
@@ -86,7 +86,7 @@ func (d *DrawDAG) Draw(screen *ebiten.Image, opts *ebiten.DrawImageOptions) {
 		}
 		// Walk up game tree to find the nearest state in cache.
 		var st state
-		stack := []interface{}{x}
+		stack := []any{x}
 		for p := d.game.Parent(x); p != nil; p = d.game.Parent(p) {
 			if s, found := cache[p]; found {
 				st = s
@@ -168,8 +168,8 @@ func (d *DrawDAG) Update() error {
 // Register recursively registers compponent and all descendants that are
 // DrawBoxers into internal data structures (the DAG, etc) unless they are
 // descendants of a different DrawManager.
-func (d *DrawDAG) Register(component, _ interface{}) error {
-	return d.game.Query(component, DrawBoxerType, func(c interface{}) error {
+func (d *DrawDAG) Register(component, _ any) error {
+	return d.game.Query(component, DrawBoxerType, func(c any) error {
 		if db, ok := c.(DrawBoxer); ok {
 			d.registerOne(db)
 		}
@@ -235,8 +235,8 @@ func (d *DrawDAG) registerOne(x DrawBoxer) {
 }
 
 // Unregister unregisters the component and all subcomponents.
-func (d *DrawDAG) Unregister(component interface{}) {
-	d.game.Query(component, DrawBoxerType, func(c interface{}) error {
+func (d *DrawDAG) Unregister(component any) {
+	d.game.Query(component, DrawBoxerType, func(c any) error {
 		if db, ok := c.(DrawBoxer); ok {
 			d.unregisterOne(db)
 		}

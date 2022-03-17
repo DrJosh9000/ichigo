@@ -39,7 +39,7 @@ func init() {
 type Parallax struct {
 	CameraID string
 	Factor   float64 // how much to translate in response to the camera
-	Child    interface{}
+	Child    any
 
 	camera *Camera
 }

@@ -49,7 +49,7 @@ func init() {
 type Scene struct {
 	ID
 	Bounds // world coordinates
-	Child  interface{}
+	Child  any
 	Disables
 	Hides
 }
@@ -66,7 +66,7 @@ func (s *Scene) String() string { return "Scene" }
 // This is mostly useful for scenes that refer to other scenes, e.g.
 //
 //    sc := &Scene{
-//	    Components: []interface{}{
+//	    Components: []any{
 //			&SceneRef{Path: "assets/foo.gob.gz"}  // inflated at Load time
 //		},
 //    }

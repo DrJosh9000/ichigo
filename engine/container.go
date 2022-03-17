@@ -33,15 +33,15 @@ func init() {
 }
 
 // Container is a component that contains many other components, in order.
-// It can be used as both a component in its own right, or as a ordered set.
+// It can be used as both a component in its own right, or as an ordered set.
 // A nil *Container contains no items and modifications will panic (like a map).
 type Container struct {
-	items   []interface{}
-	reverse map[interface{}]int
+	items   []any
+	reverse map[any]int
 }
 
 // MakeContainer puts the items into a new Container.
-func MakeContainer(items ...interface{}) *Container {
+func MakeContainer(items ...any) *Container {
 	c := &Container{items: items}
 	c.rebuildReverse()
 	return c
@@ -51,7 +51,7 @@ func (c *Container) rebuildReverse() {
 	if c == nil {
 		return
 	}
-	c.reverse = make(map[interface{}]int, len(c.items))
+	c.reverse = make(map[any]int, len(c.items))
 	for i, x := range c.items {
 		c.reverse[x] = i
 	}
@@ -100,7 +100,7 @@ func (c *Container) Scan(visit VisitFunc) error {
 // Add adds an item to the end of the container, if not already present.
 // Adding nil, or a component already present in the container, does nothing.
 // Add is _not_ safe to call on a nil *Container.
-func (c *Container) Add(component interface{}) {
+func (c *Container) Add(component any) {
 	if component == nil || c.Contains(component) {
 		return
 	}
@@ -112,7 +112,7 @@ func (c *Container) Add(component interface{}) {
 // half the slice, the slice is compacted (indexes of items will change).
 // Removing an item not in the Container does nothing.
 // Remove is safe to call on a nil *Container.
-func (c *Container) Remove(component interface{}) {
+func (c *Container) Remove(component any) {
 	if c == nil {
 		return
 	}
@@ -129,7 +129,7 @@ func (c *Container) Remove(component interface{}) {
 
 // Contains reports if an item exists in the container.
 // Contains is safe to call on a nil *Container.
-func (c *Container) Contains(component interface{}) bool {
+func (c *Container) Contains(component any) bool {
 	if c == nil {
 		return false
 	}
@@ -140,7 +140,7 @@ func (c *Container) Contains(component interface{}) bool {
 // IndexOf reports if an item exists in the container and returns the index if
 // present.
 // IndexOf is safe to call on a nil *Container.
-func (c *Container) IndexOf(component interface{}) (int, bool) {
+func (c *Container) IndexOf(component any) (int, bool) {
 	if c == nil {
 		return 0, false
 	}
@@ -159,7 +159,7 @@ func (c *Container) ItemCount() int {
 
 // Element returns the item at index i, or nil for a free slot.
 // Element is _not_ safe to call on a nil *Container.
-func (c *Container) Element(i int) interface{} { return c.items[i] }
+func (c *Container) Element(i int) any { return c.items[i] }
 
 // Len returns the number of items plus the number of nil slots in the container.
 // Len is safe to call on a nil *Container.

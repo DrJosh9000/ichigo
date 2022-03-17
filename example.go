@@ -64,7 +64,7 @@ func main() {
 	ebiten.SetWindowTitle("TODO")
 
 	// Change to true to rewrite level1.gobz
-	lev1 := interface{}(&engine.SceneRef{Path: "assets/level1.gobz"})
+	lev1 := any(&engine.SceneRef{Path: "assets/level1.gobz"})
 	if hardcodedLevel1 {
 		lev1 = example.Level1()
 		if rewriteLevel1 && runtime.GOOS != "js" {

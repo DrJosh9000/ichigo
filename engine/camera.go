@@ -39,7 +39,7 @@ func init() {
 // Camera models a camera that is viewing something.
 type Camera struct {
 	ID
-	Child interface{}
+	Child any
 	Disables
 	Hides
 

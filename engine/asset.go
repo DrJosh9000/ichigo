@@ -30,7 +30,7 @@ type assetKey struct {
 }
 
 // LoadGobz gunzips and gob-decodes a component from a file from a FS.
-func LoadGobz(dst interface{}, assets fs.FS, path string) error {
+func LoadGobz(dst any, assets fs.FS, path string) error {
 	f, err := assets.Open(path)
 	if err != nil {
 		return err
@@ -45,7 +45,7 @@ func LoadGobz(dst interface{}, assets fs.FS, path string) error {
 
 // SaveGobz takes an object, gob-encodes it, gzips it, and writes to disk.
 // This requires running on something with a disk to write to (not JS)
-func SaveGobz(src interface{}, name string) error {
+func SaveGobz(src any, name string) error {
 	f, err := os.CreateTemp(".", filepath.Base(name))
 	if err != nil {
 		return err

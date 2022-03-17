@@ -95,7 +95,7 @@ func (g *Game) cmdTree(dst io.Writer, argv []string) {
 		fmt.Println(dst, "Usage: tree [ID]")
 		return
 	}
-	c := interface{}(g)
+	c := any(g)
 	if len(argv) == 2 { // subtree
 		id := argv[1]
 		c = g.Component(id)
@@ -107,7 +107,7 @@ func (g *Game) cmdTree(dst io.Writer, argv []string) {
 	g.printTreeRecursive(dst, 0, c)
 }
 
-func (g *Game) printTreeRecursive(dst io.Writer, depth int, c interface{}) {
+func (g *Game) printTreeRecursive(dst io.Writer, depth int, c any) {
 	indent := ""
 	if depth > 0 {
 		indent = strings.Repeat("  ", depth-1) + "↳ "
@@ -118,7 +118,7 @@ func (g *Game) printTreeRecursive(dst io.Writer, depth int, c interface{}) {
 	} else {
 		fmt.Fprintf(dst, "%s%v\n", indent, c)
 	}
-	g.Children(c).Scan(func(x interface{}) error {
+	g.Children(c).Scan(func(x any) error {
 		g.printTreeRecursive(dst, depth+1, x)
 		return nil
 	})
@@ -145,7 +145,7 @@ func (g *Game) cmdQuery(dst io.Writer, argv []string) {
 		return
 	}
 
-	var ancestor interface{} = g
+	var ancestor any = g
 	if len(argv) == 3 {
 		c := g.Component(argv[2])
 		if c == nil {
@@ -156,7 +156,7 @@ func (g *Game) cmdQuery(dst io.Writer, argv []string) {
 	}
 
 	noResults := true
-	g.Query(ancestor, behaviour, func(c interface{}) error {
+	g.Query(ancestor, behaviour, func(c any) error {
 		if !reflect.TypeOf(c).Implements(behaviour) {
 			return nil
 		}
@@ -174,7 +174,7 @@ func (g *Game) cmdQuery(dst io.Writer, argv []string) {
 	}
 }
 
-func (g *Game) cmdutilComponentArg1(dst io.Writer, argv []string) interface{} {
+func (g *Game) cmdutilComponentArg1(dst io.Writer, argv []string) any {
 	if len(argv) != 2 {
 		fmt.Fprintln(dst, "Usage: hide ID")
 		return nil
