@@ -121,7 +121,7 @@ func (c *Container) Remove(component interface{}) {
 		return
 	}
 	c.items[i] = nil
-	delete(c.reverse, i)
+	delete(c.reverse, component)
 	if len(c.reverse) < len(c.items)/2 {
 		c.compact()
 	}
