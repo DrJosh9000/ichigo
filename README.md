@@ -1,6 +1,6 @@
 # ichigo 🍓
 
-> [!INFO]
+> [!NOTE]
 > This repository has been migrated to https://gitea.drjosh.dev/josh/ichigo.
 
 ![Build status](https://github.com/DrJosh9000/ichigo/actions/workflows/go.yml/badge.svg)
