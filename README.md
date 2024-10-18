@@ -1,5 +1,8 @@
 # ichigo 🍓
 
+> [!INFO]
+> This repository has been migrated to https://gitea.drjosh.dev/josh/ichigo.
+
 ![Build status](https://github.com/DrJosh9000/ichigo/actions/workflows/go.yml/badge.svg)
 [![Go Reference](https://pkg.go.dev/badge/github.com/DrJosh9000/ichigo.svg)](https://pkg.go.dev/github.com/DrJosh9000/ichigo)
 [![Go Report Card](https://goreportcard.com/badge/github.com/DrJosh9000/ichigo)](https://goreportcard.com/report/github.com/DrJosh9000/ichigo)
